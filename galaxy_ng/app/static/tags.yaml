@@ -679,6 +679,57 @@
 "v3_openapi.yaml_get":
   - Info
 
+# Service Index / Resource Registry
+"service_index_retrieve":
+  - Resource Registry
+"service_index_metadata_retrieve":
+  - Resource Registry
+"service_index_object_delete_create":
+  - Resource Registry
+  - Access
+"service_index_resource_types_list":
+  - Resource Registry
+"service_index_resource_types_retrieve":
+  - Resource Registry
+"service_index_resource_types_manifest_retrieve":
+  - Resource Registry
+"service_index_resources_list":
+  - Resource Registry
+"service_index_resources_create":
+  - Resource Registry
+"service_index_resources_retrieve":
+  - Resource Registry
+"service_index_resources_update":
+  - Resource Registry
+"service_index_resources_partial_update":
+  - Resource Registry
+"service_index_resources_destroy":
+  - Resource Registry
+"service_index_role_permissions_list":
+  - Resource Registry
+  - Access
+"service_index_role_team_assignments_list":
+  - Resource Registry
+  - Access
+"service_index_role_team_assignments_assign_create":
+  - Resource Registry
+  - Access
+"service_index_role_team_assignments_unassign_create":
+  - Resource Registry
+  - Access
+"service_index_role_types_list":
+  - Resource Registry
+  - Access
+"service_index_role_user_assignments_list":
+  - Resource Registry
+  - Access
+"service_index_role_user_assignments_assign_create":
+  - Resource Registry
+  - Access
+"service_index_role_user_assignments_unassign_create":
+  - Resource Registry
+  - Access
+
 # V3 Tasks
 "v3_tasks_get_pk":
   - Tasks

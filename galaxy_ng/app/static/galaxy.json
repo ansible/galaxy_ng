@@ -21420,6 +21420,1584 @@
         },
         "x-ai-description": "Deprecated. Delete collection version"
       }
+    },
+    "/api/galaxy/service-index/": {
+      "get": {
+        "operationId": "service_index_retrieve",
+        "description": "Link other resource registry endpoints",
+        "tags": [
+          "Resource Registry"
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        },
+        "x-ai-description": "Get the service index root listing available resource registry endpoints"
+      }
+    },
+    "/api/galaxy/service-index/metadata/": {
+      "get": {
+        "operationId": "service_index_metadata_retrieve",
+        "tags": [
+          "Resource Registry"
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        },
+        "x-ai-description": "Get metadata about this service for cross-service communication",
+        "description": "Get metadata about this service for cross-service communication"
+      }
+    },
+    "/api/galaxy/service-index/object-delete/": {
+      "post": {
+        "operationId": "service_index_object_delete_create",
+        "description": "Delete all role assignments (user and team) for a specific resource.\n\nExpected request data:\n{\n    \"resource_type\": \"main.inventory\",\n    \"resource_pk\": \"4\"\n}",
+        "tags": [
+          "Resource Registry",
+          "Access"
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        },
+        "x-ai-description": "Delete all role assignments (user and team) for a specific resource"
+      }
+    },
+    "/api/galaxy/service-index/resource-types/": {
+      "get": {
+        "operationId": "service_index_resource_types_list",
+        "description": "Index of the resource types that are configured in the system.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content_type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by content_type (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "externally_managed",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by externally_managed (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "id__gt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gt)"
+          },
+          {
+            "in": "query",
+            "name": "id__gte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gte)"
+          },
+          {
+            "in": "query",
+            "name": "id__lt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lt)"
+          },
+          {
+            "in": "query",
+            "name": "id__lte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lte)"
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by name (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "name__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by name (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "role_level",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by role level for RBAC"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object type. Supports comma-separated values for multiple types."
+          }
+        ],
+        "tags": [
+          "Resource Registry"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResourceTypeResponseList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "List resource types configured in the system for cross-service communication"
+      }
+    },
+    "/api/galaxy/service-index/resource-types/{name}/": {
+      "get": {
+        "operationId": "service_index_resource_types_retrieve",
+        "description": "Index of the resource types that are configured in the system.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Resource Registry"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceTypeResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Get details of a specific resource type by name"
+      }
+    },
+    "/api/galaxy/service-index/resource-types/{name}/manifest/": {
+      "get": {
+        "operationId": "service_index_resource_types_manifest_retrieve",
+        "description": "Returns a CSV stream of resource_id,hash for a given resource type.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Resource Registry"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Stream a CSV manifest of resource_id,hash pairs for a given resource type"
+      }
+    },
+    "/api/galaxy/service-index/resources/": {
+      "get": {
+        "operationId": "service_index_resources_list",
+        "description": "Index of all the resources in the system.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ansible_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by ansible_id (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "content_object",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by content_object (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "content_type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by content_type (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "id__gt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gt)"
+          },
+          {
+            "in": "query",
+            "name": "id__gte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gte)"
+          },
+          {
+            "in": "query",
+            "name": "id__lt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lt)"
+          },
+          {
+            "in": "query",
+            "name": "id__lte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lte)"
+          },
+          {
+            "in": "query",
+            "name": "is_partially_migrated",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by is_partially_migrated (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by name (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "name__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by name (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "object_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object_id (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "object_id__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object_id (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "role_level",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by role level for RBAC"
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by service_id (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object type. Supports comma-separated values for multiple types."
+          }
+        ],
+        "tags": [
+          "Resource Registry"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResourceListResponseList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "List all resources indexed in the system for cross-service communication"
+      },
+      "post": {
+        "operationId": "service_index_resources_create",
+        "description": "Index of all the resources in the system.",
+        "tags": [
+          "Resource Registry"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Resource"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Create a new resource entry in the service index"
+      }
+    },
+    "/api/galaxy/service-index/resources/{ansible_id}/": {
+      "get": {
+        "operationId": "service_index_resources_retrieve",
+        "description": "Index of all the resources in the system.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ansible_id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "A unique ID identifying this resource by the resource server."
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Resource Registry"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Get a specific resource by its ansible_id"
+      },
+      "put": {
+        "operationId": "service_index_resources_update",
+        "description": "Index of all the resources in the system.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ansible_id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "A unique ID identifying this resource by the resource server."
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Resource Registry"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Resource"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Update a resource entry in the service index"
+      },
+      "patch": {
+        "operationId": "service_index_resources_partial_update",
+        "description": "Index of all the resources in the system.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ansible_id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "A unique ID identifying this resource by the resource server."
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Resource Registry"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedResource"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Partially update a resource entry in the service index"
+      },
+      "delete": {
+        "operationId": "service_index_resources_destroy",
+        "description": "Index of all the resources in the system.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ansible_id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "A unique ID identifying this resource by the resource server."
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Resource Registry"
+        ],
+        "responses": {
+          "204": {
+            "description": "No response body"
+          }
+        },
+        "x-ai-description": "Delete a resource entry from the service index"
+      }
+    },
+    "/api/galaxy/service-index/role-permissions/": {
+      "get": {
+        "operationId": "service_index_role_permissions_list",
+        "description": "List of permissions managed with the RBAC system",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api_slug",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by api_slug (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "api_slug__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by api_slug (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "codename",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by codename (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "codename__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by codename (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "content_type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by content_type (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "id__gt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gt)"
+          },
+          {
+            "in": "query",
+            "name": "id__gte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gte)"
+          },
+          {
+            "in": "query",
+            "name": "id__lt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lt)"
+          },
+          {
+            "in": "query",
+            "name": "id__lte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lte)"
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by name (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "name__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by name (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "role_level",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by role level for RBAC"
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "A search term.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object type. Supports comma-separated values for multiple types."
+          }
+        ],
+        "tags": [
+          "Resource Registry",
+          "Access"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedDABPermissionResponseList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "List permissions managed with the RBAC system for cross-service communication"
+      }
+    },
+    "/api/galaxy/service-index/role-team-assignments/": {
+      "get": {
+        "operationId": "service_index_role_team_assignments_list",
+        "description": "List of team role assignments for cross-service communication",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content_object",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by content_object (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "content_type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by content_type (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "created",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "created__gt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created (gt)"
+          },
+          {
+            "in": "query",
+            "name": "created__gte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created (gte)"
+          },
+          {
+            "in": "query",
+            "name": "created__lt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created (lt)"
+          },
+          {
+            "in": "query",
+            "name": "created__lte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created (lte)"
+          },
+          {
+            "in": "query",
+            "name": "created_by",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created_by (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "id__gt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gt)"
+          },
+          {
+            "in": "query",
+            "name": "id__gte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gte)"
+          },
+          {
+            "in": "query",
+            "name": "id__lt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lt)"
+          },
+          {
+            "in": "query",
+            "name": "id__lte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lte)"
+          },
+          {
+            "in": "query",
+            "name": "object_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object_id (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "object_id__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object_id (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "object_role",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object_role (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "role_definition",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by role_definition (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "role_level",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by role level for RBAC"
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "A search term.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "team",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by team (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object type. Supports comma-separated values for multiple types."
+          }
+        ],
+        "tags": [
+          "Resource Registry",
+          "Access"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedServiceRoleTeamAssignmentResponseList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "List team role assignments for cross-service communication"
+      }
+    },
+    "/api/galaxy/service-index/role-team-assignments/assign/": {
+      "post": {
+        "operationId": "service_index_role_team_assignments_assign_create",
+        "description": "Assign a role to a team for cross-service communication",
+        "tags": [
+          "Resource Registry",
+          "Access"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceRoleTeamAssignment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceRoleTeamAssignmentResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Assign a role to a team for cross-service communication"
+      }
+    },
+    "/api/galaxy/service-index/role-team-assignments/unassign/": {
+      "post": {
+        "operationId": "service_index_role_team_assignments_unassign_create",
+        "description": "Remove a team role assignment for cross-service communication",
+        "tags": [
+          "Resource Registry",
+          "Access"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceRoleTeamAssignment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceRoleTeamAssignmentResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Remove a team role assignment for cross-service communication"
+      }
+    },
+    "/api/galaxy/service-index/role-types/": {
+      "get": {
+        "operationId": "service_index_role_types_list",
+        "description": "List of types registered with the RBAC system, or loaded in from external system",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api_slug",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by api_slug (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "api_slug__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by api_slug (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "app_label",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by app_label (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "app_label__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by app_label (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "id__gt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gt)"
+          },
+          {
+            "in": "query",
+            "name": "id__gte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gte)"
+          },
+          {
+            "in": "query",
+            "name": "id__lt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lt)"
+          },
+          {
+            "in": "query",
+            "name": "id__lte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lte)"
+          },
+          {
+            "in": "query",
+            "name": "model",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by model (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "model__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by model (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "parent_content_type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by parent_content_type (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "pk_field_type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by pk_field_type (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "pk_field_type__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by pk_field_type (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "role_level",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by role level for RBAC"
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "A search term.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by service (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "service__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by service (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object type. Supports comma-separated values for multiple types."
+          }
+        ],
+        "tags": [
+          "Resource Registry",
+          "Access"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedDABContentTypeResponseList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "List role types registered with the RBAC system for cross-service communication"
+      }
+    },
+    "/api/galaxy/service-index/role-user-assignments/": {
+      "get": {
+        "operationId": "service_index_role_user_assignments_list",
+        "description": "List of user assignments for cross-service communication",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "content_object",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by content_object (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "content_type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by content_type (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "created",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "created__gt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created (gt)"
+          },
+          {
+            "in": "query",
+            "name": "created__gte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created (gte)"
+          },
+          {
+            "in": "query",
+            "name": "created__lt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created (lt)"
+          },
+          {
+            "in": "query",
+            "name": "created__lte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created (lte)"
+          },
+          {
+            "in": "query",
+            "name": "created_by",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by created_by (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "id__gt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gt)"
+          },
+          {
+            "in": "query",
+            "name": "id__gte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (gte)"
+          },
+          {
+            "in": "query",
+            "name": "id__lt",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lt)"
+          },
+          {
+            "in": "query",
+            "name": "id__lte",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by id (lte)"
+          },
+          {
+            "in": "query",
+            "name": "object_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object_id (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "object_id__icontains",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object_id (case-insensitive partial match)"
+          },
+          {
+            "in": "query",
+            "name": "object_role",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object_role (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "in": "query",
+            "name": "order_by",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order results by field name. Prefix with '-' for descending order. Supports comma-separated values for multiple fields."
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "role_definition",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by role_definition (exact match)"
+          },
+          {
+            "in": "query",
+            "name": "role_level",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by role level for RBAC"
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "A search term.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by object type. Supports comma-separated values for multiple types."
+          },
+          {
+            "in": "query",
+            "name": "user",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by user (exact match)"
+          }
+        ],
+        "tags": [
+          "Resource Registry",
+          "Access"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedServiceRoleUserAssignmentResponseList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "List user role assignments for cross-service communication"
+      }
+    },
+    "/api/galaxy/service-index/role-user-assignments/assign/": {
+      "post": {
+        "operationId": "service_index_role_user_assignments_assign_create",
+        "description": "Assign a role to a user for cross-service communication",
+        "tags": [
+          "Resource Registry",
+          "Access"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceRoleUserAssignment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceRoleUserAssignmentResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Assign a role to a user for cross-service communication"
+      }
+    },
+    "/api/galaxy/service-index/role-user-assignments/unassign/": {
+      "post": {
+        "operationId": "service_index_role_user_assignments_unassign_create",
+        "description": "Remove a user role assignment for cross-service communication",
+        "tags": [
+          "Resource Registry",
+          "Access"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceRoleUserAssignment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceRoleUserAssignmentResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Remove a user role assignment for cross-service communication"
+      }
     }
   },
   "components": {

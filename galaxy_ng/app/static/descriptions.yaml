@@ -506,5 +506,45 @@
   Get task by pulp_id in distribution
 "v3_tasks_get_pk": >-
   Get a pulp task via the transformed v1 integer task id.
+"service_index_retrieve": >-
+  Get the service index root listing available resource registry endpoints
+"service_index_metadata_retrieve": >-
+  Get metadata about this service for cross-service communication
+"service_index_object_delete_create": >-
+  Delete all role assignments (user and team) for a specific resource
+"service_index_resource_types_list": >-
+  List resource types configured in the system for cross-service communication
+"service_index_resource_types_retrieve": >-
+  Get details of a specific resource type by name
+"service_index_resource_types_manifest_retrieve": >-
+  Stream a CSV manifest of resource_id,hash pairs for a given resource type
+"service_index_resources_list": >-
+  List all resources indexed in the system for cross-service communication
+"service_index_resources_create": >-
+  Create a new resource entry in the service index
+"service_index_resources_retrieve": >-
+  Get a specific resource by its ansible_id
+"service_index_resources_update": >-
+  Update a resource entry in the service index
+"service_index_resources_partial_update": >-
+  Partially update a resource entry in the service index
+"service_index_resources_destroy": >-
+  Delete a resource entry from the service index
+"service_index_role_permissions_list": >-
+  List permissions managed with the RBAC system for cross-service communication
+"service_index_role_team_assignments_list": >-
+  List team role assignments for cross-service communication
+"service_index_role_team_assignments_assign_create": >-
+  Assign a role to a team for cross-service communication
+"service_index_role_team_assignments_unassign_create": >-
+  Remove a team role assignment for cross-service communication
+"service_index_role_types_list": >-
+  List role types registered with the RBAC system for cross-service communication
+"service_index_role_user_assignments_list": >-
+  List user role assignments for cross-service communication
+"service_index_role_user_assignments_assign_create": >-
+  Assign a role to a user for cross-service communication
+"service_index_role_user_assignments_unassign_create": >-
+  Remove a user role assignment for cross-service communication
 "v3_tasks_get_tasks": >-
   List tasks
