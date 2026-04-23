@@ -19,8 +19,10 @@ class AnsibleGalaxy29MultiPartParser(MultiPartParser):
         new_stream.write(body_parts[1])
 
         if not body_parts[2].startswith(b'\r\n'):
-            log.warning('Malformed multipart body user-agent: %s',
-                        parser_context['request'].META.get('HTTP_USER_AGENT'))
+            raw_ua = parser_context['request'].META.get('HTTP_USER_AGENT', '')
+            # Sanitize user-controlled data before logging (CWE-117)
+            sanitized_ua = raw_ua.replace('\n', '').replace('\r', '').replace('\0', '')[:256]
+            log.warning('Malformed multipart body user-agent: %s', sanitized_ua)
 
             # add the crlf to the new stream so the base parser does the right thing
             new_stream.write(b'\r\n')

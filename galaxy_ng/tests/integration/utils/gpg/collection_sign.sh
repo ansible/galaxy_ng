@@ -14,7 +14,7 @@ gpg --debug-all --lock-never --quiet --batch --pinentry-mode loopback --yes --pa
 
 # Check the exit status
 STATUS=$?
-if [ $STATUS -eq 0 ]; then
+if [[ $STATUS -eq 0 ]]; then
    echo {\"file\": \"$FILE_PATH\", \"signature\": \"$SIGNATURE_PATH\"}
 else
    exit $STATUS

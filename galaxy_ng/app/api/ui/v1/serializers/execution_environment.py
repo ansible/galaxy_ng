@@ -16,7 +16,7 @@ from galaxy_ng.app.api import utils
 
 namespace_fields = ("name", "my_permissions", "owners")
 
-VALID_REMOTE_REGEX = r"^[A-Za-z0-9._-]*/?[A-Za-z0-9._-]*$"
+VALID_REMOTE_REGEX = r"^[A-Za-z0-9._-]*(/[A-Za-z0-9._-]*)?$"
 
 
 class ContainerRemoteSerializer(

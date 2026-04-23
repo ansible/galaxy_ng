@@ -103,7 +103,7 @@ def associate_namespace_metadata(sender, instance, created, **kwargs):
     object is added to the system.
     """
 
-    ns, created = Namespace.objects.get_or_create(name=instance.name)
+    ns, ns_created = Namespace.objects.get_or_create(name=instance.name)
     ns_metadata = ns.last_created_pulp_metadata
 
     def _update_metadata():
@@ -115,7 +115,7 @@ def associate_namespace_metadata(sender, instance, created, **kwargs):
         ns.set_links([{"name": x, "url": instance.links[x]} for x in instance.links])
         ns.save()
 
-    if created or ns_metadata is None or ns.metadata_sha256 != instance.metadata_sha256:
+    if ns_created or ns_metadata is None or ns.metadata_sha256 != instance.metadata_sha256:
         _update_metadata()
 
 

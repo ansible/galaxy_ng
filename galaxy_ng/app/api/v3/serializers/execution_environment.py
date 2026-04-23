@@ -18,7 +18,7 @@ from galaxy_ng.app.api.ui.v1 import serializers as ui_serializers
 namespace_fields = ("id", "pulp_href", "name", "my_permissions",
                     "owners", "created_at", "updated_at")
 
-VALID_REMOTE_REGEX = r"^[A-Za-z0-9._-]*/?[A-Za-z0-9._-]*$"
+VALID_REMOTE_REGEX = r"^[A-Za-z0-9._-]*(/[A-Za-z0-9._-]*)?$"
 
 
 class ManifestListManifestSerializer(serializers.ModelSerializer):

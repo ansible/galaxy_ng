@@ -111,7 +111,7 @@ def create_or_update_remote_container(container_data, registry_pk, request_data)
         try:
             serializer.is_valid(raise_exception=True)
         except ValidationError as e:
-            CouldNotCreateContainerError(
+            raise CouldNotCreateContainerError(
                 container_data['name'],
                 error=str(e)
             )

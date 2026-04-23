@@ -106,6 +106,9 @@ def find_namespace(baseurl=None, name=None, id=None):
         ns_name = ds['name']
         ns_info = ds
 
+    if ns_info is None:
+        raise ValueError("Either 'name' or 'id' is required to find a namespace")
+
     # get the owners too
     ns_id = ns_info['id']
     owners = []
@@ -265,7 +268,7 @@ def upstream_collection_iterator(
             )
 
             collection_count = -1
-            while next_url:
+            if next_url:
                 page = safe_fetch(next_url)
                 ds = page.json()
                 collections = ds['collection']['results']
