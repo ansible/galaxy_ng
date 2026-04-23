@@ -6,11 +6,38 @@ This guide is intended to walk you through the basics of managing collections in
 
 ## Namespaces
 
-Collection namespaces typically contain information about the publisher of a specific collection. To view the namespaces in the system, navigate to the namespaces page under Collections > Namespaces in the navigation menu. From here you can view the namespaces that you have access to manage under "My namespaces", as well as all of the namespaces under "All".
+Collection namespaces typically contain information about the publisher of a specific collection.
 
-New namespaces can be created from here. To create a namespace, click the "create" button and pick a new namespace name. 
+### Namespace limitations
 
-To edit a namespace, select the namespace from "My namespaces" and  click the "Edit namespace" button from the kebab in the header. 
+Namespaces must conform to the following requirements:
+
+* Has a minimum length of two characters.
+* Contains only lowercase alphanumeric characters, `a-z, 0-9`, and underscores, `_`. No other characters are allowed, including periods `.`, hyphens `-`, and spaces.
+* Does not start with an underscore character. The first character of a namespace must be alphanumeric.
+
+### Viewing namespaces
+
+To view the namespaces in the system, do the following:
+
+1. Navigate to the namespaces page under Collections > Namespaces in the navigation menu.
+1. View the namespaces that you have access to manage under "My namespaces", as well as all of the namespaces under "All".
+
+### Creating namespaces
+
+To create new namespaces in the system, do the following:
+
+1. Ensure the new namespace fits with limitations.
+1. Navigate to the namespaces page under Collections > Namespaces in the navigation menu.
+1. Select the "create" button.
+1. Specify the new namespace. 
+
+### Editing namespaces
+
+To edit a namespace, do the following:
+
+1. Select the namespace from "My namespaces".
+1. Select the "Edit namespace" button from the kebab menu in the header.  
 
 ![Namespace kebab](assets/namespace_kebab.png)
 
