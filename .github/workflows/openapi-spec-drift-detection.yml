@@ -25,6 +25,7 @@ on:
 
 jobs:
   detect-drift:
+    if: github.repository_owner == 'ansible-automation-platform'
     runs-on: ubuntu-latest
     permissions:
       contents: read
