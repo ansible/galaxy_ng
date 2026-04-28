@@ -101,6 +101,11 @@ plugins:
   - mkdocstrings:
       enable_inventory: true
       default_handler: python
+      import:
+        - url: https://docs.ansible.com/ansible/latest/objects.inv
+          domains: [py, std, "std:doc", "std:label"]
+        - url: https://pip.pypa.io/en/latest/objects.inv
+          domains: [py, std]
       handlers:
         python:
           paths: [src]
@@ -110,11 +115,6 @@ plugins:
             docstring_style: sphinx
             merge_init_into_class: yes
             show_submodules: yes
-          import:
-            - url: https://docs.ansible.com/ansible/latest/objects.inv
-              domains: [py, std, "std:doc", "std:label"]
-            - url: https://pip.pypa.io/en/latest/objects.inv
-              domains: [py, std]
   - minify:
       minify_html: true
 markdown_extensions:
