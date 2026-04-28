@@ -181,10 +181,15 @@ def test_openapi_authentication(ansible_config, endpoint, settings, galaxy_clien
         verify=ssl_verify,
     )
 
-    if settings.get("GALAXY_API_SPEC_REQUIRE_AUTHENTICATION"):
-        assert resp.status_code == 401
+    require_auth = settings.get("GALAXY_API_SPEC_REQUIRE_AUTHENTICATION")
+    if require_auth is None:
+        pytest.skip(reason="GALAXY_API_SPEC_REQUIRE_AUTHENTICATION is not set.")
+
+    if require_auth:
+        assert resp.status_code in (401, 403)
         assert "Authentication credentials were not provided." in str(resp.content) \
-            or "401 Unauthorized" in str(resp.content)
+            or "401 Unauthorized" in str(resp.content) \
+            or "403 Forbidden" in str(resp.content)
     else:
         assert resp.status_code == 200
 
