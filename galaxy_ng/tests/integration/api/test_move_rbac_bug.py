@@ -30,6 +30,11 @@ def staged_collection(galaxy_client):
     return artifact
 
 
+# These tests require creating groups via Hub's API (_ui/v1/groups/), which is blocked
+# in gateway mode (403) since group management is delegated to the gateway.
+# RBAC testing for AAP+Gateway should be done in ATF instead.
+# TODO(dconway): AAP-72808 - AAP-70914 fix is not validated in gateway mode until covered in ATF
+@pytest.mark.skip_in_gw
 @pytest.mark.min_hub_version("4.7dev")
 class TestMoveV3RBAC:
     """Tests for AAP-70914: v3 move endpoint with object-level permissions"""
