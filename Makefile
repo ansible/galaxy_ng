@@ -9,7 +9,7 @@ help:             ## Show the help.
 	@echo "Usage: make <target>"
 	@echo ""
 	@echo "Targets:"
-	@grep -F "##" Makefile | grep -F -v grep -F | sed 's/^/\n/' | sed 's/#/\n/'
+	@grep -E '^[a-zA-Z0-9/_-]+:.*##' Makefile | sed 's/^/\n/' | sed 's/#/\n/'
 
 # Update python dependencies lock files (i.e. requirements.*.txt)
 
@@ -20,10 +20,16 @@ requirements/no-pip-upgrade:     ## Update based on setup.py and *.in files with
 	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py
 
 .PHONY: requirements/pip-upgrade-single-package
-requirements/pip-upgrade-single-package:     ## Update based on setup.py and *.in files, and parameter via pip, i.e. package=djangorestframework
+requirements/pip-upgrade-single-package:     ## Upgrade a single package based on setup.py and *.in files. Example: `make requirements/pip-upgrade-single-package package=django`
 	pip-compile -o requirements/requirements.common.txt setup.py --upgrade-package $(package)
 	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py --upgrade-package $(package)
 	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py --upgrade-package $(package)
+
+.PHONY: requirements/pip-upgrade-multiple-packages
+requirements/pip-upgrade-multiple-packages:     ## Upgrade multiple packages based on setup.py and *.in files. Example: `make requirements/pip-upgrade-multiple-packages packages="django djangorestframework pulpcore"`
+	pip-compile -o requirements/requirements.common.txt setup.py $(foreach p,$(packages),--upgrade-package $(p))
+	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py $(foreach p,$(packages),--upgrade-package $(p))
+	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py $(foreach p,$(packages),--upgrade-package $(p))
 
 .PHONY: requirements/pip-upgrade-all
 requirements/pip-upgrade-all:     ## Update based on setup.py and *.in files, and all packages via pip
