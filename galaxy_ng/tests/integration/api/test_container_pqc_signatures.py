@@ -14,10 +14,44 @@ import shutil
 import uuid
 import pytest
 
+from packaging.version import parse as parse_version
+
 from galaxy_ng.tests.integration.utils.iqe_utils import run_container_command
 from galaxykit.utils import wait_for_task
 
 logger = logging.getLogger(__name__)
+
+# PQC signature support (pysequoia) backports:
+# https://github.com/pulp/pulp_container/issues/2237
+PQC_MIN_PULP_CONTAINER_VERSIONS = [
+    parse_version("2.19.9"),   # backport: https://github.com/pulp/pulp_container/pull/2291
+    parse_version("2.27.4"),   # backport: https://github.com/pulp/pulp_container/pull/2255
+]
+
+
+def pulp_container_has_pqc_support(version_str):
+    if not version_str:
+        return False
+    v = parse_version(version_str)
+    max_known = max(PQC_MIN_PULP_CONTAINER_VERSIONS)
+    # Any version newer than the highest known backport has PQC support
+    if v >= max_known:
+        return True
+    # For older branches, check if the version is at or above the backport for that branch
+    return any(
+        v.release[:2] == mv.release[:2] and v >= mv
+        for mv in PQC_MIN_PULP_CONTAINER_VERSIONS
+    )
+
+
+@pytest.fixture
+def skip_if_no_pqc_support(galaxy_client):
+    gc = galaxy_client("admin")
+    pc_version = gc.get(gc.galaxy_root).get("pulp_container_version", "")
+    if not pulp_container_has_pqc_support(pc_version):
+        pytest.skip(
+            f"pulp_container {pc_version} does not support PQC signatures"
+        )
 
 
 # Red Hat container registry and sigstore URLs
@@ -39,7 +73,7 @@ REDHAT_PQC_KEY_ID = "FCD355B305707A62"
 
 
 @pytest.mark.deployment_standalone
-def test_sync_image_with_pqc_signatures(galaxy_client):
+def test_sync_image_with_pqc_signatures(galaxy_client, skip_if_no_pqc_support):
     """Sync ubi10-micro:latest and verify traditional and PQC signatures are parsed.
 
     Syncs the image from registry.access.redhat.com via sigstore, then checks
@@ -140,7 +174,9 @@ def test_sync_image_with_pqc_signatures(galaxy_client):
 
 
 @pytest.mark.deployment_standalone
-def test_push_image_with_pqc_signatures_via_skopeo(ansible_config, galaxy_client):
+def test_push_image_with_pqc_signatures_via_skopeo(
+    ansible_config, galaxy_client, skip_if_no_pqc_support
+):
     """Push ubi10-micro:latest via skopeo and verify traditional and PQC signatures are parsed.
 
     Uses skopeo copy to transfer the image directly from registry.access.redhat.com
