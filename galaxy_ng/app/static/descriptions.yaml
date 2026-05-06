@@ -246,11 +246,11 @@
   Get group by ID
 "v1_ui_groups_post": >-
   Create group
-"v1_ui_groups_users_delete_id_user_id": >-
+"v1_ui_groups_users_delete": >-
   Remove user from group
-"v1_ui_groups_users_get_id": >-
+"v1_ui_groups_users_get": >-
   List group users
-"v1_ui_groups_users_post_id": >-
+"v1_ui_groups_users_post": >-
   Add user to group
 "v1_ui_imports_collections_get_collections": >-
   List collection import tasks
@@ -360,12 +360,44 @@
   Update organization
 "v2_ui_role_definitions_delete": >-
   Delete role definition
-"v2_ui_role_definitions_get": >-
+"v2_ui_role_definitions_get_id": >-
   Get role definition by ID
+"v2_ui_role_definitions_get_role_definitions": >-
+  List role definitions. Role definitions contain a list of permissions
+  and can be used to assign those permissions to a user or team.
 "v2_ui_role_definitions_patch": >-
   Partially update role definition
+"v2_ui_role_definitions_post": >-
+  Create a role definition. Custom roles can be created with a list of
+  permissions to assign to users or teams.
 "v2_ui_role_definitions_put": >-
   Update role definition
+"v2_ui_role_definitions_team_assignments_get": >-
+  List team assignments for a specific role definition
+"v2_ui_role_definitions_user_assignments_get": >-
+  List user assignments for a specific role definition
+"v2_ui_role_metadata_get": >-
+  Get metadata about models and permissions tracked by the RBAC system
+"v2_ui_role_team_assignments_delete": >-
+  Remove a team role assignment
+"v2_ui_role_team_assignments_get_id": >-
+  Get a team role assignment by ID
+"v2_ui_role_team_assignments_get_role_team_assignments": >-
+  List team role assignments. Use this endpoint to view which teams have
+  been granted permissions to resources or organizations.
+"v2_ui_role_team_assignments_post": >-
+  Create a team role assignment. Gives a team permission to a resource
+  or organization by assigning a role definition.
+"v2_ui_role_user_assignments_delete": >-
+  Remove a user role assignment
+"v2_ui_role_user_assignments_get_id": >-
+  Get a user role assignment by ID
+"v2_ui_role_user_assignments_get_role_user_assignments": >-
+  List user role assignments. Use this endpoint to view which users have
+  been granted permissions to resources or organizations.
+"v2_ui_role_user_assignments_post": >-
+  Create a user role assignment. Gives a user permission to a resource
+  or organization by assigning a role definition.
 "v2_ui_teams_delete": >-
   Delete team
 "v2_ui_teams_get_id": >-
@@ -506,45 +538,45 @@
   Get task by pulp_id in distribution
 "v3_tasks_get_pk": >-
   Get a pulp task via the transformed v1 integer task id.
-"service_index_retrieve": >-
+"service_index_get": >-
   Get the service index root listing available resource registry endpoints
-"service_index_metadata_retrieve": >-
+"service_index_metadata_get": >-
   Get metadata about this service for cross-service communication
-"service_index_object_delete_create": >-
+"service_index_object_delete_post": >-
   Delete all role assignments (user and team) for a specific resource
-"service_index_resource_types_list": >-
+"service_index_resource_types_get_resource_types": >-
   List resource types configured in the system for cross-service communication
-"service_index_resource_types_retrieve": >-
+"service_index_resource_types_get_name": >-
   Get details of a specific resource type by name
-"service_index_resource_types_manifest_retrieve": >-
+"service_index_resource_types_manifest_get": >-
   Stream a CSV manifest of resource_id,hash pairs for a given resource type
-"service_index_resources_list": >-
+"service_index_resources_get_resources": >-
   List all resources indexed in the system for cross-service communication
-"service_index_resources_create": >-
+"service_index_resources_post": >-
   Create a new resource entry in the service index
-"service_index_resources_retrieve": >-
+"service_index_resources_get_ansible_id": >-
   Get a specific resource by its ansible_id
-"service_index_resources_update": >-
+"service_index_resources_put": >-
   Update a resource entry in the service index
-"service_index_resources_partial_update": >-
+"service_index_resources_patch": >-
   Partially update a resource entry in the service index
-"service_index_resources_destroy": >-
+"service_index_resources_delete": >-
   Delete a resource entry from the service index
-"service_index_role_permissions_list": >-
+"service_index_role_permissions_get": >-
   List permissions managed with the RBAC system for cross-service communication
-"service_index_role_team_assignments_list": >-
+"service_index_role_team_assignments_get": >-
   List team role assignments for cross-service communication
-"service_index_role_team_assignments_assign_create": >-
+"service_index_role_team_assignments_assign_post": >-
   Assign a role to a team for cross-service communication
-"service_index_role_team_assignments_unassign_create": >-
+"service_index_role_team_assignments_unassign_post": >-
   Remove a team role assignment for cross-service communication
-"service_index_role_types_list": >-
+"service_index_role_types_get": >-
   List role types registered with the RBAC system for cross-service communication
-"service_index_role_user_assignments_list": >-
+"service_index_role_user_assignments_get": >-
   List user role assignments for cross-service communication
-"service_index_role_user_assignments_assign_create": >-
+"service_index_role_user_assignments_assign_post": >-
   Assign a role to a user for cross-service communication
-"service_index_role_user_assignments_unassign_create": >-
+"service_index_role_user_assignments_unassign_post": >-
   Remove a user role assignment for cross-service communication
 "v3_tasks_get_tasks": >-
   List tasks

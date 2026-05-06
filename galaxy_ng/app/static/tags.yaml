@@ -559,11 +559,11 @@
   - Access
 "v1_ui_groups_post":
   - Access
-"v1_ui_groups_users_delete_id_user_id":
+"v1_ui_groups_users_delete":
   - Access
-"v1_ui_groups_users_get_id":
+"v1_ui_groups_users_get":
   - Access
-"v1_ui_groups_users_post_id":
+"v1_ui_groups_users_post":
   - Access
 
 # UI V1 Me
@@ -626,11 +626,37 @@
 # UI V2 Role Definitions
 "v2_ui_role_definitions_delete":
   - Access
-"v2_ui_role_definitions_get":
+"v2_ui_role_definitions_get_id":
+  - Access
+"v2_ui_role_definitions_get_role_definitions":
   - Access
 "v2_ui_role_definitions_patch":
   - Access
+"v2_ui_role_definitions_post":
+  - Access
 "v2_ui_role_definitions_put":
+  - Access
+"v2_ui_role_definitions_team_assignments_get":
+  - Access
+"v2_ui_role_definitions_user_assignments_get":
+  - Access
+"v2_ui_role_metadata_get":
+  - Access
+"v2_ui_role_team_assignments_delete":
+  - Access
+"v2_ui_role_team_assignments_get_id":
+  - Access
+"v2_ui_role_team_assignments_get_role_team_assignments":
+  - Access
+"v2_ui_role_team_assignments_post":
+  - Access
+"v2_ui_role_user_assignments_delete":
+  - Access
+"v2_ui_role_user_assignments_get_id":
+  - Access
+"v2_ui_role_user_assignments_get_role_user_assignments":
+  - Access
+"v2_ui_role_user_assignments_post":
   - Access
 
 # UI V2 Teams
@@ -680,53 +706,53 @@
   - Info
 
 # Service Index / Resource Registry
-"service_index_retrieve":
+"service_index_get":
   - Resource Registry
-"service_index_metadata_retrieve":
+"service_index_metadata_get":
   - Resource Registry
-"service_index_object_delete_create":
-  - Resource Registry
-  - Access
-"service_index_resource_types_list":
-  - Resource Registry
-"service_index_resource_types_retrieve":
-  - Resource Registry
-"service_index_resource_types_manifest_retrieve":
-  - Resource Registry
-"service_index_resources_list":
-  - Resource Registry
-"service_index_resources_create":
-  - Resource Registry
-"service_index_resources_retrieve":
-  - Resource Registry
-"service_index_resources_update":
-  - Resource Registry
-"service_index_resources_partial_update":
-  - Resource Registry
-"service_index_resources_destroy":
-  - Resource Registry
-"service_index_role_permissions_list":
+"service_index_object_delete_post":
   - Resource Registry
   - Access
-"service_index_role_team_assignments_list":
+"service_index_resource_types_get_resource_types":
+  - Resource Registry
+"service_index_resource_types_get_name":
+  - Resource Registry
+"service_index_resource_types_manifest_get":
+  - Resource Registry
+"service_index_resources_get_resources":
+  - Resource Registry
+"service_index_resources_post":
+  - Resource Registry
+"service_index_resources_get_ansible_id":
+  - Resource Registry
+"service_index_resources_put":
+  - Resource Registry
+"service_index_resources_patch":
+  - Resource Registry
+"service_index_resources_delete":
+  - Resource Registry
+"service_index_role_permissions_get":
   - Resource Registry
   - Access
-"service_index_role_team_assignments_assign_create":
+"service_index_role_team_assignments_get":
   - Resource Registry
   - Access
-"service_index_role_team_assignments_unassign_create":
+"service_index_role_team_assignments_assign_post":
   - Resource Registry
   - Access
-"service_index_role_types_list":
+"service_index_role_team_assignments_unassign_post":
   - Resource Registry
   - Access
-"service_index_role_user_assignments_list":
+"service_index_role_types_get":
   - Resource Registry
   - Access
-"service_index_role_user_assignments_assign_create":
+"service_index_role_user_assignments_get":
   - Resource Registry
   - Access
-"service_index_role_user_assignments_unassign_create":
+"service_index_role_user_assignments_assign_post":
+  - Resource Registry
+  - Access
+"service_index_role_user_assignments_unassign_post":
   - Resource Registry
   - Access
 
