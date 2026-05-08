@@ -99,7 +99,7 @@ django_ansible_base_dependency = (
 
 requirements = [
     "galaxy-importer>=0.4.31,<0.5.0",
-    "pulpcore>=3.105.2,<3.106",
+    "pulpcore>=3.105.6,<3.106",
     "pulp_ansible>=0.29.6,<0.30",
     "pulp-container>=2.27.6,<2.28",
     "pyjwt[crypto]>=2.12.0",  # minimum version enforced to address: AAP-68406
