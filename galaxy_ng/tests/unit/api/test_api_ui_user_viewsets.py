@@ -596,10 +596,24 @@ class TestUiUserViewSet(BaseTestCase):
 
         # set valid user
         new_user_data["password"] = "trekkie4Lyfe1701"
+
+        if method_call == self.client.put and not auth_user.is_superuser:
+            # email updates are not allowed; users cannot modify their own email.
+            new_user_data["email"] = "you-cant-change-me@example.com"
+
+            response = method_call(url, new_user_data, format="json")
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(
+                response.data["errors"][0]["detail"],
+                "You do not have permission to change the email field.",
+            )
+
+            del new_user_data["email"]
+
         response = method_call(url, new_user_data, format="json")
+
         self.assertEqual(response.status_code, crud_status)
         data = response.data
-        self.assertEqual(data["email"], new_user_data["email"])
         self.assertEqual(data["first_name"], new_user_data["first_name"])
         self.assertEqual(data["groups"], new_user_data["groups"])
         self.assertFalse(self.client.login(username=new_user_data["username"], password="bad"))
@@ -616,7 +630,6 @@ class TestUiUserViewSet(BaseTestCase):
             "username": "test2",
             "first_name": "First",
             "last_name": "Last",
-            "email": "email@email.com",
             "groups": [{"id": self.pe_group.id, "name": self.pe_group.name}],
         }
 
@@ -652,7 +665,6 @@ class TestUiUserViewSet(BaseTestCase):
             "username": "test2",
             "first_name": "First",
             "last_name": "Last",
-            "email": "email@email.com",
             "groups": [{"id": self.pe_group.id, "name": self.pe_group.name}],
         }
 
@@ -694,7 +706,6 @@ class TestUiUserViewSet(BaseTestCase):
             "username": "test2",
             "first_name": "First",
             "last_name": "Last",
-            "email": "email@email.com",
             "groups": [],
         }
 
@@ -706,7 +717,6 @@ class TestUiUserViewSet(BaseTestCase):
             "username": "test2",
             "first_name": "First",
             "last_name": "Last",
-            "email": "email@email.com",
             "groups": [{"id": self.pe_group.id, "name": self.pe_group.name}],
         }
 
@@ -745,7 +755,6 @@ class TestUiUserViewSet(BaseTestCase):
             "username": "delete_me_test",
             "first_name": "Del",
             "last_name": "Eetmi",
-            "email": "email@email.com",
             "groups": [{"id": group.id, "name": group.name}],
         }
 
@@ -850,7 +859,6 @@ class TestUiUserViewSet(BaseTestCase):
             "username": "user_trying_to_delete_superuser",
             "first_name": "Del",
             "last_name": "Sooperuuser",
-            "email": "email@email.com",
             "groups": [{"id": group.id, "name": group.name}],
         }
 
