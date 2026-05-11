@@ -23,6 +23,7 @@ include galaxy_ng/tests/integration/utils/gpg/collection_sign.sh
 include galaxy_ng/tests/integration/utils/gpg/qe-sign-priv.gpg
 include galaxy-operator/bin/readyz.py
 exclude .coveragerc
+exclude codecov.yml
 exclude sonar-project.properties
 exclude tox.ini
 prune .tekton

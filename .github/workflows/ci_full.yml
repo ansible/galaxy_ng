@@ -132,11 +132,23 @@ jobs:
         run: sed -i '2i <!-- PR ${{ github.event.number }} -->' coverage.xml
 
       - name: upload coverage as artifact
-        if: matrix.python-version == env.PRIMARY_PYTHON_VERSION
+        if: always() && matrix.python-version == env.PRIMARY_PYTHON_VERSION
         uses: actions/upload-artifact@v5
         with:
           name: coverage
           path: coverage.xml
+
+      - name: Upload coverage to Codecov
+        if: always() && matrix.python-version == env.PRIMARY_PYTHON_VERSION
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          url: ${{ vars.CODECOV_URL }}
+          slug: ansible-automation-platform/galaxy_ng
+          files: ./coverage.xml
+          flags: unit-tests
+          disable_search: true
+          fail_ci_if_error: false
 
       - name: 'Extract and export repo owner/name'
         shell: bash
@@ -151,7 +163,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
-        if: github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main' && matrix.python-version == env.PRIMARY_PYTHON_VERSION
+        if: always() && github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main' && matrix.python-version == env.PRIMARY_PYTHON_VERSION
         env:
           SONAR_TOKEN: ${{ secrets.CICD_ORG_SONAR_TOKEN_CICD_BOT || secrets.AAP_ORG_SONAR_TOKEN_ANSIBLE_CICD_BOT }}
         with:
@@ -160,7 +172,7 @@ jobs:
             -Dsonar.organization=${{ env.REPO_OWNER }}
 
       - name: upload jUnit XML test results
-        if: github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main' && matrix.python-version == env.PRIMARY_PYTHON_VERSION
+        if: always() && github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main' && matrix.python-version == env.PRIMARY_PYTHON_VERSION
         continue-on-error: true
         run: |
           curl -v --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}" \
