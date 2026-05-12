@@ -82,7 +82,7 @@ click==8.3.2
     # via
     #   black
     #   pulpcore
-cryptography==46.0.6
+cryptography==46.0.7
     # via
     #   ansible-core
     #   ansible-lint
