@@ -121,8 +121,8 @@ requirements = [
     "aiohttp>=3.13.3",
     "aiodns>=3.3.0,<3.7",  # aligned with pulpcore; >=3.3 required to fix hanging issue
     "setuptools<=81",  # declare here to ensure it's included in the RPM system
-    "pillow>=12.1.1",  # minimum version enforced to address AAP-65505, AAP-65509, AAP-65510
-    "cryptography>=46.0.5",  # minimum version enforced to address AAP-65409
+    "pillow>=12.2.0",  # minimum version enforced to address AAP-72161
+    "cryptography>=46.0.7",  # minimum version enforced to address AAP-75045
     "pyopenssl>=25.3.0",  # bumped to allow cryptography>=46.0.5
     "black>=26.3.1",  # minimum version enforced for AAP-68431, AAP-68430, AAP-68421
     "ansible-lint>=26.1.1",  # minimum version enforced for AAP-68431, AAP-68430, AAP-68421
