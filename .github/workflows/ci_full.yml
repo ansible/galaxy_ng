@@ -95,7 +95,7 @@ jobs:
       matrix:
         # Note: GitHub Actions doesn't support env vars in matrix definitions
         # PRIMARY_PYTHON_VERSION is used for coverage/SonarCloud reporting
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.12", "3.13"]
     steps:
 
       - uses: actions/setup-python@v6
