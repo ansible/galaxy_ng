@@ -22,12 +22,12 @@ class GatewayUserAttributes:
 
 @pytest.fixture
 def gateway_admin_client(galaxy_client):
-    if not os.environ.get('AAP_GATEWAY_ADMIN_USERNAME'):
-        pytest.skip("AAP_GATEWAY_ADMIN_USERNAME not set")
+    if os.environ.get('AAP_GATEWAY', '') not in ('true', 'True', '1'):
+        pytest.skip("AAP_GATEWAY not enabled")
 
     gc = galaxy_client("admin", ignore_cache=True)
-    username = os.environ.get('AAP_GATEWAY_ADMIN_USERNAME')
-    password = os.environ.get('AAP_GATEWAY_ADMIN_PASSWORD')
+    username = os.environ.get('AAP_GATEWAY_ADMIN_USERNAME', 'admin')
+    password = os.environ.get('AAP_GATEWAY_ADMIN_PASSWORD', os.environ.get('HUB_ADMIN_PASS'))
     return BasicAuthClient(gc.galaxy_root, username, password)
 
 
