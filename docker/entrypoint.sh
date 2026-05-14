@@ -83,6 +83,7 @@ run_service() {
     fi
 
     if [[ "${WITH_MIGRATIONS}" -eq "1" ]]; then
+        django-admin fix-squashed-migrations
         django-admin migrate
     elif [[ "${WAIT_FOR_MIGRATIONS}" -eq "1" ]]; then
         wait-for-migrations
