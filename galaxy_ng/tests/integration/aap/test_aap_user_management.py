@@ -21,13 +21,14 @@ class GatewayUserAttributes:
 
 
 @pytest.fixture
-def gateway_admin_client(galaxy_client):
+def gateway_admin_client(galaxy_client, ansible_config):
     if os.environ.get('AAP_GATEWAY', '') not in ('true', 'True', '1'):
         pytest.skip("AAP_GATEWAY not enabled")
 
     gc = galaxy_client("admin", ignore_cache=True)
-    username = os.environ.get('AAP_GATEWAY_ADMIN_USERNAME', 'admin')
-    password = os.environ.get('AAP_GATEWAY_ADMIN_PASSWORD', os.environ.get('HUB_ADMIN_PASS'))
+    admin_config = ansible_config("admin")
+    username = os.environ.get('AAP_GATEWAY_ADMIN_USERNAME', admin_config["username"])
+    password = os.environ.get('AAP_GATEWAY_ADMIN_PASSWORD', admin_config["password"])
     return BasicAuthClient(gc.galaxy_root, username, password)
 
 
