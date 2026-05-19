@@ -8,6 +8,7 @@ metadata:
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch == "main"
+    pipelinesascode.tekton.dev/target-namespace: ansible-automationhu-tenant
   creationTimestamp:
   labels:
     appstudio.openshift.io/application: automation-hub-main
