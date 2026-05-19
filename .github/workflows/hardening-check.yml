@@ -1,0 +1,123 @@
+name: "Release Hardening Gate"
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: hardening-gate
+  cancel-in-progress: false
+
+jobs:
+  hardening-gate:
+    name: "Enforce Hardening on stable-2.7"
+    if: github.repository == 'ansible-automation-platform/galaxy_ng'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan open PRs targeting stable-2.7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          REVIEW_BODY: |
+            ## ❌ Merge Blocked — Release Hardening
+
+            This PR targets **stable-2.7**, which is currently in the **Release Hardening Phase**.
+
+            Only **release blockers** and **approved hardening exceptions** may be merged during this phase.
+
+            ### To unblock this PR, a maintainer must apply one of the following labels:
+
+            - `release-blocker` — the defect meets [release blocker criteria](https://redhat.atlassian.net/wiki/spaces/AAP/pages/114275149/Change+Control+Policy+-+Release+Hardening)
+            - `hardening-exception-approved` — an exception has been approved in the Daily Release Health call per the [Hardening Exception Request Process](https://redhat.atlassian.net/wiki/spaces/AAP/pages/114275149/Change+Control+Policy+-+Release+Hardening)
+
+            Once the appropriate label is applied, this review will be automatically dismissed.
+
+            ---
+            _See the [AAP 2.7 Release Hardening Guidelines](https://redhat.atlassian.net/wiki/spaces/AAP/pages/114275305/AAP+2.7+Release+Hardening+Guidelines) for the full release timeline and policy._
+        run: |
+          TARGET_BRANCH="stable-2.7"
+          REVIEW_MARKER="Release Hardening"
+
+          # Get all open PRs targeting the hardening branch
+          PR_NUMBERS=$(gh pr list --base "$TARGET_BRANCH" --state open --repo "$REPO" --limit 200 --json number --jq '.[].number')
+
+          if [[ -z "$PR_NUMBERS" ]]; then
+            echo "No open PRs targeting $TARGET_BRANCH."
+            exit 0
+          fi
+
+          for PR_NUMBER in $PR_NUMBERS; do
+            echo "::group::PR #$PR_NUMBER"
+
+            LABELS=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json labels --jq '[.labels[].name]')
+            HAS_HOLD=$(echo "$LABELS"      | jq 'contains(["hold: release-hardening"])')
+            HAS_BLOCKER=$(echo "$LABELS"   | jq 'contains(["release-blocker"])')
+            HAS_EXCEPTION=$(echo "$LABELS" | jq 'contains(["hardening-exception-approved"])')
+
+            # Check if a hardening review already exists from this bot
+            EXISTING_REVIEW_ID=$(gh api "repos/$REPO/pulls/$PR_NUMBER/reviews" --paginate \
+              | jq -s '[.[][] | select(.state == "CHANGES_REQUESTED" and (.body | contains("'"$REVIEW_MARKER"'")))][0].id // empty')
+
+            # -----------------------------------------------------------------
+            # BLOCK: No bypass labels → add hold label + request changes review
+            # -----------------------------------------------------------------
+            if [[ "$HAS_BLOCKER" == "false" && "$HAS_EXCEPTION" == "false" ]]; then
+
+              # Add hold label if missing
+              if [[ "$HAS_HOLD" == "false" ]]; then
+                if ! gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label "hold: release-hardening"; then
+                  echo "::error::Failed to add hold label for PR #$PR_NUMBER"
+                else
+                  echo "  Added hold: release-hardening label"
+                fi
+              fi
+
+              # Submit request-changes review if one doesn't already exist
+              if [[ -z "$EXISTING_REVIEW_ID" ]]; then
+                if ! gh api "repos/$REPO/pulls/$PR_NUMBER/reviews" \
+                  --method POST \
+                  -f event="REQUEST_CHANGES" \
+                  -f body="$REVIEW_BODY"; then
+                  echo "::error::Failed to submit review for PR #$PR_NUMBER"
+                else
+                  echo "  Submitted request-changes review"
+                fi
+              else
+                echo "  Hardening review already exists (ID: $EXISTING_REVIEW_ID), skipping"
+              fi
+
+            # -----------------------------------------------------------------
+            # PASS: Has a bypass label → dismiss hardening review if one exists
+            # -----------------------------------------------------------------
+            else
+              # Remove hold label if present
+              if [[ "$HAS_HOLD" == "true" ]]; then
+                if ! gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "hold: release-hardening"; then
+                  echo "::error::Failed to remove hold label for PR #$PR_NUMBER"
+                else
+                  echo "  Removed hold: release-hardening label"
+                fi
+              fi
+
+              # Dismiss hardening review if one exists
+              if [[ -n "$EXISTING_REVIEW_ID" ]]; then
+                if ! gh api "repos/$REPO/pulls/$PR_NUMBER/reviews/$EXISTING_REVIEW_ID/dismissals" \
+                  --method PUT \
+                  -f message="Release hardening review dismissed — bypass label applied." \
+                  -f event="DISMISS"; then
+                  echo "::error::Failed to dismiss hardening review for PR #$PR_NUMBER"
+                else
+                  echo "  Dismissed hardening review (ID: $EXISTING_REVIEW_ID)"
+                fi
+              else
+                echo "  Bypass label present, no hardening review to dismiss"
+              fi
+            fi
+
+            echo "::endgroup::"
+          done
