@@ -188,8 +188,8 @@ class LegacyRoleImportFilter(filterset.FilterSet):
     role_name = filters.NumberFilter(field_name='role__name')
     namespace_id = filters.NumberFilter(field_name='role__namespace_id')
     namespace_name = filters.NumberFilter(field_name='role__namespace_name')
-    github_user = filters.CharFilter(field_name='task__kwargs__github_user')
-    github_repo = filters.CharFilter(field_name='task__kwargs__github_repo')
+    github_user = filters.CharFilter(method='github_user_filter')
+    github_repo = filters.CharFilter(method='github_repo_filter')
     state = filters.CharFilter(method='state_filter')
 
     class Meta:
@@ -203,6 +203,27 @@ class LegacyRoleImportFilter(filterset.FilterSet):
             'github_repo',
             'state'
         ]
+
+    def _filter_by_enc_kwarg(self, queryset, key, value):
+        task_pks = []
+        related_qs = (
+            queryset.select_related('task')
+            .only('task_id', 'task__enc_kwargs')
+            .iterator(chunk_size=1000)
+        )
+        for obj in related_qs:
+            if not obj.task:
+                continue
+            kwargs = obj.task.enc_kwargs or {}
+            if kwargs.get(key) == value:
+                task_pks.append(obj.task_id)
+        return queryset.filter(task_id__in=task_pks)
+
+    def github_user_filter(self, queryset, name, value):
+        return self._filter_by_enc_kwarg(queryset, 'github_user', value)
+
+    def github_repo_filter(self, queryset, name, value):
+        return self._filter_by_enc_kwarg(queryset, 'github_repo', value)
 
     def state_filter(self, queryset, name, value):
         if value.lower() == 'success':
