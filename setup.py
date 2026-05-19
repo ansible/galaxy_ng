@@ -9,8 +9,6 @@ import urllib.error
 from distutils import log
 
 from setuptools import find_packages, setup, Command
-from setuptools.command.build_py import build_py as _BuildPyCommand
-from setuptools.command.sdist import sdist as _SDistCommand
 
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
 version = "4.12.0dev"
@@ -73,18 +71,6 @@ class PrepareStaticCommand(Command):
 
     def _download_tarball(self, url, download_file):
         urllib.request.urlretrieve(url, filename=download_file.name)
-
-
-class SDistCommand(_SDistCommand):
-    def run(self):
-        self.run_command("prepare_static")
-        return super().run()
-
-
-class BuildPyCommand(_BuildPyCommand):
-    def run(self):
-        self.run_command("prepare_static")
-        return super().run()
 
 
 # use full commit hash in place of DAB tag
@@ -189,7 +175,5 @@ setup(
     entry_points={"pulpcore.plugin": ["galaxy_ng = galaxy_ng:default_app_config"]},
     cmdclass={
         "prepare_static": PrepareStaticCommand,
-        "build_py": BuildPyCommand,
-        "sdist": SDistCommand,
     },
 )
