@@ -139,12 +139,11 @@ jobs:
           path: coverage.xml
 
       - name: Upload coverage to Codecov
-        if: always() && matrix.python-version == env.PRIMARY_PYTHON_VERSION
+        if: always() && github.event_name == 'push' && github.ref_name == 'main' && matrix.python-version == env.PRIMARY_PYTHON_VERSION
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           url: ${{ vars.CODECOV_URL }}
-          slug: ansible-automation-platform/galaxy_ng
           files: ./coverage.xml
           flags: unit-tests
           disable_search: true

@@ -29,6 +29,21 @@ The static spec differs from the dynamically generated spec above in that it:
 - Contains `x-ai-description` fields for AI/MCP tool integration
 - Serves as the source of truth for Hub's API specification in AAP
 
+## Code Coverage
+
+This project uses both SonarCloud and Codecov for code coverage tracking:
+
+### SonarCloud
+- **Public Coverage:** Available at [SonarCloud](https://sonarcloud.io/summary/new_code?id=ansible_galaxy_ng)
+- **Badge Integration:** Coverage metrics displayed in README badges above
+- **Configuration:** Managed through `sonar-project.properties`
+
+### Codecov
+- **Purpose:** Internal coverage tracking
+- **Coverage Configuration:** `codecov.yml` (aligned with `sonar-project.properties` exclusions)  
+- **CI Integration:** Coverage uploads automatically on main branch pushes
+- **Flags:** `unit-tests` flag tracks unit test coverage separately
+
 ## Communication
 
 Refer to the [Communication](https://ansible.readthedocs.io/projects/galaxy-ng/en/latest/community/overview/#communication)
