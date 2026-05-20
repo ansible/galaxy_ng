@@ -628,7 +628,21 @@ PULP_CORE_VIEWSETS = {
                 "condition": "has_model_or_domain_or_obj_perms:core.change_task",
             },
         ]
-    }
+    },
+    "signing-services": {
+        "statements": [
+            {
+                "action": ["list", "retrieve"],
+                "principal": "authenticated",
+                "effect": "allow",
+            },
+            {
+                "action": "*",
+                "principal": "admin",
+                "effect": "allow",
+            },
+        ]
+    },
 }
 
 
