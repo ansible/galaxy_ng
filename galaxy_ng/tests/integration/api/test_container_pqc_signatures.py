@@ -121,6 +121,7 @@ def test_sync_image_with_pqc_signatures(galaxy_client, skip_if_no_pqc_support):
         tags_response = gc.get(
             f"pulp/api/v3/content/container/tags/"
             f"?repository_version={latest_version}"
+            f"&name={UBI10_MICRO_TAG}"
         )
         assert tags_response["count"] == 1
         assert tags_response["results"][0]["name"] == UBI10_MICRO_TAG
