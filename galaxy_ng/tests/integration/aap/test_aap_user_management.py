@@ -4,8 +4,7 @@ import os
 
 import pytest
 
-from galaxykit.client import BasicAuthClient
-
+from galaxykit.utils import GalaxyClientError
 from galaxy_ng.tests.integration.utils.namespaces import generate_namespace
 from galaxy_ng.tests.integration.utils.iqe_utils import is_disabled_local_management
 
@@ -21,15 +20,19 @@ class GatewayUserAttributes:
 
 
 @pytest.fixture
-def gateway_admin_client(galaxy_client, ansible_config):
+def gateway_admin_client(galaxy_client):
     if os.environ.get('AAP_GATEWAY', '') not in ('true', 'True', '1'):
         pytest.skip("AAP_GATEWAY not enabled")
 
-    gc = galaxy_client("admin", ignore_cache=True)
-    admin_config = ansible_config("admin")
-    username = os.environ.get('AAP_GATEWAY_ADMIN_USERNAME', admin_config["username"])
-    password = os.environ.get('AAP_GATEWAY_ADMIN_PASSWORD', admin_config["password"])
-    return BasicAuthClient(gc.galaxy_root, username, password)
+    gw_username = os.environ.get('AAP_GATEWAY_ADMIN_USERNAME')
+    gw_password = os.environ.get('AAP_GATEWAY_ADMIN_PASSWORD')
+
+    if gw_username and gw_password:
+        return galaxy_client(
+            {"username": gw_username, "password": gw_password}, ignore_cache=True
+        )
+
+    return galaxy_client("admin", ignore_cache=True)
 
 
 @pytest.fixture
@@ -42,8 +45,9 @@ def random_gateway_user(gateway_admin_client, galaxy_client, random_username):
     )
 
     # access galaxy as the user to process claims ...
-    gc = galaxy_client("admin", ignore_cache=True)
-    uc = BasicAuthClient(gc.galaxy_root, random_username, 'redhat1234')
+    uc = galaxy_client(
+        {"username": random_username, "password": "redhat1234"}, ignore_cache=True
+    )
 
     gu = GatewayUserAttributes()
     gu.username = random_username
@@ -68,8 +72,9 @@ def gateway_user_factory(gateway_admin_client, galaxy_client):
         )
 
         # access galaxy as the user to process claims ...
-        gc = galaxy_client("admin", ignore_cache=True)
-        uc = BasicAuthClient(gc.galaxy_root, username, 'redhat1234')
+        uc = galaxy_client(
+            {"username": username, "password": "redhat1234"}, ignore_cache=True
+        )
 
         gu = GatewayUserAttributes()
         gu.username = username
@@ -114,7 +119,7 @@ def test_aap_galaxy_normal_user_can_not_demote_superuser(
 
     # make user1 a superuser & process claims
     url = '/api/gateway/v1/users/' + str(u1.gateway_v1_me['id']) + "/"
-    resp = gateway_admin_client.patch(url, json={'is_superuser': True})
+    resp = gateway_admin_client.patch(url, body={'is_superuser': True})
     assert resp['is_superuser'], resp
     me2 = u1.user_client.get('/api/galaxy/_ui/v2/me/')
     assert me2['is_superuser'], me2
@@ -129,8 +134,9 @@ def test_aap_galaxy_normal_user_can_not_demote_superuser(
         payload = {'is_superuser': False}
 
     func = getattr(u2.user_client, verb.lower())
-    resp = func(user_url, json=payload)
-    assert "You do not have permission to perform this action" in str(resp)
+    with pytest.raises(GalaxyClientError) as ctx:
+        func(user_url, body=payload)
+    assert ctx.value.response.status_code == 403
 
 
 @pytest.mark.deployment_standalone
@@ -152,11 +158,12 @@ def test_aap_galaxy_local_resource_management_setting_gates_user_creation(
     random_username
 ):
     # make sure the user can't be created directly in galaxy ...
-    resp = gateway_admin_client.post(
-        users_endpoint,
-        body=json.dumps({'username': random_username, 'password': 'redhat1234'})
-    )
-    assert "You do not have permission to perform this action" in str(resp)
+    with pytest.raises(GalaxyClientError) as ctx:
+        gateway_admin_client.post(
+            users_endpoint,
+            body=json.dumps({'username': random_username, 'password': 'redhat1234'})
+        )
+    assert ctx.value.response.status_code == 403
 
 
 @pytest.mark.deployment_standalone
@@ -196,8 +203,9 @@ def test_aap_galaxy_local_resource_management_setting_gates_field_modification(
         payload[field] = "foobar12345"
     else:
         payload = {field: "foobar12345"}
-    resp = admin_func(user_url, json=payload)
-    assert "You do not have permission to perform this action" in str(resp)
+    with pytest.raises(GalaxyClientError) as ctx:
+        admin_func(user_url, body=payload)
+    assert ctx.value.response.status_code == 403
 
 
 @pytest.mark.deployment_standalone
@@ -220,8 +228,9 @@ def test_aap_galaxy_local_resource_management_setting_gates_deletion(
 ):
     uid = random_gateway_user.galaxy_v2_me['id']
     user_url = f'{users_endpoint}/{uid}/'
-    resp = gateway_admin_client.delete(user_url)
-    assert "You do not have permission to perform this action" in str(resp)
+    with pytest.raises(GalaxyClientError) as ctx:
+        gateway_admin_client.delete(user_url)
+    assert ctx.value.response.status_code == 403
 
 
 @pytest.mark.deployment_standalone
@@ -258,7 +267,7 @@ def test_aap_galaxy_superuser_management(
             payload['is_superuser'] = value
         else:
             payload = {'is_superuser': value}
-        resp = admin_func(user_url, json=payload)
+        resp = admin_func(user_url, body=payload)
         assert resp.get('is_superuser') is value, resp
 
     # make sure the user can not promote themself ...
@@ -268,15 +277,16 @@ def test_aap_galaxy_superuser_management(
         payload['is_superuser'] = True
     else:
         payload = {'is_superuser': True}
-    resp = user_func(user_url, json=payload)
-    assert "You do not have permission to perform this action" in str(resp)
+    with pytest.raises(GalaxyClientError) as ctx:
+        user_func(user_url, body=payload)
+    assert ctx.value.response.status_code == 403
 
     # make sure the user can demote themself ...
-    ga.patch(user_url, json={"is_superuser": True})
+    ga.patch(user_url, body={"is_superuser": True})
     if verb == 'PUT':
         payload = copy.deepcopy(galaxy_user_data)
         payload['is_superuser'] = False
     else:
         payload = {'is_superuser': False}
-    resp = user_func(user_url, json=payload)
+    resp = user_func(user_url, body=payload)
     assert resp.get('is_superuser') is False, resp
