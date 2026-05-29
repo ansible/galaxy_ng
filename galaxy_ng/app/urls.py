@@ -3,6 +3,8 @@ from django.urls import re_path as url
 from django.shortcuts import redirect
 from django.urls import include, path
 
+from django_prometheus import exports
+
 from . import views
 from galaxy_ng.app.api import urls as api_urls
 from galaxy_ng.ui import urls as ui_urls
@@ -17,6 +19,11 @@ API_PATH_PREFIX = settings.GALAXY_API_PATH_PREFIX.strip("/")
 
 galaxy_urls = [
     path(f"{API_PATH_PREFIX}/", include(api_urls)),
+]
+
+status_urls = [
+    path("healthz", views.health_view, name="status-healthz"),
+    path("metrics", exports.ExportToDjangoView, name="status-metrics"),
 ]
 
 urlpatterns = [
@@ -59,6 +66,7 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("healthz", views.health_view),
+    path(f"{API_PATH_PREFIX}/status/", include(status_urls)),
 ]
 
 urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(resource_api_urls)))
