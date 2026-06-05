@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 PQC_MIN_PULP_CONTAINER_VERSIONS = [
     parse_version("2.19.9"),   # backport: https://github.com/pulp/pulp_container/pull/2291
     parse_version("2.27.4"),   # backport: https://github.com/pulp/pulp_container/pull/2255
+    parse_version("2.26.9"),   # backport: https://github.com/pulp/pulp_container/pull/2290
 ]
 
 
