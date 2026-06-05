@@ -106,6 +106,9 @@ def test_social_auth_creates_v3_namespace(gh_user_1_pre, generate_test_artifact)
     logger.debug("Waiting for upload to be completed")
     resp = wait_for_task(gh_user_1_pre, resp)
     assert resp["state"] == "completed"
+    url = (f"v3/plugin/ansible/content/published/collections/index/"
+           f"{expected_ns}/{generate_test_artifact.name}/")
+    wait_for_url(gh_user_1_pre, url)
 
 
 @pytest.mark.galaxy_stage_ansible
@@ -227,6 +230,9 @@ def test_social_auth_deprecate_collection(gh_user_1, generate_test_artifact, gal
     logger.debug("Waiting for upload to be completed")
     resp = wait_for_task(gh_user_1, resp)
     assert resp["state"] == "completed"
+    url = (f"v3/plugin/ansible/content/published/collections/index/"
+           f"{expected_ns}/{generate_test_artifact.name}/")
+    wait_for_url(gh_user_1, url)
     gc = galaxy_client("github_user", github_social_auth=True, ignore_cache=True)
     gc.deprecate_collection(namespace=expected_ns, collection=generate_test_artifact.name,
                             repository="published")
