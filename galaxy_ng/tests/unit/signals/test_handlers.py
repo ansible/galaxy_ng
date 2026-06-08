@@ -414,6 +414,55 @@ class TestRoleDefinitionSignals:
         assert SHARED_TEAM_ROLE == "Team Member"
 
 
+class TestCopyRoleDefinitionToRole:
+    """Test copy_role_definition_to_role signal handler."""
+
+    HANDLER = "galaxy_ng.app.signals.handlers"
+
+    def _call_handler(self, instance, role_exists=False, signal_in_progress=False):
+        """Call copy_role_definition_to_role with standard mocks, return the Role mock."""
+        from galaxy_ng.app.signals.handlers import copy_role_definition_to_role
+
+        with (
+            patch(f"{self.HANDLER}.rbac_signal_in_progress", return_value=signal_in_progress),
+            patch(f"{self.HANDLER}.Role") as mock_role,
+            patch(f"{self.HANDLER}.dab_rbac_signals"),
+        ):
+            existing = Mock() if role_exists else None
+            mock_role.objects.filter.return_value.first.return_value = existing
+
+            copy_role_definition_to_role(sender=None, instance=instance, created=True)
+
+            return mock_role
+
+    def _make_role_definition(self, role_name, managed):
+        rd = Mock(spec=["name", "managed"])
+        rd.name = role_name
+        rd.managed = managed
+        return rd
+
+    def test_managed_role_definition_creates_locked_role(self):
+        rd = self._make_role_definition("galaxy.some_role", managed=True)
+        mock_role = self._call_handler(rd)
+        mock_role.objects.create.assert_called_once_with(name="galaxy.some_role", locked=True)
+
+    def test_unmanaged_role_definition_creates_unlocked_role(self):
+        rd = self._make_role_definition("galaxy.custom_role", managed=False)
+        mock_role = self._call_handler(rd)
+        mock_role.objects.create.assert_called_once_with(name="galaxy.custom_role", locked=False)
+
+    def test_existing_role_is_not_recreated(self):
+        rd = self._make_role_definition("galaxy.existing_role", managed=True)
+        mock_role = self._call_handler(rd, role_exists=True)
+        mock_role.objects.create.assert_not_called()
+
+    def test_skipped_when_signal_in_progress(self):
+        rd = self._make_role_definition("galaxy.any_role", managed=True)
+        mock_role = self._call_handler(rd, signal_in_progress=True)
+        mock_role.objects.filter.assert_not_called()
+        mock_role.objects.create.assert_not_called()
+
+
 class TestUserRoleSignals:
     """Test UserRole signal handlers."""
 
