@@ -22,12 +22,21 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(github.repository, 'ansible-automation-platform')
     steps:
+      - name: Generate ephemeral read-only token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ANSIBLE_CICD_BOT_ORG_RW_TOKEN_APP_ID }}
+          private-key: ${{ secrets.ANSIBLE_CICD_BOT_ORG_RW_TOKEN_PRIVATE_KEY }}
+          permissions: >-
+            {"contents": "read"}
+
       - name: Force push to Ansible repository
         run: |
           SOURCE_BRANCH="${{ github.event.inputs.source_branch || 'main' }}"
           TARGET_BRANCH="${{ github.event.inputs.target_branch || 'main' }}"
 
-          export GH_TOKEN=${{ secrets.AAP_ORG_FG_ANSIBLE_CICD_BOT_ACTIONS_REPO_READ }}
+          export GH_TOKEN=${{ steps.generate-token.outputs.token }}
           gh repo clone ansible-automation-platform/galaxy_ng
           cd galaxy_ng
           git checkout $SOURCE_BRANCH
