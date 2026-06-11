@@ -625,7 +625,11 @@ def generate_test_artifact(ansible_config):
     yield artifact
     galaxy_client = get_galaxy_client(ansible_config)
     gc_admin = galaxy_client("admin")
-    delete_collection(gc_admin, namespace=artifact.namespace, collection=artifact.name)
+    try:
+        delete_collection(gc_admin, namespace=artifact.namespace, collection=artifact.name)
+    except GalaxyClientError as e:
+        if "404" not in str(e):
+            raise
 
 
 @pytest.fixture

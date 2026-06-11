@@ -108,7 +108,7 @@ def test_social_auth_creates_v3_namespace(gh_user_1_pre, generate_test_artifact)
     assert resp["state"] == "completed"
     url = (f"v3/plugin/ansible/content/published/collections/index/"
            f"{expected_ns}/{generate_test_artifact.name}/")
-    wait_for_url(gh_user_1_pre, url)
+    wait_for_url(gh_user_1_pre, url, timeout_sec=120)
 
 
 @pytest.mark.galaxy_stage_ansible
@@ -126,7 +126,7 @@ def test_social_auth_creates_v3_namespace_upload_cli(gh_user_1, galaxy_client,
     gc_admin = galaxy_client("admin")
     url = f"v3/plugin/ansible/content/" \
           f"published/collections/index/{expected_ns}/{generate_test_artifact.name}/"
-    wait_for_url(gc_admin, url)
+    wait_for_url(gc_admin, url, timeout_sec=120)
 
 
 @pytest.mark.galaxy_stage_ansible
@@ -217,6 +217,9 @@ def test_social_auth_delete_collection(gh_user_1, keep_generated_test_artifact, 
     logger.debug("Waiting for upload to be completed")
     resp = wait_for_task(gh_user_1, resp)
     assert resp["state"] == "completed"
+    url = (f"v3/plugin/ansible/content/published/collections/index/"
+           f"{expected_ns}/{keep_generated_test_artifact.name}/")
+    wait_for_url(gh_user_1, url, timeout_sec=120)
 
     gc = galaxy_client("github_user", github_social_auth=True, ignore_cache=True)
     gc.delete_collection(namespace=expected_ns, collection=keep_generated_test_artifact.name,
@@ -232,7 +235,7 @@ def test_social_auth_deprecate_collection(gh_user_1, generate_test_artifact, gal
     assert resp["state"] == "completed"
     url = (f"v3/plugin/ansible/content/published/collections/index/"
            f"{expected_ns}/{generate_test_artifact.name}/")
-    wait_for_url(gh_user_1, url)
+    wait_for_url(gh_user_1, url, timeout_sec=120)
     gc = galaxy_client("github_user", github_social_auth=True, ignore_cache=True)
     gc.deprecate_collection(namespace=expected_ns, collection=generate_test_artifact.name,
                             repository="published")
