@@ -7,5 +7,13 @@
     "enabled": true,
     "automerge": false,
     "schedule": ["* 0-5 * * 5"]
-  }
+  },
+  "packageRules": [
+    {
+      "description": "Update aap-ci tekton-catalog pipeline bundles",
+      "matchPackageNames": ["/^quay\\.io\\/aap-ci\\/tekton-catalog\\/pipeline\\//"],
+      "matchManagers": ["tekton"],
+      "automerge": true
+    }
+  ]
 }

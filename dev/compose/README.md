@@ -36,7 +36,7 @@ bash-4.4#
 ```
 Django Admin
 ```console
-$ docker compose -f dev/compose/aap.yaml exec manager pulpcore-manager
+$  docker compose -f dev/compose/aap.yaml exec manager pulpcore-manager
 Type 'pulpcore-manager help <subcommand>' for help on a specific subcommand.
 
 Available subcommands:
@@ -148,13 +148,13 @@ Start the compose setting the desired editable paths.
 ```console
 $ cd ~/projects/galaxy_ng
 $ export DEV_SOURCE_PATH="dynaconf:pulp_ansible:galaxy_ng"
-$ docker compose -f dev/compose/aap.yaml up --build
+$ docker compose -f dev/compose/app.yaml up --build
 ```
 
 Optionally it can be informed in a single line:
 
 ```console
-$ DEV_SOURCE_PATH="dynaconf:pulp_ansible:galaxy_ng" docker compose -f dev/compose/aap.yaml up --build
+$ DEV_SOURCE_PATH="dynaconf:pulp_ansible:galaxy_ng" docker compose -f dev/compose/app.yaml up --build
 ```
 
 > [!NOTE]
