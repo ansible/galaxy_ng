@@ -13,7 +13,9 @@ The script has three checkout strategies:
 """
 
 import os
+import pathlib
 import re
+import subprocess
 import sys
 
 import requests
@@ -21,6 +23,8 @@ import requests
 # --- Configuration ---
 DAB_REPO = "ansible/django-ansible-base"
 GITHUB_API_URL = "https://api.github.com"
+workspace = pathlib.Path(os.environ.get("GITHUB_WORKSPACE", ".")).resolve()
+DAB_CHECKOUT_PATH = str(workspace.parent / "django-ansible-base")
 # ---
 
 # --- Get CI Environment Variables ---
@@ -62,9 +66,9 @@ if matches:
 
         if not pr_data.get("merged"):
             print(f"Checking out branch '{branch}' from '{repo_url}'...")
-            exit_code = os.system(
-                f"cd .. && git clone {repo_url} -b {branch} --depth=1 django-ansible-base"
-            )
+            exit_code = subprocess.run(
+                ['git', 'clone', repo_url, '-b', branch, '--depth=1', DAB_CHECKOUT_PATH]
+            ).returncode
             if exit_code == 0:
                 dab_checked_out = True
                 print(f"✅ Successfully checked out DAB branch '{branch}'")
@@ -99,9 +103,9 @@ if not dab_checked_out:
             print(f"✅ Success! Found matching branch '{current_branch}' in '{DAB_REPO}'.")
             repo_url = f"https://github.com/{DAB_REPO}.git"
             print(f"Checking out '{current_branch}' from '{repo_url}'...")
-            exit_code = os.system(
-                f"cd .. && git clone {repo_url} -b {current_branch} --depth=1 django-ansible-base"
-            )
+            exit_code = subprocess.run(
+                ['git', 'clone', repo_url, '-b', current_branch, '--depth=1', DAB_CHECKOUT_PATH]
+            ).returncode
             if exit_code == 0:
                 dab_checked_out = True
                 print(f"✅ Successfully checked out DAB branch '{current_branch}'")
@@ -175,9 +179,9 @@ else:
     print(f"No specific DAB requirements found. Cloning default '{branch}' branch...")
     print(f"Checking out '{branch}' from '{repo_url}'...")
 
-    exit_code = os.system(
-        f"cd .. && git clone {repo_url} -b {branch} --depth=1 django-ansible-base"
-    )
+    exit_code = subprocess.run(
+        ['git', 'clone', repo_url, '-b', branch, '--depth=1', DAB_CHECKOUT_PATH]
+    ).returncode
 
     if exit_code == 0:
         dab_checked_out = True

@@ -45,8 +45,11 @@ jobs:
 
       - name: Set PR info into env
         run: |
-          echo "PR_BASE=${{ fromJson(steps.pr_info.outputs.data).base.ref }}" >> $GITHUB_ENV
-          echo "PR_HEAD=${{ fromJson(steps.pr_info.outputs.data).head.ref }}" >> $GITHUB_ENV
+          echo "PR_BASE=$PR_BASE_VALUE" >> $GITHUB_ENV
+          echo "PR_HEAD=$PR_HEAD_VALUE" >> $GITHUB_ENV
+        env:
+          PR_BASE_VALUE: ${{ fromJson(steps.pr_info.outputs.data).base.ref }}
+          PR_HEAD_VALUE: ${{ fromJson(steps.pr_info.outputs.data).head.ref }}
 
       - name: Add base branch
         run: |
