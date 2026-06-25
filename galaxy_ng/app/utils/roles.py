@@ -7,15 +7,13 @@ import yaml
 
 def get_path_git_root(path):
     """ Find the root of a checkout path """
-    cmd = 'git rev-parse --show-toplevel'
-    pid = subprocess.run(cmd, cwd=path, shell=True, stdout=subprocess.PIPE)
+    pid = subprocess.run(['git', 'rev-parse', '--show-toplevel'], cwd=path, stdout=subprocess.PIPE)
     return pid.stdout.decode('utf-8').strip()
 
 
 def get_path_head_date(path):
     """ Get the timestamp of the HEAD commit """
-    cmd = 'git log -1 --format="%ci"'
-    pid = subprocess.run(cmd, cwd=path, shell=True, stdout=subprocess.PIPE)
+    pid = subprocess.run(['git', 'log', '-1', '--format=%ci'], cwd=path, stdout=subprocess.PIPE)
     ds = pid.stdout.decode('utf-8').strip()
 
     # 2021-10-31 00:03:43 -0500
@@ -23,12 +21,14 @@ def get_path_head_date(path):
     return ts
 
 
+def _get_origin_fetch_url(path):
+    proc = subprocess.run(['git', 'remote', 'get-url', 'origin'], cwd=path, stdout=subprocess.PIPE)
+    return proc.stdout.decode('utf-8').strip() if proc.returncode == 0 else ''
+
+
 def get_path_role_repository(path):
     """ Get the repository url for a checkout """
-    cmd = "git remote -v | head -1 | awk '{print $2}'"
-    pid = subprocess.run(cmd, cwd=path, shell=True, stdout=subprocess.PIPE)
-    origin = pid.stdout.decode('utf-8').strip()
-    return origin
+    return _get_origin_fetch_url(path)
 
 
 def get_path_role_meta(path):
@@ -72,9 +72,7 @@ def get_path_role_name(path):
     if meta and 'role_name' in meta['galaxy_info']:
         name = meta['galaxy_info']['role_name']
     else:
-        cmd = "git remote -v | head -1 | awk '{print $2}'"
-        pid = subprocess.run(cmd, cwd=path, shell=True, stdout=subprocess.PIPE)
-        origin = pid.stdout.decode('utf-8').strip()
+        origin = _get_origin_fetch_url(path)
         name = origin.replace('https://github.com/', '').split('/')[1]
 
     return _clean_role_name(name)
@@ -86,9 +84,7 @@ def get_path_role_namespace(path):
     if namespace is not None:
         return namespace
 
-    cmd = "git remote -v | head -1 | awk '{print $2}'"
-    pid = subprocess.run(cmd, cwd=path, shell=True, stdout=subprocess.PIPE)
-    origin = pid.stdout.decode('utf-8').strip()
+    origin = _get_origin_fetch_url(path)
     namespace = origin.replace('https://github.com/', '').split('/')[0]
 
     if namespace == 'ansible-collections':

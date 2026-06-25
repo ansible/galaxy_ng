@@ -32,9 +32,8 @@ class TestGitUtilities(TestCase):
         result = get_path_git_root('/some/path')
         assert result == '/home/user/project'
         mock_run.assert_called_once_with(
-            'git rev-parse --show-toplevel',
+            ['git', 'rev-parse', '--show-toplevel'],
             cwd='/some/path',
-            shell=True,
             stdout=-1
         )
 
@@ -54,7 +53,8 @@ class TestGitUtilities(TestCase):
     @patch('galaxy_ng.app.utils.roles.subprocess.run')
     def test_get_path_role_repository(self, mock_run):
         mock_result = Mock()
-        mock_result.stdout.decode.return_value = 'https://github.com/user/repo.git\n'
+        mock_result.stdout = b'https://github.com/user/repo.git\n'
+        mock_result.returncode = 0
         mock_run.return_value = mock_result
 
         result = get_path_role_repository('/some/path')
@@ -107,9 +107,10 @@ class TestRoleMetadata(TestCase):
         mock_get_galaxy_key.return_value = None
         mock_exists.return_value = False
         mock_result = Mock()
-        mock_result.stdout.decode.return_value = (
-            'https://github.com/user/ansible-role-docker.git\n'
+        mock_result.stdout = (
+            b'https://github.com/user/ansible-role-docker.git\n'
         )
+        mock_result.returncode = 0
         mock_run.return_value = mock_result
 
         result = get_path_role_name('/some/path')
@@ -130,9 +131,10 @@ class TestRoleMetadata(TestCase):
     ):
         mock_get_galaxy_key.return_value = None
         mock_result = Mock()
-        mock_result.stdout.decode.return_value = (
-            'https://github.com/ansible-collections/community.general.git\n'
+        mock_result.stdout = (
+            b'https://github.com/ansible-collections/community.general.git\n'
         )
+        mock_result.returncode = 0
         mock_run.return_value = mock_result
 
         result = get_path_role_namespace('/some/path')
@@ -257,9 +259,10 @@ class TestRoleNameTransformations(TestCase):
         mock_get_galaxy_key.return_value = None
         mock_exists.return_value = False
         mock_result = Mock()
-        mock_result.stdout.decode.return_value = (
-            'https://github.com/user/docker.ubuntu.git\n'
+        mock_result.stdout = (
+            b'https://github.com/user/docker.ubuntu.git\n'
         )
+        mock_result.returncode = 0
         mock_run.return_value = mock_result
 
         result = get_path_role_name('/some/path')
@@ -274,9 +277,10 @@ class TestRoleNameTransformations(TestCase):
         mock_get_galaxy_key.return_value = None
         mock_exists.return_value = False
         mock_result = Mock()
-        mock_result.stdout.decode.return_value = (
-            'https://github.com/user/update-management.git\n'
+        mock_result.stdout = (
+            b'https://github.com/user/update-management.git\n'
         )
+        mock_result.returncode = 0
         mock_run.return_value = mock_result
 
         result = get_path_role_name('/some/path')
@@ -325,9 +329,10 @@ class TestMissingEdgeCases(TestCase):
     def test_get_path_role_namespace_regular_user(self, mock_run, mock_get_galaxy_key):
         mock_get_galaxy_key.return_value = None
         mock_result = Mock()
-        mock_result.stdout.decode.return_value = (
-            'https://github.com/regularuser/some-role.git\n'
+        mock_result.stdout = (
+            b'https://github.com/regularuser/some-role.git\n'
         )
+        mock_result.returncode = 0
         mock_run.return_value = mock_result
 
         result = get_path_role_namespace('/some/path')
@@ -413,9 +418,10 @@ class TestErrorHandling(TestCase):
         with patch('builtins.open', mock_open(read_data=yaml.dump(meta_content))), \
              patch('galaxy_ng.app.utils.roles.subprocess.run') as mock_run:
             mock_result = Mock()
-            mock_result.stdout.decode.return_value = (
-                'https://github.com/user/test-role.git\n'
+            mock_result.stdout = (
+                b'https://github.com/user/test-role.git\n'
             )
+            mock_result.returncode = 0
             mock_run.return_value = mock_result
 
             result = get_path_role_name('/some/path')

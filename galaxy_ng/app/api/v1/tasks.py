@@ -6,6 +6,7 @@ import os
 import subprocess
 import traceback
 import tempfile
+from urllib.parse import urlparse
 import uuid
 
 from django.db import transaction
@@ -110,10 +111,16 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
         - the last commit object from the github_reference or $HEAD
     :rtype: tuple(git.Repo, string, git.Commit)
     """
+    parsed_url = urlparse(clone_url)
+    if parsed_url.scheme and parsed_url.scheme not in ('http', 'https'):
+        raise ValueError(
+            f"Unsupported URL scheme: {parsed_url.scheme!r}. Only http/https URLs are allowed."
+        )
+
     logger.info(f'cloning {clone_url} ...')
 
     # pygit didn't have an obvious way to prevent interactive clones ...
-    cmd_args = ['git', 'clone', '--recurse-submodules', clone_url, checkout_path]
+    cmd_args = ['git', 'clone', '--recurse-submodules', '--', clone_url, checkout_path]
     pid = subprocess.run(
         cmd_args,
         shell=False,
@@ -139,10 +146,10 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
         if github_reference in branch_names:
             current_branch = gitrepo.active_branch.name
             if github_reference != current_branch:
-                cmd = f'git checkout origin/{github_reference}'
+                cmd = ['git', 'checkout', f'origin/{github_reference}']
 
         elif github_reference in tag_names:
-            cmd = f'git checkout tags/{github_reference} -b local_${github_reference}'
+            cmd = ['git', 'checkout', f'tags/{github_reference}', '-b', f'local_{github_reference}']
 
         else:
             raise Exception(f'{github_reference} is not a valid branch or tag name')
@@ -152,7 +159,7 @@ def do_git_checkout(clone_url, checkout_path, github_reference):
             pid = subprocess.run(
                 cmd,
                 cwd=checkout_path,
-                shell=True,
+                shell=False,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             )

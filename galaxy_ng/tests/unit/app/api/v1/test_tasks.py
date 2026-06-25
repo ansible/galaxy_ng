@@ -7,8 +7,38 @@ from galaxy_ng.app.models import Namespace
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole
 
-from galaxy_ng.app.api.v1.tasks import legacy_role_import
+from galaxy_ng.app.api.v1.tasks import do_git_checkout, legacy_role_import
 # from galaxy_ng.app.api.v1.tasks import legacy_sync_from_upstream
+
+
+@pytest.mark.parametrize('url', [
+    'file:///etc/passwd',
+    'ssh://git@github.com/user/repo.git',
+    'git://github.com/user/repo.git',
+    'git+ssh://git@github.com/user/repo.git',
+    'ftp://example.com/repo.git',
+])
+def test_do_git_checkout_rejects_non_http_schemes(url):
+    with pytest.raises(ValueError, match="Unsupported URL scheme"):
+        do_git_checkout(url, '/tmp/test_checkout', 'main')
+
+
+@pytest.mark.parametrize('url', [
+    'https://github.com/user/repo.git',
+    'http://github.com/user/repo.git',
+    '/tmp/local/clone/path',
+])
+@patch('galaxy_ng.app.api.v1.tasks.Repo')
+@patch('galaxy_ng.app.api.v1.tasks.subprocess.run')
+def test_do_git_checkout_allows_http_and_local_paths(mock_run, mock_repo, url):
+    mock_run.return_value.returncode = 0
+    mock_run.return_value.stdout = b''
+
+    do_git_checkout(url, '/tmp/test_checkout', None)
+
+    mock_run.assert_called_once()
+    assert mock_run.call_args[0][0] == \
+        ['git', 'clone', '--recurse-submodules', '--', url, '/tmp/test_checkout']
 
 
 @pytest.mark.django_db

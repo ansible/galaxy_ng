@@ -1,4 +1,3 @@
-import subprocess
 from unittest.mock import patch, Mock
 from django.test import TestCase
 
@@ -30,16 +29,19 @@ class TestGitUtils(TestCase):
 
         # Verify git clone call
         mock_subprocess_run.assert_any_call(
-            'git clone https://github.com/test/repo.git /tmp/test_checkout',
-            shell=True
+            ['git', 'clone', '--', 'https://github.com/test/repo.git', '/tmp/test_checkout'],
+            capture_output=True,
+            check=True,
+            timeout=300,
         )
 
         # Verify git log call
         mock_subprocess_run.assert_any_call(
-            "git log -1 --format='%ci'",
-            shell=True,
+            ['git', 'log', '-1', '--format=%ci'],
             cwd='/tmp/test_checkout',
-            stdout=subprocess.PIPE
+            capture_output=True,
+            check=True,
+            timeout=60,
         )
 
     @patch('galaxy_ng.app.utils.git.subprocess.run')
@@ -57,10 +59,11 @@ class TestGitUtils(TestCase):
 
         # Verify git log call only (no clone since path provided)
         mock_subprocess_run.assert_called_once_with(
-            "git log -1 --format='%ci'",
-            shell=True,
+            ['git', 'log', '-1', '--format=%ci'],
             cwd='/existing/path',
-            stdout=subprocess.PIPE
+            capture_output=True,
+            check=True,
+            timeout=60,
         )
 
     @patch('galaxy_ng.app.utils.git.subprocess.run')
@@ -98,16 +101,19 @@ class TestGitUtils(TestCase):
 
         # Verify git clone call
         mock_subprocess_run.assert_any_call(
-            'git clone https://github.com/test/repo.git /tmp/test_checkout',
-            shell=True
+            ['git', 'clone', '--', 'https://github.com/test/repo.git', '/tmp/test_checkout'],
+            capture_output=True,
+            check=True,
+            timeout=300,
         )
 
         # Verify git log call
         mock_subprocess_run.assert_any_call(
-            "git log -1 --format='%H'",
-            shell=True,
+            ['git', 'log', '-1', '--format=%H'],
             cwd='/tmp/test_checkout',
-            stdout=subprocess.PIPE
+            capture_output=True,
+            check=True,
+            timeout=60,
         )
 
     @patch('galaxy_ng.app.utils.git.subprocess.run')
@@ -125,10 +131,11 @@ class TestGitUtils(TestCase):
 
         # Verify git log call only (no clone since path provided)
         mock_subprocess_run.assert_called_once_with(
-            "git log -1 --format='%H'",
-            shell=True,
+            ['git', 'log', '-1', '--format=%H'],
             cwd='/existing/path',
-            stdout=subprocess.PIPE
+            capture_output=True,
+            check=True,
+            timeout=60,
         )
 
     @patch('galaxy_ng.app.utils.git.subprocess.run')
