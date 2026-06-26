@@ -1,8 +1,9 @@
 name: "Release Hardening Gate"
 
 on:
-  schedule:
-    - cron: '*/15 * * * *'
+  # Disabled: release hardening phase for 2.7 is over
+  # schedule:
+  #   - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:
