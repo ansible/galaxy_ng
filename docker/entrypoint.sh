@@ -126,6 +126,10 @@ run_manage() {
 
     schedule_resource_sync_task
 
+    if [[ "${1:-}" == "migrate" ]]; then
+      django-admin fix-squashed-migrations
+    fi
+
     exec django-admin "$@"
 }
 

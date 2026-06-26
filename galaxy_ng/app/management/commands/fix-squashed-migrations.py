@@ -3,20 +3,26 @@ from django.db import connection
 from django.db.migrations.recorder import MigrationRecorder
 
 
-SQUASHED_CORE_MIGRATIONS = [
+SQUASHED_MIGRATIONS = [
     {
+        "app": "core",
         "squashed": "0001_squashed_0090_char_to_text_field",
         "last_individual": "0090_char_to_text_field",
+    },
+    {
+        "app": "file",
+        "squashed": "0001_initial_squashed_0016_add_domain",
+        "last_individual": "0016_add_domain",
     },
 ]
 
 
 class Command(BaseCommand):
-    """Fix inconsistent migration history caused by pulpcore squashed migrations.
+    """Fix inconsistent migration history caused by squashed migrations.
 
-    When upgrading from pulpcore <3.85 to 3.85+, the individual core
-    migrations 0001-0090 are replaced by a single squashed migration.
-    Databases migrated with the old version have the individual records
+    When upgrading across versions that introduced squashed migrations
+    (e.g. pulpcore 3.85+ for core, pulp_file for file), databases
+    migrated with the old version have the individual migration records
     but not the squashed one, which causes InconsistentMigrationHistory.
 
     This command inserts the missing squashed migration record when the
@@ -31,21 +37,22 @@ class Command(BaseCommand):
         recorder = MigrationRecorder(connection)
         recorder.ensure_schema()
         applied = recorder.applied_migrations()
-        for entry in SQUASHED_CORE_MIGRATIONS:
-            if ("core", entry["squashed"]) in applied:
+        for entry in SQUASHED_MIGRATIONS:
+            app = entry["app"]
+            if (app, entry["squashed"]) in applied:
                 self.stdout.write(
-                    f"core.{entry['squashed']} already recorded, skipping."
+                    f"{app}.{entry['squashed']} already recorded, skipping."
                 )
                 continue
 
-            if ("core", entry["last_individual"]) not in applied:
+            if (app, entry["last_individual"]) not in applied:
                 self.stdout.write(
-                    f"core.{entry['last_individual']} not applied,"
+                    f"{app}.{entry['last_individual']} not applied,"
                     " nothing to fix (fresh database)."
                 )
                 continue
 
-            recorder.record_applied("core", entry["squashed"])
+            recorder.record_applied(app, entry["squashed"])
             self.stdout.write(
-                f"Inserted core.{entry['squashed']} into django_migrations."
+                f"Inserted {app}.{entry['squashed']} into django_migrations."
             )
