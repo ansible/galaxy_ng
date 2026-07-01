@@ -73,6 +73,10 @@ class ApiRootView(api_base.APIView):
 
         data = {**VERSIONS}
 
+        if not request.user or not request.user.is_authenticated:
+            versions = {k: v for k, v in data["available_versions"].items() if k != "pulp-v3"}
+            data = {"available_versions": versions}
+
         if kwargs.get("path"):
             distro = get_object_or_404(
                 AnsibleDistribution,

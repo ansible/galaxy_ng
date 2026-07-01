@@ -28,12 +28,8 @@ def api_status():
 
 
 def hub_version():
-    status = api_status()
-    galaxy_version = ''
-    for version in status['versions']:
-        if version['component'] == 'galaxy':
-            galaxy_version = version['version']
-    return galaxy_version
+    from django.apps import apps
+    return apps.get_app_config("galaxy").version
 
 
 def config():

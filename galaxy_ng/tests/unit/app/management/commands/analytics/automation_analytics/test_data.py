@@ -4,6 +4,20 @@ from unittest.mock import MagicMock, patch
 import unittest
 
 
+class TestHubVersion(TestCase):
+
+    @patch('django.apps.apps.get_app_config')
+    def test_hub_version_returns_galaxy_app_version(self, mock_get_app_config):
+        mock_app_config = MagicMock()
+        mock_app_config.version = "4.11.7"
+        mock_get_app_config.return_value = mock_app_config
+
+        result = galaxy_ng.app.metrics_collection.common_data.hub_version()
+
+        mock_get_app_config.assert_called_with("galaxy")
+        self.assertEqual(result, "4.11.7")
+
+
 class TestAutomationAnalyticsData(TestCase):
 
     @unittest.skip("FIXME - broken by dab 2024.12.13")

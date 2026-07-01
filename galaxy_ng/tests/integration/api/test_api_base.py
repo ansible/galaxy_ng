@@ -15,7 +15,36 @@ def test_galaxy_api_root_standalone_no_auth_access(galaxy_client):
     # verify api root works without authentication
     response = gc.get("")
     assert "v3" in response["available_versions"]
-    assert "pulp-v3" in response["available_versions"]
+    assert "pulp-v3" not in response["available_versions"]
+    # verify version info is not disclosed to unauthenticated users (AAP-68691)
+    assert "server_version" not in response
+    assert "galaxy_ng_version" not in response
+    assert "galaxy_ng_commit" not in response
+    assert "galaxy_importer_version" not in response
+    assert "pulp_core_version" not in response
+    assert "pulp_ansible_version" not in response
+    assert "pulp_container_version" not in response
+    assert "ansible_base_version" not in response
+    assert "ansible_lint_version" not in response
+    assert "dynaconf_version" not in response
+    assert "django_version" not in response
+    assert "aap_version" not in response
+
+
+@pytest.mark.min_hub_version("4.10")
+@pytest.mark.deployment_standalone
+@pytest.mark.skip_in_gw
+def test_galaxy_api_root_standalone_auth_has_versions(galaxy_client):
+    """Test that authenticated users can see version info."""
+
+    gc = galaxy_client("basic_user")
+    response = gc.get("")
+    assert "available_versions" in response
+    assert "server_version" in response
+    assert "galaxy_ng_version" in response
+    assert "pulp_core_version" in response
+    assert "pulp_ansible_version" in response
+    assert "pulp_container_version" in response
 
 
 @pytest.mark.min_hub_version("4.6dev")
