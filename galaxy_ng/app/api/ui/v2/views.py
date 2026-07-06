@@ -5,7 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.utils.translation import gettext_lazy as _
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework import mixins
 from rest_framework import views
 
@@ -101,7 +101,7 @@ class UserViewSet(BaseViewSet):
 
     def update(self, request, *args, **kwargs):
         if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
-            return HttpResponseBadRequest(self.bad_request_msg)
+            raise PermissionDenied(self.bad_request_msg)
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)

@@ -63,25 +63,24 @@ class TestUiV2UserViewSet(BaseTestCase):
         self.assertTrue("id" in response.data)
 
     def test_user_update_blocked_when_connected_to_resource_server(self):
-        """Test that user update is blocked when connected to resource server"""
-        # First create a user
+        """When Gateway manages users, directly editing user fields like email
+        through Hub's v2 API should be forbidden. The response must be a JSON
+        403 so that API clients can parse the error.
+        """
         user = auth_models.User.objects.create(
             username="test_user",
             email="original@example.com"
         )
-        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
         self.client.force_authenticate(user=self.admin_user)
 
         update_data = {"email": "updated@example.com"}
 
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
         with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
             response = self.client.patch(f"{self.user_url}{user.id}/", update_data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn(
-            "Request should be made to '/api/gateway/v1/users/'",
-            response.content.decode()
-        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response["Content-Type"], "application/json")
 
     def test_user_update_success_when_not_connected_to_resource_server(self):
         """Test that user update works when not connected to resource server"""
@@ -103,13 +102,13 @@ class TestUiV2UserViewSet(BaseTestCase):
         self.assertEqual(response.data["username"], "test_user")
 
     def test_user_put_update_blocked_when_connected_to_resource_server(self):
-        """Test that user PUT update is blocked when connected to resource server"""
-        # First create a user
+        """When Gateway manages users, a full PUT should be forbidden with a
+        JSON 403. All user modifications must go through Gateway.
+        """
         user = auth_models.User.objects.create(
             username="test_user",
             email="original@example.com"
         )
-        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
         self.client.force_authenticate(user=self.admin_user)
 
         update_data = {
@@ -119,14 +118,12 @@ class TestUiV2UserViewSet(BaseTestCase):
             "last_name": "User"
         }
 
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
         with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
             response = self.client.put(f"{self.user_url}{user.id}/", update_data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn(
-            "Request should be made to '/api/gateway/v1/users/'",
-            response.content.decode()
-        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response["Content-Type"], "application/json")
 
     def test_user_delete_blocked_when_connected_to_resource_server(self):
         """Test that user deletion is blocked when connected to resource server"""
@@ -374,6 +371,176 @@ class TestUiV2UserViewSet(BaseTestCase):
             # Try to delete a non-existent user
             response = self.client.delete(f"{self.user_url}999999/")
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_is_superuser_toggle_blocked_via_patch_when_connected(self):
+        """When Gateway manages users, even is_superuser changes should be
+        blocked on Hub's v2 endpoint. All user modifications, including
+        superuser promotion/demotion, should go through Gateway.
+        """
+        user = auth_models.User.objects.create(
+            username="target_user", is_superuser=False
+        )
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.patch(
+                f"{self.user_url}{user.id}/",
+                {"is_superuser": True},
+                format="json"
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response["Content-Type"], "application/json")
+
+        user.refresh_from_db()
+        self.assertFalse(user.is_superuser)
+
+    def test_is_superuser_toggle_blocked_via_put_when_connected(self):
+        """When Gateway manages users, even a full PUT that only changes
+        is_superuser should be blocked on Hub's v2 endpoint. All user
+        modifications should go through Gateway.
+        """
+        user = auth_models.User.objects.create(
+            username="target_user",
+            email="target@example.com",
+            first_name="Target",
+            last_name="User",
+            is_superuser=False
+        )
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        put_data = {
+            "username": "target_user",
+            "email": "target@example.com",
+            "first_name": "Target",
+            "last_name": "User",
+            "is_superuser": True
+        }
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.put(
+                f"{self.user_url}{user.id}/",
+                put_data,
+                format="json"
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response["Content-Type"], "application/json")
+
+        user.refresh_from_db()
+        self.assertFalse(user.is_superuser)
+
+    # The following tests exercise ComplexUserPermissions scenarios that are
+    # currently unreachable: the view guard in UserViewSet.update() blocks all
+    # PUT/PATCH before has_object_permission runs (connected), and the
+    # permission class short-circuits for superusers (not connected). These
+    # are preserved as documentation of expected behavior in case the
+    # enforcement architecture changes.
+
+    @pytest.mark.skip(
+        reason="As of Jul 2026, UserViewSet.update() returns 403 before "
+               "field-level permission checks are reached when connected "
+               "to Gateway (resource server)"
+    )
+    def test_mixed_field_patch_blocked_when_connected(self):
+        """When Gateway manages users, a PATCH that changes multiple fields
+        (including is_superuser) should be rejected entirely. No partial
+        apply should occur.
+        """
+        user = auth_models.User.objects.create(
+            username="target_user", email="original@example.com", is_superuser=False
+        )
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.patch(
+                f"{self.user_url}{user.id}/",
+                {"is_superuser": True, "email": "sneaky@example.com"},
+                format="json"
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        user.refresh_from_db()
+        self.assertFalse(user.is_superuser)
+
+    @pytest.mark.skip(
+        reason="As of Jul 2026, UserViewSet.update() returns 403 before "
+               "caller-level permission checks are reached when connected "
+               "to Gateway (resource server)"
+    )
+    def test_non_superuser_cannot_self_promote_when_connected(self):
+        """When Gateway manages users, a regular user should not be able to
+        promote themselves to superuser via Hub's v2 endpoint.
+        """
+        regular = auth_models.User.objects.create(
+            username="regular_user", is_superuser=False
+        )
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=regular)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.patch(
+                f"{self.user_url}{regular.id}/",
+                {"is_superuser": True},
+                format="json"
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    @pytest.mark.skip(
+        reason="As of Jul 2026, UserViewSet.update() returns 403 before "
+               "last-superuser protection is reached when connected "
+               "to Gateway (resource server)"
+    )
+    def test_last_superuser_cannot_self_demote_when_connected(self):
+        """The system must always have at least one superuser. If only one
+        superuser remains, they should not be able to demote themselves,
+        as this would lock out all administrative access.
+        """
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        self.assertEqual(
+            auth_models.User.objects.filter(is_superuser=True).count(), 1
+        )
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.patch(
+                f"{self.user_url}{self.admin_user.id}/",
+                {"is_superuser": False},
+                format="json"
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    @pytest.mark.skip(
+        reason="As of Jul 2026, UserViewSet.update() returns 403 before "
+               "self-demotion permission checks are reached when connected "
+               "to Gateway (resource server)"
+    )
+    def test_self_demotion_blocked_when_connected(self):
+        """When Gateway manages users, even self-demotion of superuser status
+        should be blocked. All user modifications should go through Gateway.
+        """
+        auth_models.User.objects.create(
+            username="other_admin", is_superuser=True
+        )
+        kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": True}
+        self.client.force_authenticate(user=self.admin_user)
+
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', MockSettings(kwargs)):
+            response = self.client.patch(
+                f"{self.user_url}{self.admin_user.id}/",
+                {"is_superuser": False},
+                format="json"
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.admin_user.refresh_from_db()
+        self.assertTrue(self.admin_user.is_superuser)
 
 
 class TestUiUserViewSet(BaseTestCase):

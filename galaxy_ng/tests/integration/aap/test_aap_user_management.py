@@ -248,6 +248,11 @@ def test_aap_galaxy_superuser_management(
     gateway_admin_client,
     random_gateway_user
 ):
+    """When connected to a resource server, Hub's v2 user endpoint is
+    read-only. All user modifications, including is_superuser changes,
+    must go through the Gateway API. This test verifies that attempts
+    to change is_superuser directly via Hub are rejected with 403.
+    """
     ga = gateway_admin_client
     uc = random_gateway_user.user_client
     galaxy_user_data = random_gateway_user.galaxy_v2_me
@@ -257,20 +262,24 @@ def test_aap_galaxy_superuser_management(
     assert random_gateway_user.galaxy_v1_me['is_superuser'] is False
     assert random_gateway_user.galaxy_v2_me['is_superuser'] is False
 
-    # try to promote&demote the user as the admin ...
+    # When connected to a resource server, all user modifications
+    # (including is_superuser) should go through Gateway. Hub's v2
+    # endpoint should reject these with 403.
     uid = galaxy_user_data['id']
     user_url = f'/api/galaxy/_ui/v2/users/{uid}/'
-    admin_func = getattr(ga, verb.lower())
-    for value in [True, False]:
-        if verb == 'PUT':
-            payload = copy.deepcopy(galaxy_user_data)
-            payload['is_superuser'] = value
-        else:
-            payload = {'is_superuser': value}
-        resp = admin_func(user_url, body=payload)
-        assert resp.get('is_superuser') is value, resp
 
-    # make sure the user can not promote themself ...
+    # admin cannot promote a user directly via Hub ...
+    admin_func = getattr(ga, verb.lower())
+    if verb == 'PUT':
+        payload = copy.deepcopy(galaxy_user_data)
+        payload['is_superuser'] = True
+    else:
+        payload = {'is_superuser': True}
+    with pytest.raises(GalaxyClientError) as ctx:
+        admin_func(user_url, body=payload)
+    assert ctx.value.response.status_code == 403
+
+    # regular user cannot promote themselves either ...
     user_func = getattr(uc, verb.lower())
     if verb == 'PUT':
         payload = copy.deepcopy(galaxy_user_data)
@@ -281,12 +290,12 @@ def test_aap_galaxy_superuser_management(
         user_func(user_url, body=payload)
     assert ctx.value.response.status_code == 403
 
-    # make sure the user can demote themself ...
-    ga.patch(user_url, body={"is_superuser": True})
+    # user cannot demote themselves directly via Hub either ...
     if verb == 'PUT':
         payload = copy.deepcopy(galaxy_user_data)
         payload['is_superuser'] = False
     else:
         payload = {'is_superuser': False}
-    resp = user_func(user_url, body=payload)
-    assert resp.get('is_superuser') is False, resp
+    with pytest.raises(GalaxyClientError) as ctx:
+        user_func(user_url, body=payload)
+    assert ctx.value.response.status_code == 403
