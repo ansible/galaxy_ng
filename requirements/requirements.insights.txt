@@ -308,7 +308,7 @@ pathspec==1.0.4
     #   yamllint
 pbr==7.0.3
     # via bindep
-pillow==12.2.0
+pillow==12.3.0
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
