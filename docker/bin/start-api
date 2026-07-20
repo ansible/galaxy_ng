@@ -23,10 +23,8 @@ GUNICORN_OPTIONS=(
   --workers "${GUNICORN_WORKERS}"
   --access-logfile -
   --timeout "${GUNICORN_TIMEOUT}"
+  --limit-request-field-size 32768
 )
-
-# Note: add back the following option as soon as there is a fix for the pulpcore issue
-#   --limit-request-field-size 32768
 
 if [[ -n "${GUNICORN_FORWARDED_ALLOW_IPS}" ]]; then
     GUNICORN_OPTIONS+=(--forwarded-allow-ips "${GUNICORN_FORWARDED_ALLOW_IPS}")
