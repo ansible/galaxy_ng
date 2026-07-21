@@ -85,7 +85,7 @@ django_ansible_base_dependency = (
 
 requirements = [
     "galaxy-importer>=0.4.31,<0.5.0",
-    "pulpcore>=3.105.6,<3.106",
+    "pulpcore>=3.105.12,<3.106",
     "pulp_ansible>=0.29.6,<0.30",
     "pulp-container>=2.27.10,<2.28",
     "pyjwt[crypto]>=2.13.0",  # minimum version enforced to address AAP-78030
@@ -104,7 +104,7 @@ requirements = [
     "django-crum==0.7.9",
     "django-automated-logging~=6.2",
     "django-storages[azure,boto3,s3]",
-    "aiohttp>=3.13.3",
+    "aiohttp>=3.14.0",
     "aiodns>=3.3.0,<3.7",  # aligned with pulpcore; >=3.3 required to fix hanging issue
     "setuptools<=81",  # declare here to ensure it's included in the RPM system
     "pillow>=12.3.0",  # minimum version enforced to address AAP-82156
