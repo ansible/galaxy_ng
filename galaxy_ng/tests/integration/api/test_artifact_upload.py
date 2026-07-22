@@ -101,8 +101,8 @@ def test_validated_publish(ansible_config, artifact, galaxy_client):
     """
     # gc = galaxy_client("partner_engineer")
     gc = galaxy_client("admin")
-    logging.debug(f"artifact name {artifact.name}")
-    logging.debug(f"artifact namespace {artifact.namespace}")
+    logger.debug(f"artifact name {artifact.name}")
+    logger.debug(f"artifact namespace {artifact.namespace}")
 
     resp = upload_artifact(None, gc, artifact)
     logger.debug("Waiting for upload to be completed")

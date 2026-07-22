@@ -21,9 +21,6 @@ src = [
 ]
 revision = "origin/main..."
 isort = true
-lint = [
-    "flake8 --config flake8.cfg",
-]
 log_level = "INFO"
 line_length = 100
 
@@ -42,11 +39,9 @@ ignore = [
     "requirements/**",
     "docs/**",
     "galaxy_ng/tests/assets/**",
-    "flake8.cfg",
     "template_config.yml",
     ".travis/**",
     ".travis.yml",
-    ".flake8",
     ".pep8speaks.yml",
     ".ci/**",
     ".github/**",

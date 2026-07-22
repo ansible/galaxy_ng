@@ -61,7 +61,7 @@ def connection_error_wrapper(
             return func(*args, **kwargs)
         except (redis.ConnectionError, TypeError) as e:
             # TypeError is raised when an invalid port number for the Redis connection is configured
-            logging.error(f"Redis connection error: {e}")
+            logger.error(f"Redis connection error: {e}")
             return default()
 
     if func:
