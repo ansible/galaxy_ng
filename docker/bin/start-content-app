@@ -6,6 +6,8 @@ set -o nounset
 readonly ENTRYPOINT=${ENTRYPOINT:-'/venv/bin/pulpcore-content'}
 readonly GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
 readonly GUNICORN_TIMEOUT="${GUNICORN_TIMEOUT:-90}"
+readonly GUNICORN_MAX_REQUESTS="${GUNICORN_MAX_REQUESTS:-2500}"
+readonly GUNICORN_MAX_REQUESTS_JITTER="${GUNICORN_MAX_REQUESTS_JITTER:-500}"
 readonly RELOAD_ENABLED="${RELOAD_ENABLED:-no}"
 readonly ENABLE_DEBUGPY="${ENABLE_DEBUGPY:-}"
 readonly DEBUGPY_PATH=${DEBUGPY_PATH:-'/venv/bin/debugpy'}
@@ -19,6 +21,8 @@ GUNICORN_OPTIONS=(
   --workers "${GUNICORN_WORKERS}"
   --access-logfile -
   --timeout "${GUNICORN_TIMEOUT}"
+  --max-requests "${GUNICORN_MAX_REQUESTS}"
+  --max-requests-jitter "${GUNICORN_MAX_REQUESTS_JITTER}"
 )
 
 if [[ "${RELOAD_ENABLED}" == 'yes' ]]; then
