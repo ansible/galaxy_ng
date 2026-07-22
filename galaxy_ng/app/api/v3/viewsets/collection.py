@@ -99,7 +99,7 @@ class CollectionUploadViewSet(api_base.LocalSettingsMixin,
         description="Create an artifact and trigger an asynchronous task to create "
         "Collection content from it.",
         summary="Upload a collection",
-        request=CollectionUploadSerializer,
+        request={"multipart/form-data": CollectionUploadSerializer},
         responses={202: AsyncOperationResponseSerializer},
     )
     def create(self, request, *args, **kwargs):

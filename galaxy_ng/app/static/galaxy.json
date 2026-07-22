@@ -3499,11 +3499,6 @@
               "schema": {
                 "$ref": "#/components/schemas/CollectionUploadWithDownloadUrl"
               }
-            },
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/CollectionUploadWithDownloadUrl"
-              }
             }
           },
           "required": true
@@ -7136,11 +7131,6 @@
               "schema": {
                 "$ref": "#/components/schemas/CollectionUploadWithDownloadUrl"
               }
-            },
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/CollectionUploadWithDownloadUrl"
-              }
             }
           },
           "required": true
@@ -7984,11 +7974,6 @@
         "requestBody": {
           "content": {
             "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/CollectionUploadWithDownloadUrl"
-              }
-            },
-            "application/x-www-form-urlencoded": {
               "schema": {
                 "$ref": "#/components/schemas/CollectionUploadWithDownloadUrl"
               }
@@ -10662,11 +10647,6 @@
               "schema": {
                 "$ref": "#/components/schemas/CollectionOneShot"
               }
-            },
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/CollectionOneShot"
-              }
             }
           },
           "required": true
@@ -10778,11 +10758,6 @@
         "requestBody": {
           "content": {
             "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/CollectionOneShot"
-              }
-            },
-            "application/x-www-form-urlencoded": {
               "schema": {
                 "$ref": "#/components/schemas/CollectionOneShot"
               }
