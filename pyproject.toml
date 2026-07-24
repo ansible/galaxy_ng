@@ -56,7 +56,6 @@ ignore = [
     "Makefile",
     "ROADMAP.rst",
     "ansible.cfg",
-    "build_deploy.sh",
     "compose",
     "pr_check.sh",
     "lint_requirements.txt",
