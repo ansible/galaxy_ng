@@ -334,7 +334,7 @@ pulpcore==3.105.12
     #   galaxy-ng (setup.py)
     #   pulp-ansible
     #   pulp-container
-pyasn1==0.6.3
+pyasn1==0.6.4
     # via
     #   galaxy-ng (setup.py)
     #   pyasn1-modules
@@ -453,6 +453,7 @@ tablib==3.9.0
     #   pulpcore
 typing-extensions==4.15.0
     # via
+    #   aiohttp
     #   aiosignal
     #   azure-core
     #   azure-storage-blob
