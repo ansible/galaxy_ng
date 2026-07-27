@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0091_systemid'),
-        ('ansible', '0021_rename_role_remote'),
+        ('ansible', '0001_initial_squashed_0040_ansiblerepository_keyring'),
         ('galaxy', '0004_rbac'),
     ]
 

@@ -29,7 +29,7 @@ def set_default_upstream_repository(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ansible', '0018_fix_collection_relative_path'),
+        ('ansible', '0001_initial_squashed_0040_ansiblerepository_keyring'),
         ('galaxy', '0002_add_synclist_20200330_squashed'),
         ('core', '0091_systemid'),
     ]

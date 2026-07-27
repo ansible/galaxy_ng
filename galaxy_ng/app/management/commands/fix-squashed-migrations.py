@@ -14,6 +14,11 @@ SQUASHED_MIGRATIONS = [
         "squashed": "0001_initial_squashed_0016_add_domain",
         "last_individual": "0016_add_domain",
     },
+    {
+        "app": "ansible",
+        "squashed": "0001_initial_squashed_0040_ansiblerepository_keyring",
+        "last_individual": "0040_ansiblerepository_keyring",
+    },
 ]
 
 
