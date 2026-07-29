@@ -8,6 +8,7 @@ from django.core.exceptions import SuspiciousOperation
 from galaxy_ng.app.dynaconf_hooks import (
     post as post_hook,
     configure_cors,
+    configure_keycloak,
     configure_logging,
     configure_socialauth,
     configure_renderers,
@@ -169,6 +170,14 @@ BASE_SETTINGS = {
             {
                 "GALAXY_AUTH_KEYCLOAK_ENABLED": True,
                 "GALAXY_FEATURE_FLAGS__external_authentication": True,
+                # the legacy wildfly /auth prefix is the default ...
+                "KEYCLOAK_PATH_PREFIX": "/auth",
+                "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL": (
+                    "http://cloak.com:8080/auth/realms/aap/protocol/openid-connect/auth/"
+                ),
+                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL": (
+                    "http://cloak.com:8080/auth/realms/aap/protocol/openid-connect/token/"
+                ),
                 "AUTHENTICATION_BACKENDS": [
                     "social_core.backends.keycloak.KeycloakOAuth2",
                     "dynaconf_merge",
@@ -338,6 +347,59 @@ BASE_SETTINGS = {
                 ],
             },
         ),
+        # 6 >=4.10 keycloak 17+ (quarkus) serves the endpoints at the root ...
+        (
+            True,
+            {
+                "AUTHENTICATION_BACKEND_PRESET": "keycloak",
+                "SOCIAL_AUTH_KEYCLOAK_KEY": "xyz",
+                "SOCIAL_AUTH_KEYCLOAK_SECRET": "abc",
+                "SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY": "1234",
+                "KEYCLOAK_PROTOCOL": "http",
+                "KEYCLOAK_HOST": "cloak.com",
+                "KEYCLOAK_PORT": 8080,
+                "KEYCLOAK_REALM": "aap",
+                "KEYCLOAK_PATH_PREFIX": "",
+            },
+            {
+                "GALAXY_AUTH_KEYCLOAK_ENABLED": True,
+                "KEYCLOAK_PATH_PREFIX": "",
+                "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL": (
+                    "http://cloak.com:8080/realms/aap/protocol/openid-connect/auth/"
+                ),
+                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL": (
+                    "http://cloak.com:8080/realms/aap/protocol/openid-connect/token/"
+                ),
+            },
+        ),
+        # 7 >=4.10 keycloak loopback host with a custom path prefix ...
+        (
+            True,
+            {
+                "AUTHENTICATION_BACKEND_PRESET": "keycloak",
+                "SOCIAL_AUTH_KEYCLOAK_KEY": "xyz",
+                "SOCIAL_AUTH_KEYCLOAK_SECRET": "abc",
+                "SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY": "1234",
+                "KEYCLOAK_PROTOCOL": "http",
+                "KEYCLOAK_HOST": "cloak.com",
+                "KEYCLOAK_HOST_LOOPBACK": "localhost",
+                "KEYCLOAK_PORT": 8080,
+                "KEYCLOAK_REALM": "aap",
+                "KEYCLOAK_PATH_PREFIX": "sso",
+            },
+            {
+                "GALAXY_AUTH_KEYCLOAK_ENABLED": True,
+                "KEYCLOAK_PATH_PREFIX": "/sso",
+                "KEYCLOAK_URL": "http://cloak.com:8080",
+                # only the authorization url swaps in the loopback host ...
+                "SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL": (
+                    "http://localhost:8080/sso/realms/aap/protocol/openid-connect/auth/"
+                ),
+                "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL": (
+                    "http://cloak.com:8080/sso/realms/aap/protocol/openid-connect/token/"
+                ),
+            },
+        ),
     ],
 )
 def test_dynaconf_hooks_authentication_backends_and_classes(
@@ -391,6 +453,73 @@ def test_dab_dynaconf():
     ]
     for key in expected_keys:
         assert key in new_settings
+
+
+class TestConfigureKeycloak:
+
+    BASE_KEYCLOAK_SETTINGS = {
+        "SOCIAL_AUTH_KEYCLOAK_KEY": "xyz",
+        "SOCIAL_AUTH_KEYCLOAK_SECRET": "abc",
+        "SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY": "1234",
+        "KEYCLOAK_PROTOCOL": "http",
+        "KEYCLOAK_HOST": "cloak.com",
+        "KEYCLOAK_PORT": 8080,
+        "KEYCLOAK_REALM": "aap",
+    }
+
+    def _configure(self, **extra_settings):
+        xsettings = SuperDict()
+        xsettings.update(copy.deepcopy(BASE_SETTINGS))
+        xsettings.update(copy.deepcopy(self.BASE_KEYCLOAK_SETTINGS))
+        xsettings.update(extra_settings)
+        return configure_keycloak(xsettings)
+
+    def test_path_prefix_defaults_to_legacy_auth(self):
+        data = self._configure()
+        assert data["KEYCLOAK_PATH_PREFIX"] == "/auth"
+        assert data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] == (
+            "http://cloak.com:8080/auth/realms/aap/protocol/openid-connect/auth/"
+        )
+        assert data["SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"] == (
+            "http://cloak.com:8080/auth/realms/aap/protocol/openid-connect/token/"
+        )
+
+    @pytest.mark.parametrize(
+        ("prefix", "expected"),
+        [
+            ("/auth", "/auth"),
+            ("auth", "/auth"),
+            ("/auth/", "/auth"),
+            ("auth/", "/auth"),
+            ("", ""),
+            ("/", ""),
+            (None, ""),
+            ("/sso/auth/", "/sso/auth"),
+        ],
+    )
+    def test_path_prefix_normalization(self, prefix, expected):
+        data = self._configure(KEYCLOAK_PATH_PREFIX=prefix)
+        assert data["KEYCLOAK_PATH_PREFIX"] == expected
+        assert data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] == (
+            f"http://cloak.com:8080{expected}/realms/aap/protocol/openid-connect/auth/"
+        )
+        assert data["SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"] == (
+            f"http://cloak.com:8080{expected}/realms/aap/protocol/openid-connect/token/"
+        )
+
+    def test_empty_path_prefix_does_not_disable_keycloak(self):
+        data = self._configure(KEYCLOAK_PATH_PREFIX="")
+        assert data["GALAXY_AUTH_KEYCLOAK_ENABLED"] is True
+
+    def test_path_prefix_applies_to_loopback_authorization_url(self):
+        data = self._configure(KEYCLOAK_HOST_LOOPBACK="localhost", KEYCLOAK_PATH_PREFIX="")
+        assert data["SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL"] == (
+            "http://localhost:8080/realms/aap/protocol/openid-connect/auth/"
+        )
+        # the token url keeps the non-loopback host ...
+        assert data["SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"] == (
+            "http://cloak.com:8080/realms/aap/protocol/openid-connect/token/"
+        )
 
 
 class TestConfigureCors:
