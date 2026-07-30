@@ -127,6 +127,7 @@ class CollectionRemoteSerializer(pulp_viewsets.CollectionRemoteSerializer):
             'write_only_fields',
             'rate_limit',
             'signed_only',
+            'sync_highest_versions',
         )
         extra_kwargs = {
             'name': {'read_only': True},

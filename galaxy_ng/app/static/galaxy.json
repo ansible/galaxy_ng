@@ -31126,6 +31126,12 @@
           "signed_only": {
             "type": "boolean",
             "description": "Sync only collections that have a signature"
+          },
+          "sync_highest_versions": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "description": "The number of highest versions of each collection to sync. Unset or null syncs all versions. 1 syncs only the highest version."
           }
         }
       },
@@ -36483,6 +36489,12 @@
           "signed_only": {
             "type": "boolean",
             "description": "Sync only collections that have a signature"
+          },
+          "sync_highest_versions": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "description": "The number of highest versions of each collection to sync. Unset or null syncs all versions. 1 syncs only the highest version."
           }
         },
         "required": [
@@ -36601,6 +36613,12 @@
           "signed_only": {
             "type": "boolean",
             "description": "Sync only collections that have a signature"
+          },
+          "sync_highest_versions": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "description": "The number of highest versions of each collection to sync. Unset or null syncs all versions. 1 syncs only the highest version."
           }
         },
         "required": [

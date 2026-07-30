@@ -269,3 +269,84 @@ class TestUiCollectionRemoteViewSet(BaseTestCase):
 
         # token is not visible in a GET
         self.assertNotIn('token', response.data['data'][1])
+
+    def test_get_remote_includes_sync_highest_versions(self):
+        response = self.client.get(get_current_ui_url('remotes-list'))
+        self.assertIn('sync_highest_versions', response.data['data'][1])
+        self.assertIsNone(response.data['data'][1]['sync_highest_versions'])
+
+    def test_get_remote_detail_includes_sync_highest_versions(self):
+        detail_url = get_current_ui_url('remotes-detail', kwargs={"pk": str(self.remote.pk)})
+        response = self.client.get(detail_url)
+        self.assertIn('sync_highest_versions', response.data)
+        self.assertIsNone(response.data['sync_highest_versions'])
+
+    def _as_admin(self):
+        self.user.is_superuser = True
+        self.user.save()
+        self.client.force_authenticate(user=self.user)
+
+    def test_put_sync_highest_versions(self):
+        self._as_admin()
+        detail_url = get_current_ui_url('remotes-detail', kwargs={"pk": str(self.remote.pk)})
+        put_data = {
+            "name": self.remote_data["name"],
+            "url": self.remote_data["url"],
+            "sync_highest_versions": 1,
+        }
+        response = self.client.put(detail_url, put_data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(detail_url)
+        self.assertEqual(response.data['sync_highest_versions'], 1)
+
+    def test_patch_sync_highest_versions(self):
+        self._as_admin()
+        detail_url = get_current_ui_url('remotes-detail', kwargs={"pk": str(self.remote.pk)})
+        patch_data = {
+            "url": self.remote_data["url"],
+            "sync_highest_versions": 3,
+        }
+        response = self.client.patch(detail_url, patch_data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(detail_url)
+        self.assertEqual(response.data['sync_highest_versions'], 3)
+
+    def test_clear_sync_highest_versions(self):
+        self._as_admin()
+        detail_url = get_current_ui_url('remotes-detail', kwargs={"pk": str(self.remote.pk)})
+        self.client.put(detail_url, {
+            "name": self.remote_data["name"],
+            "url": self.remote_data["url"],
+            "sync_highest_versions": 1,
+        }, format='json')
+
+        self.client.put(detail_url, {
+            "name": self.remote_data["name"],
+            "url": self.remote_data["url"],
+            "sync_highest_versions": None,
+        }, format='json')
+
+        response = self.client.get(detail_url)
+        self.assertIsNone(response.data['sync_highest_versions'])
+
+    def test_sync_highest_versions_rejects_zero(self):
+        self._as_admin()
+        detail_url = get_current_ui_url('remotes-detail', kwargs={"pk": str(self.remote.pk)})
+        response = self.client.put(detail_url, {
+            "name": self.remote_data["name"],
+            "url": self.remote_data["url"],
+            "sync_highest_versions": 0,
+        }, format='json')
+        self.assertEqual(response.status_code, 400)
+
+    def test_sync_highest_versions_rejects_negative(self):
+        self._as_admin()
+        detail_url = get_current_ui_url('remotes-detail', kwargs={"pk": str(self.remote.pk)})
+        response = self.client.put(detail_url, {
+            "name": self.remote_data["name"],
+            "url": self.remote_data["url"],
+            "sync_highest_versions": -1,
+        }, format='json')
+        self.assertEqual(response.status_code, 400)
