@@ -123,8 +123,6 @@ def associate_namespace_metadata(sender, instance, created, **kwargs):
 
 # These roles should NOT sync to Pulp
 TEAM_ROLES = ['Team Member', 'Team Admin']
-# TODO (aoladele): keeping this variable for compatibility, but should replace its usage later
-SHARED_TEAM_ROLE = TEAM_ROLES[0]
 
 
 def create_managed_roles(*args, **kwargs) -> None:
@@ -581,7 +579,7 @@ def copy_dab_group_to_role(instance, action, model, pk_set, reverse, **kwargs):
     if action.startswith("pre_"):
         return
 
-    shared_member_rd = RoleDefinition.objects.get(name=SHARED_TEAM_ROLE)
+    shared_member_rd = RoleDefinition.objects.get(name=TEAM_ROLES[0])
     if reverse:
         groups = [instance]
     else:

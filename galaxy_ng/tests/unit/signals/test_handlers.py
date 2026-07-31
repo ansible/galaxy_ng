@@ -405,13 +405,12 @@ class TestRoleDefinitionSignals:
         from galaxy_ng.app.signals.handlers import (
             PULP_TO_ROLEDEF,
             ROLEDEF_TO_PULP,
-            SHARED_TEAM_ROLE,
+            TEAM_ROLES,
         )
 
         assert isinstance(PULP_TO_ROLEDEF, dict)
         assert isinstance(ROLEDEF_TO_PULP, dict)
-        assert isinstance(SHARED_TEAM_ROLE, str)
-        assert SHARED_TEAM_ROLE == "Team Member"
+        assert TEAM_ROLES[0] == "Team Member"
 
 
 class TestCopyRoleDefinitionToRole:
@@ -560,13 +559,13 @@ class TestDABAssignmentSignals:
         from galaxy_ng.app.signals.handlers import (
             copy_dab_user_role_assignment,
             RoleUserAssignment,
-            SHARED_TEAM_ROLE,
+            TEAM_ROLES,
         )
 
         mock_signal_check.return_value = False
 
         mock_instance = Mock()
-        mock_instance.role_definition.name = SHARED_TEAM_ROLE
+        mock_instance.role_definition.name = TEAM_ROLES[0]
         mock_instance.user = Mock()
         mock_instance.content_object.group.user_set = Mock()
 

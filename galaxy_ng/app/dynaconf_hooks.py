@@ -79,6 +79,49 @@ def _parse_forwarded_header(forwarded_header: str) -> tuple[str | None, str | No
     return proto, host
 
 
+def _extract_proto_and_host(headers):
+    """Extract proto and host from request headers.
+
+    Tries X-Forwarded-* headers first, falls back to RFC 7239 Forwarded header.
+    """
+    proto = headers.get("X-Forwarded-Proto")
+    host = headers.get("X-Forwarded-Host") or headers.get("Host")
+
+    if proto and host:
+        return proto, host
+
+    forwarded_header = headers.get("Forwarded")
+    if forwarded_header:
+        forwarded_proto, forwarded_host = _parse_forwarded_header(forwarded_header)
+        proto = proto or forwarded_proto
+        host = host or forwarded_host
+
+    return proto, host
+
+
+def _apply_proto_host_fallbacks(proto, host, req):
+    """Apply fallback values for proto and host when not provided in headers."""
+    if not proto:
+        proto = 'https' if req.is_secure() else 'http'
+    if not host:
+        host = "localhost:5001"  # host read/set in _extract_proto_and_host()
+    return proto, host
+
+
+def _validate_resource_server_headers(proto, host):
+    """Raise SuspiciousOperation if proto or host are missing for resource server content
+    downloads.
+    """
+    if not proto or not host:
+        from django.core.exceptions import SuspiciousOperation
+        raise SuspiciousOperation(
+            "alter_hostname_settings: When connected to resource server, proto and host "
+            f"must be provided in headers. Found proto='{proto}', host='{host}'. "
+            "Required headers: X-Forwarded-Proto + (X-Forwarded-Host or Host), "
+            "or RFC 7239 Forwarded header with proto and host parameters."
+        )
+
+
 def alter_hostname_settings(
     temp_settings,
     value,
@@ -104,70 +147,25 @@ def alter_hostname_settings(
     Returns:
         The modified URL based on request headers, or the original value if no modification needed
     """
-    # we only want to modify these settings based on request headers
     ALLOWED_KEYS = ['CONTENT_ORIGIN', 'ANSIBLE_API_HOSTNAME', 'TOKEN_SERVER']
 
-    # If app is starting up or key is not on allowed list bypass and just return the value
     if not apps.ready or key.upper() not in ALLOWED_KEYS:
         return value.value
 
     req = get_current_request()
     if req is None:
-        # No request context available (e.g., during script execution)
-        # Always return the original value when no request context
         return value.value
 
     headers = dict(req.headers)
+    proto, host = _extract_proto_and_host(headers)
+
     is_resource_server_connected = temp_settings.get("IS_CONNECTED_TO_RESOURCE_SERVER", False)
+    is_content_download = "/content/" in req.build_absolute_uri()
 
-    # Extract protocol and host from headers
-    proto = None
-    host = None
-
-    # Try X-Forwarded-* headers first
-    x_forwarded_proto = headers.get("X-Forwarded-Proto")
-    x_forwarded_host = headers.get("X-Forwarded-Host")
-    host_header = headers.get("Host")
-
-    if x_forwarded_proto:
-        proto = x_forwarded_proto
-    if x_forwarded_host:
-        host = x_forwarded_host
-    elif host_header:
-        host = host_header
-
-    # If X-Forwarded-* headers not available, try RFC 7239 Forwarded header
-    if not proto or not host:
-        forwarded_header = headers.get("Forwarded")
-        if forwarded_header:
-            forwarded_proto, forwarded_host = _parse_forwarded_header(forwarded_header)
-            if not proto and forwarded_proto:
-                proto = forwarded_proto
-            if not host and forwarded_host:
-                host = forwarded_host
-
-    # When connected to resource server, headers are mandatory for content downloads
-    url_requested = req.build_absolute_uri()
-    is_content_download = "/content/" in url_requested
     if is_resource_server_connected and is_content_download:
-        if not proto or not host:
-            # Use Django's SuspiciousOperation for 400 Bad Request
-            from django.core.exceptions import SuspiciousOperation
-            error_msg = (
-                "alter_hostname_settings: When connected to resource server, proto and host "
-                f"must be provided in headers. Found proto='{proto}', host='{host}'. "
-                "Required headers: X-Forwarded-Proto + (X-Forwarded-Host or Host), "
-                "or RFC 7239 Forwarded header with proto and host parameters."
-            )
-            raise SuspiciousOperation(error_msg)
+        _validate_resource_server_headers(proto, host)
     else:
-        # Fallback behavior when not connected to resource server
-        if not proto:
-            # Use current request protocol if no forwarded protocol header
-            proto = 'https' if req.is_secure() else 'http'
-        if not host:
-            # Fallback to Host header or default
-            host = host_header or "localhost:5001"
+        proto, host = _apply_proto_host_fallbacks(proto, host, req)
 
     baseurl = proto + "://" + host
     if key.upper() == 'TOKEN_SERVER':
@@ -232,7 +230,7 @@ def read_settings_from_cache_or_db(
         if data:
             temp_settings.update(data, loader_identifier=metadata, tomlfy=True)
     except (DynaconfFormatError, DynaconfParseError) as exc:
-        logger.error("Error loading dynamic settings: %s", str(exc))
+        logger.exception("Error loading dynamic settings: %s", str(exc))
 
     if not data:
         logger.debug("Dynamic settings are empty, reading key %s from default sources", key)
@@ -1003,7 +1001,7 @@ def configure_dynamic_settings(settings: Dynaconf) -> dict[str, Any]:
         from dynaconf.hooking import Action, Hook
     except ImportError as exc:
         # Graceful degradation for dynaconf < 3.2.3 where method hooking is not available
-        logger.error(
+        logger.warning(
             "Galaxy Dynamic Settings requires Dynaconf >=3.2.3, "
             "system will work normally but dynamic settings from database will be ignored: %s",
             str(exc)

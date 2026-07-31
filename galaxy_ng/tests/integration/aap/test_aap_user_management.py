@@ -158,11 +158,9 @@ def test_aap_galaxy_local_resource_management_setting_gates_user_creation(
     random_username
 ):
     # make sure the user can't be created directly in galaxy ...
+    body = json.dumps({'username': random_username, 'password': 'redhat1234'})
     with pytest.raises(GalaxyClientError) as ctx:
-        gateway_admin_client.post(
-            users_endpoint,
-            body=json.dumps({'username': random_username, 'password': 'redhat1234'})
-        )
+        gateway_admin_client.post(users_endpoint, body=body)
     assert ctx.value.response.status_code == 403
 
 

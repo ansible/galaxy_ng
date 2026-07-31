@@ -219,13 +219,10 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
 
     def test_team_role_constants(self):
         """Test that team role constants are set correctly."""
-        from galaxy_ng.app.signals.handlers import TEAM_ROLES, SHARED_TEAM_ROLE
+        from galaxy_ng.app.signals.handlers import TEAM_ROLES
 
         # TEAM_ROLES should contain both team roles that use Django Group membership
         self.assertEqual(TEAM_ROLES, ["Team Member", "Team Admin"])
-
-        # SHARED_TEAM_ROLE should reference Team Member for backward compatibility
-        self.assertEqual(SHARED_TEAM_ROLE, "Team Member")
 
     @patch("galaxy_ng.app.signals.handlers.rbac_signal_in_progress")
     @patch("galaxy_ng.app.signals.handlers.dab_rbac_signals")

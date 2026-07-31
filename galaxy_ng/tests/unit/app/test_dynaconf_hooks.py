@@ -1,3 +1,4 @@
+import builtins
 import copy
 import os
 from unittest.mock import Mock, patch
@@ -668,11 +669,14 @@ class TestConfigureDynamicSettings:
         mock_settings = Mock()
         mock_settings.get.return_value = ["read_settings_from_cache_or_db"]
 
-        # Simulate ImportError by making the specific imports fail
+        # Capture the real __import__ before patching to avoid recursion
+        # when logger.exception() triggers internal imports for traceback formatting
+        real_import = builtins.__import__
+
         def failing_import(name, *args, **kwargs):
             if 'dynaconf' in name:
                 raise ImportError("test error")
-            return __import__(name, *args, **kwargs)
+            return real_import(name, *args, **kwargs)
 
         with patch('builtins.__import__', side_effect=failing_import):
             result = configure_dynamic_settings(mock_settings)
@@ -684,16 +688,17 @@ class TestConfigureDynamicSettings:
         mock_settings = Mock()
         mock_settings.get.return_value = ["read_settings_from_cache_or_db"]
 
-        # Simulate ImportError by making the specific imports fail
+        real_import = builtins.__import__
+
         def failing_import(name, *args, **kwargs):
             if 'dynaconf' in name:
                 raise ImportError("test error")
-            return __import__(name, *args, **kwargs)
+            return real_import(name, *args, **kwargs)
 
         with patch('builtins.__import__', side_effect=failing_import):
             configure_dynamic_settings(mock_settings)
 
-        mock_logger.error.assert_called_once()
+        mock_logger.warning.assert_called_once()
 
     @patch('galaxy_ng.app.dynaconf_hooks.logger')
     @patch('galaxy_ng.app.dynaconf_hooks.apps')
@@ -1603,8 +1608,8 @@ class TestReadSettingsFromCacheOrDb:
         }):
             result = read_settings_from_cache_or_db(mock_settings, mock_value, "TEST_KEY")
 
-        mock_logger.error.assert_called()
-        assert "Format error" in str(mock_logger.error.call_args)
+        mock_logger.exception.assert_called()
+        assert "Format error" in str(mock_logger.exception.call_args)
         assert result == "fallback"
 
     @patch('galaxy_ng.app.dynaconf_hooks.logger')
@@ -1632,8 +1637,8 @@ class TestReadSettingsFromCacheOrDb:
         }):
             result = read_settings_from_cache_or_db(mock_settings, mock_value, "TEST_KEY")
 
-        mock_logger.error.assert_called()
-        assert "Parse error" in str(mock_logger.error.call_args)
+        mock_logger.exception.assert_called()
+        assert "Parse error" in str(mock_logger.exception.call_args)
         assert result == "fallback"
 
     # Tests for logging behavior

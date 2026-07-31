@@ -244,17 +244,21 @@ class TestGalaxyTeamMemberRoleTransition(TestCase):
 
     def test_backward_compatibility_constants(self):
         """Test that signal handler constants are properly updated."""
-        from galaxy_ng.app.signals.handlers import SHARED_TEAM_ROLE
+        from galaxy_ng.app.signals.handlers import TEAM_ROLES
 
-        # Verify the constant is set to the new role name
-        self.assertEqual(SHARED_TEAM_ROLE, "Team Member")
+        # Verify TEAM_ROLES[0] is set to the expected role name
+        self.assertEqual(TEAM_ROLES[0], "Team Member")
 
-        # Verify the old constant is removed by checking the module's attributes
+        # Verify the old constants are removed by checking the module's attributes
         import galaxy_ng.app.signals.handlers as handlers_module
 
         self.assertFalse(
             hasattr(handlers_module, "TEAM_MEMBER_ROLE"),
             "TEAM_MEMBER_ROLE constant should have been removed",
+        )
+        self.assertFalse(
+            hasattr(handlers_module, "SHARED_TEAM_ROLE"),
+            "SHARED_TEAM_ROLE constant should have been removed",
         )
 
     def test_serializer_compatibility(self):
