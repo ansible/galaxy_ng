@@ -2,10 +2,6 @@
 # to be looked at by PR author and reviewer to keep or remove
 # called by .github/workflows/labeler.yml
 
-backport-2.4:
-- changed-files:
-  - any-glob-to-any-file: 'galaxy_ng/app/**/*'
-
 backport-2.5:
 - changed-files:
   - any-glob-to-any-file: 'galaxy_ng/app/**/*'
