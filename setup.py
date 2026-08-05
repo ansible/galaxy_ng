@@ -104,7 +104,7 @@ requirements = [
     "django-crum==0.7.9",
     "django-automated-logging~=6.2",
     "django-storages[azure,boto3,s3]",
-    "aiohttp>=3.14.0",
+    "aiohttp>=3.14.3",
     "aiodns>=3.3.0,<3.7",  # aligned with pulpcore; >=3.3 required to fix hanging issue
     "setuptools<=81",  # declare here to ensure it's included in the RPM system
     "pillow>=12.3.0",  # minimum version enforced to address AAP-82156
