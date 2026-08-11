@@ -8226,7 +8226,7 @@
             "description": ""
           }
         },
-        "x-ai-description": "Get collection index in distribution"
+        "x-ai-description": "Returns metadata for a specific Ansible collection (namespace, name, description)."
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/index/{namespace}/{name}/": {
@@ -8699,7 +8699,7 @@
             "description": ""
           }
         },
-        "x-ai-description": "List collection versions in distribution"
+        "x-ai-description": "Returns a paginated list of available versions for a collection in a distribution."
       }
     },
     "/api/galaxy/v3/plugin/ansible/content/{distro_base_path}/collections/index/{namespace}/{name}/versions/{version}/": {
@@ -9965,7 +9965,7 @@
             "description": ""
           }
         },
-        "x-ai-description": "List execution environment repositories",
+        "x-ai-description": "Returns a paginated list of container image repositories available in Galaxy.",
         "description": "List execution environment repositories"
       }
     },
