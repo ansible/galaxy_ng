@@ -81,6 +81,7 @@ def ansible_galaxy(
                 shell=True,
                 capture_output=True,
                 env=os.environ,
+                timeout=300,
             )
             logger.debug(f"RUN [retry #{x}] {command_string}")
             logger.debug("STDOUT---")
