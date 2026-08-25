@@ -1,22 +1,130 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "enabledManagers": [
-    "tekton"
-  ],
+  "enabledManagers": ["tekton", "pip-compile"],
+
   "tekton": {
     "enabled": true,
     "automerge": false,
     "schedule": ["* 0-5 * * 5"]
   },
+
+  "pip-compile": {
+    "schedule": ["every weekday"],
+    "addLabels": ["dependencies", "python"]
+  },
+
+  "ignoreDeps": [
+    "django-ansible-base",
+    "django-auth-ldap",
+    "django-crum"
+  ],
+
   "packageRules": [
     {
-      "description": "Update aap-ci tekton-catalog pipeline bundles",
+      "description": "Auto-merge Tekton catalog pipeline bundle updates",
       "matchPackageNames": ["/^quay\\.io\\/aap-ci\\/tekton-catalog\\/pipeline\\//"],
       "matchManagers": ["tekton"],
       "automerge": true,
       "postUpgradeTasks": {
         "commands": []
       }
+    },
+
+    {
+      "description": "All pip-compile patch updates — no auto-merge in Phase 1a",
+      "matchManagers": ["pip-compile"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": false,
+      "addLabels": ["dependencies", "python"]
+    },
+    {
+      "description": "Minor and major Python updates always require review",
+      "matchManagers": ["pip-compile"],
+      "matchUpdateTypes": ["minor", "major"],
+      "automerge": false
+    },
+
+    {
+      "description": "Enforce django<5.3 ceiling",
+      "matchPackageNames": ["django"],
+      "allowedVersions": "<5.3"
+    },
+    {
+      "description": "Enforce ansible-core<2.17 ceiling",
+      "matchPackageNames": ["ansible-core"],
+      "allowedVersions": "<2.17"
+    },
+    {
+      "description": "Enforce galaxy-importer<0.5.0 ceiling",
+      "matchPackageNames": ["galaxy-importer"],
+      "allowedVersions": "<0.5.0"
+    },
+    {
+      "description": "Enforce pulpcore<3.106 ceiling",
+      "matchPackageNames": ["pulpcore"],
+      "allowedVersions": "<3.106"
+    },
+    {
+      "description": "Enforce pulp-ansible<0.31 ceiling",
+      "matchPackageNames": ["pulp-ansible", "pulp_ansible"],
+      "allowedVersions": "<0.31"
+    },
+    {
+      "description": "Enforce pulp-container<2.28 ceiling",
+      "matchPackageNames": ["pulp-container"],
+      "allowedVersions": "<2.28"
+    },
+    {
+      "description": "Enforce djangorestframework<3.16 ceiling",
+      "matchPackageNames": ["djangorestframework"],
+      "allowedVersions": "<3.16"
+    },
+    {
+      "description": "Enforce aiodns<3.7 ceiling",
+      "matchPackageNames": ["aiodns"],
+      "allowedVersions": "<3.7"
+    },
+
+    {
+      "description": "Security-critical packages — grouped, no auto-merge in Phase 1a",
+      "matchPackageNames": [
+        "cryptography", "pyopenssl", "pyjwt", "urllib3",
+        "requests", "certifi", "pyasn1", "pillow", "gitpython"
+      ],
+      "matchUpdateTypes": ["patch"],
+      "groupName": "security dependencies",
+      "automerge": false,
+      "addLabels": ["security", "dependencies", "python"]
+    },
+    {
+      "description": "Django ecosystem patches — grouped, no auto-merge in Phase 1a",
+      "matchPackageNames": [
+        "django", "djangorestframework", "django-filter", "django-flags",
+        "django-prometheus", "django-storages", "drf-spectacular",
+        "social-auth-core", "social-auth-app-django", "dynaconf",
+        "django-automated-logging"
+      ],
+      "matchUpdateTypes": ["patch"],
+      "groupName": "django ecosystem",
+      "automerge": false,
+      "addLabels": ["dependencies", "python", "django"]
+    },
+    {
+      "description": "Pulp ecosystem — grouped, never auto-merge",
+      "matchPackageNames": ["pulpcore", "pulp-ansible", "pulp_ansible", "pulp-container", "pulp-glue"],
+      "groupName": "pulp ecosystem",
+      "automerge": false,
+      "addLabels": ["dependencies", "python", "pulp"]
+    },
+    {
+      "description": "Ansible tooling — grouped, never auto-merge",
+      "matchPackageNames": [
+        "ansible-core", "ansible-lint", "ansible-compat",
+        "ansible-builder"
+      ],
+      "groupName": "ansible tooling",
+      "automerge": false,
+      "addLabels": ["dependencies", "python", "ansible"]
     }
   ]
 }
