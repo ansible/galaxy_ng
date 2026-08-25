@@ -130,6 +130,71 @@ class AccessPolicyBase(AccessPolicyFromSettings):
 
     NAME = None
 
+    def _candidate_actions_for_metadata(self, request, view):
+        """
+        Return the real action name(s) whose statements should decide an OPTIONS
+        ('metadata') request, in priority order, so drf-access-policy reuses the
+        viewset's existing rules instead of falling through to the deny-all catch-all.
+
+        view.action_map is the exact {http_method: action_name} table DRF's router
+        built for this URL (e.g. {'get': 'retrieve', 'put': 'update'}, or
+        {'post': 'sign'} for a custom @action route) -- using it, rather than
+        guessing from the HTTP verb, means custom actions like 'sign'/'download'/
+        'move_content' get their own statements applied instead of being collapsed
+        into 'retrieve'/'create'/'update'.
+        """
+        action_map = getattr(view, "action_map", None) or {}
+        method = request.method.lower()
+
+        # Nested clone_request(request, 'PUT'/'POST'/'PATCH') calls that
+        # SimpleMetadata.determine_actions() issues against this same view while
+        # view.action is still 'metadata' -- resolve to exactly the action
+        # registered for that method on this URL.
+        if method in action_map:
+            return [action_map[method]]
+
+        # The outer OPTIONS request itself: request.method is 'options', which is
+        # never a registered action key. Prefer GET's action, mirroring controller's
+        # check_options_permissions -> check_get_permissions.
+        if "get" in action_map:
+            return [action_map["get"]]
+
+        # Write-only custom routes (e.g. a POST-only 'sign' action) have no GET
+        # equivalent to borrow. Allow metadata through if the user can perform ANY
+        # action registered on this URL -- the nested clone_request checks above
+        # still independently re-verify each action by its own exact-match lookup,
+        # so this only controls whether metadata is visible at all, not what gets
+        # disclosed in it.
+        return list(action_map.values()) or ["list"]
+
+    def has_permission(self, request, view):
+        # Plain (non-ViewSet) APIViews, e.g. TokenView/LoginView/LogoutView, have no
+        # `action` attribute at all -- only ViewSetMixin-based views set it.
+        if getattr(view, "action", None) != "metadata":
+            return super().has_permission(request, view)
+        original_action = view.action
+        try:
+            for candidate in self._candidate_actions_for_metadata(request, view):
+                view.action = candidate
+                if super().has_permission(request, view):
+                    return True
+            return False
+        finally:
+            view.action = original_action
+
+    def has_object_permission(self, request, view, obj):
+        if getattr(view, "action", None) != "metadata":
+            return super().has_object_permission(request, view, obj)
+        original_action = view.action
+        try:
+            for candidate in self._candidate_actions_for_metadata(request, view):
+                view.action = candidate
+                if super().has_object_permission(request, view, obj):
+                    return True
+            return False
+        finally:
+            view.action = original_action
+
     @classmethod
     def get_access_policy(cls, view):
         statements = GALAXY_STATEMENTS
