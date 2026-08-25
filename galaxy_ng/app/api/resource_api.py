@@ -9,6 +9,7 @@ from ansible_base.resource_registry.shared_types import (
     TeamType,
     UserType,
 )
+
 # RBAC models
 from ansible_base.rbac.models import RoleDefinition
 from ansible_base.resource_registry.shared_types import RoleDefinitionType
@@ -45,4 +46,8 @@ RESOURCE_LIST = (
         AAPFlag,
         shared_resource=SharedResource(serializer=FeatureFlagType, is_provider=False),
     ),
+    # Register Namespace so Hub creates Resource rows (with stable UUIDs) for each
+    # namespace. Without this, the assignment sync cannot resolve object_ansible_id
+    # UUIDs returned by Gateway back to local Namespace instances (AAP-77392).
+    ResourceConfig(models.Namespace, name_field="name"),
 )

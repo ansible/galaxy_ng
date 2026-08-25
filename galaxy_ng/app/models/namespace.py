@@ -17,10 +17,13 @@ __all__ = ("Namespace", "NamespaceLink")
 
 
 class Namespace(
-    LifecycleModel,
-    mixins.GroupModelPermissionsMixin,
-    mixins.UserModelPermissionsMixin
+    LifecycleModel, mixins.GroupModelPermissionsMixin, mixins.UserModelPermissionsMixin
 ):
+    # Registered in the resource registry for UUID generation only — Gateway has
+    # no handler for galaxy.namespace, so there's nothing to push upstream.
+    # This skips ansible_base's reverse sync post-save signal.
+    _skip_reverse_resource_sync = True
+
     """
     A model representing Ansible content namespace.
 
@@ -53,7 +56,7 @@ class Namespace(
         AnsibleNamespaceMetadata,
         null=True,
         on_delete=models.SET_NULL,
-        related_name="galaxy_namespace"
+        related_name="galaxy_namespace",
     )
 
     # We use these to keep track of newly created and updated namespaces
@@ -84,8 +87,7 @@ class Namespace(
         """Replace namespace related links with new ones."""
         self.links.all().delete()
         self.links.bulk_create(
-            NamespaceLink(name=link["name"], url=link["url"], namespace=self)
-            for link in links
+            NamespaceLink(name=link["name"], url=link["url"], namespace=self) for link in links
         )
 
     @property
@@ -98,7 +100,7 @@ class Namespace(
             "description": self.description,
             "resources": self.resources,
             "links": {x.name: x.url for x in self.links.all()},
-            "avatar_sha256": None
+            "avatar_sha256": None,
         }
 
         if self.last_created_pulp_metadata:
@@ -109,9 +111,7 @@ class Namespace(
         return hasher.hexdigest()
 
     class Meta:
-        permissions = (
-            ('upload_to_namespace', 'Can upload collections to namespace'),
-        )
+        permissions = (("upload_to_namespace", "Can upload collections to namespace"),)
 
 
 class NamespaceLink(LifecycleModel):
@@ -131,9 +131,7 @@ class NamespaceLink(LifecycleModel):
     url = models.URLField(max_length=256)
 
     # References
-    namespace = models.ForeignKey(
-        Namespace, on_delete=models.CASCADE, related_name="links"
-    )
+    namespace = models.ForeignKey(Namespace, on_delete=models.CASCADE, related_name="links")
 
     def __str__(self):
         return self.name

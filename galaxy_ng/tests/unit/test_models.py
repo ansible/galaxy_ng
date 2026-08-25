@@ -1,7 +1,10 @@
+from unittest.mock import patch
+
 from django.test import TestCase
 from pulp_ansible.app.models import AnsibleRepository, Collection
 
 from django.conf import settings
+from galaxy_ng.app.api.resource_api import RESOURCE_LIST
 from galaxy_ng.app.models import Namespace, Setting
 from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
 from galaxy_ng.app.models.config import MAX_VERSIONS_TO_KEEP
@@ -40,25 +43,84 @@ class TestSignalCreateRepository(TestCase):
         self.assertEqual(updated.retain_repo_versions, 99)
 
 
+class TestNamespaceResourceSync(TestCase):
+    def test_skip_reverse_resource_sync_flag_is_set(self):
+        """Namespace must opt out of ansible_base's reverse sync post-save signal.
+
+        Namespace is registered in the resource registry for UUID generation only.
+        Gateway has no handler for galaxy.namespace, so pushing namespace data
+        upstream would crash with TypeError (serializer_class is None) and roll
+        back the transaction, returning HTTP 500 on every namespace save.
+        """
+        self.assertTrue(
+            getattr(Namespace, "_skip_reverse_resource_sync", False),
+            "_skip_reverse_resource_sync must be True on Namespace to prevent the "
+            "reverse sync signal from crashing when RESOURCE_SERVER_SYNC_ENABLED=True",
+        )
+
+    def test_unmanaged_resource_types_skip_reverse_sync(self):
+        """Any model registered without a managed_serializer must opt out of reverse sync.
+
+        When RESOURCE_SERVER_SYNC_ENABLED=True, ansible_base connects a post_save
+        signal that calls resource_type.serializer_class(instance) for all registered
+        models. For resource types with no managed_serializer, serializer_class is None
+        and the call raises TypeError, rolling back the transaction and returning 500.
+
+        Any ResourceConfig added to RESOURCE_LIST without a shared_resource (and
+        therefore no managed_serializer) must set _skip_reverse_resource_sync = True
+        on the model to prevent this.
+        """
+        unmanaged = [config for config in RESOURCE_LIST if config.managed_serializer is None]
+        missing_flag = [
+            config.model.__name__
+            for config in unmanaged
+            if not getattr(config.model, "_skip_reverse_resource_sync", False)
+        ]
+        self.assertEqual(
+            missing_flag,
+            [],
+            f"These models are registered in RESOURCE_LIST without a managed_serializer "
+            f"but are missing _skip_reverse_resource_sync = True: {missing_flag}. "
+            f"Add the flag to prevent TypeError in ansible_base's reverse sync signal "
+            f"when RESOURCE_SERVER_SYNC_ENABLED=True.",
+        )
+
+    def test_namespace_create_succeeds_when_reverse_sync_enabled(self):
+        """Namespace.save() must not raise when reverse sync is enabled.
+
+        Simulates the OCP+Gateway environment where _should_reverse_sync() returns
+        True. Without _skip_reverse_resource_sync=True, ansible_base's post-save
+        signal calls resource_type.serializer_class(instance) which is None for
+        Namespace, raising TypeError and causing HTTP 500.
+        """
+        with patch("ansible_base.resource_registry.apps._should_reverse_sync", return_value=True):
+            # Should not raise — _skip_reverse_resource_sync=True causes
+            # should_skip_reverse_sync() to return True before serializer_class is called
+            ns = Namespace.objects.create(name="test_sync_skip")
+
+        self.assertTrue(Namespace.objects.filter(name="test_sync_skip").exists())
+        ns.delete()
+
+
 class TestSignalCreateNamespace(TestCase):
-    namespace_name = 'my_test_ns'
+    namespace_name = "my_test_ns"
 
     def test_new_collection_create_namespace(self):
         self.assertFalse(Namespace.objects.filter(name=self.namespace_name))
         Collection.objects.create(
-            name='my_collection',
+            name="my_collection",
             namespace=self.namespace_name,
         )
         self.assertTrue(Namespace.objects.filter(name=self.namespace_name))
 
     def test_existing_namespace_not_changed(self):
-        description = 'Namespace created not by signal'
+        description = "Namespace created not by signal"
         Namespace.objects.create(
             name=self.namespace_name,
             description=description,
         )
         Collection.objects.create(
-            name='my_collection',
+            name="my_collection",
             namespace=self.namespace_name,
         )
         namespace = Namespace.objects.get(name=self.namespace_name)
@@ -71,31 +133,31 @@ class TestSetting(TestCase):
         Setting.objects.all().delete()
 
     def test_create_setting_directly(self):
-        Setting.objects.create(key='test', value='value')
+        Setting.objects.create(key="test", value="value")
 
         # Lowercase read
-        setting = Setting.get_setting_from_db('test')
-        self.assertEqual(setting.key, 'TEST')
-        self.assertEqual(setting.value, 'value')
+        setting = Setting.get_setting_from_db("test")
+        self.assertEqual(setting.key, "TEST")
+        self.assertEqual(setting.value, "value")
 
         # Uppercase read
-        setting = Setting.get_setting_from_db('TEST')
-        self.assertEqual(setting.key, 'TEST')
-        self.assertEqual(setting.value, 'value')
+        setting = Setting.get_setting_from_db("TEST")
+        self.assertEqual(setting.key, "TEST")
+        self.assertEqual(setting.value, "value")
 
         # Bump the version
         first_version = setting.version
-        Setting.objects.create(key='test', value='value2')
-        setting = Setting.get_setting_from_db('test')
-        self.assertEqual(setting.key, 'TEST')
-        self.assertEqual(setting.value, 'value2')
+        Setting.objects.create(key="test", value="value2")
+        setting = Setting.get_setting_from_db("test")
+        self.assertEqual(setting.key, "TEST")
+        self.assertEqual(setting.value, "value2")
         assert setting.version > first_version
 
     def test_only_latest_x_old_versions_are_kept(self):
         for i in range(MAX_VERSIONS_TO_KEEP * 2):
-            Setting.objects.create(key='test', value=f'value{i}')
+            Setting.objects.create(key="test", value=f"value{i}")
 
-        assert Setting.objects.filter(key='test').count() == MAX_VERSIONS_TO_KEEP + 1
+        assert Setting.objects.filter(key="test").count() == MAX_VERSIONS_TO_KEEP + 1
 
     def test_get_settings_as_dict(self):
         Setting.set_value_in_db("FOO", "BAR")
