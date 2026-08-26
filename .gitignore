@@ -127,3 +127,6 @@ tmp/
 
 # Shell plus from container run saves a session
 .ipython
+
+# Personal Claude overrides
+CLAUDE.local.md

@@ -10,7 +10,37 @@ A Pulp plugin to support hosting your very own Ansible Galaxy server.
 
 Our mission is to help organizations share Ansible automation and promote a culture of collaboration around Ansible automation development. We'll be providing features that make it easy to create, discover, use and distribute Ansible automation content.
 
+## Tech Stack
+
+- **Framework:** Django + Django REST Framework, running as a [Pulp](https://pulpproject.org/) plugin
+- **Async Tasks:** Pulp tasking system (RQ workers with resource locking)
+- **Database:** PostgreSQL
+- **Configuration:** Dynaconf (settings loaded from multiple sources with `PULP_` env var prefix)
+- **Access Control:** Dual RBAC system (legacy Pulp access policies + django-ansible-base DAB RBAC)
+
 To learn more about Pulp, [view the Pulp project page](https://pulpproject.org/).
+
+## Project Structure
+
+```
+galaxy_ng/
+  app/
+    models/              # Galaxy-native models (Namespace, User, Organization, etc.)
+    api/
+      v1/                # Legacy roles API
+      v3/                # Main Galaxy API (collections, namespaces, EE, tasks)
+      ui/v1/, ui/v2/     # UI-optimized endpoints
+    access_control/      # Access policies and RBAC statements
+    tasks/               # Async Pulp tasks (publishing, signing, sync, etc.)
+    auth/                # Authentication backends
+    settings.py          # Settings fragment (merged via Dynaconf)
+    dynaconf_hooks.py    # Post-load conditional settings
+  tests/
+    unit/                # Unit tests (real DB, DRF APIClient)
+    integration/         # Integration tests (require running compose stack)
+```
+
+For the full structure and architectural details, see [AGENTS.md](AGENTS.md).
 
 ## Documentation
 
@@ -51,6 +81,20 @@ section of the Contributor Guide to find out how to get in touch with us.
 
 You can also find more information in the
 [Ansible communication guide](https://docs.ansible.com/ansible/devel/community/communication.html).
+
+## Documentation for AI Agents
+
+This repository includes structured guidance for AI coding agents in [AGENTS.md](AGENTS.md), covering architecture, conventions, and common pitfalls. Domain-specific guidelines live in `docs/`:
+
+| Guide | Topics |
+|-------|--------|
+| [Security](docs/security-guidelines.md) | Access policies, RBAC, authentication, input validation |
+| [API Contracts](docs/api-contracts-guidelines.md) | API versions, viewsets, serializers, backward compatibility |
+| [Database](docs/database-guidelines.md) | Model patterns, migrations, query conventions |
+| [Error Handling](docs/error-handling-guidelines.md) | Exception handler, ValidationError usage, logging |
+| [Performance](docs/performance-guidelines.md) | Task dispatch, resource locking, query optimization |
+| [Testing](docs/testing-guidelines.md) | Unit/integration test structure, fixtures, markers |
+| [Integration](docs/integration-guidelines.md) | Pulp tasks, signal handlers, external services |
 
 ## Contributing
 
