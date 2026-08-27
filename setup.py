@@ -7,16 +7,6 @@ from setuptools import find_packages, setup
 package_name = os.environ.get("GALAXY_NG_ALTERNATE_NAME", "galaxy-ng")
 version = "4.12.0dev"
 
-# use full commit hash in place of DAB tag
-# i.e. 2.6.20251016 = 9db7237883e071724eb927b4dc56966d0ec28106
-django_ansible_base_branch = os.getenv(
-    'DJANGO_ANSIBLE_BASE_BRANCH', '9db7237883e071724eb927b4dc56966d0ec28106'
-)
-django_ansible_base_dependency = (
-    'django-ansible-base[jwt-consumer,feature-flags] @ '
-    f'git+https://github.com/ansible/django-ansible-base@{django_ansible_base_branch}'
-)
-
 requirements = [
     "galaxy-importer>=0.4.31,<0.5.0",
     "pulpcore>=3.105.12,<3.106",
@@ -34,7 +24,7 @@ requirements = [
     "boto3",
     "distro",
     "django-flags>=5.0.13",
-    django_ansible_base_dependency,  # noqa 501
+    "django-ansible-base[jwt-consumer,feature-flags] @ git+https://github.com/ansible/django-ansible-base@9db7237883e071724eb927b4dc56966d0ec28106",
     "django-crum==0.7.9",
     "django-automated-logging~=6.2",
     "django-storages[azure,boto3,s3]",
