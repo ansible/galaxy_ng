@@ -9,7 +9,7 @@
   },
 
   "pip-compile": {
-    "managerFilePatterns": ["/requirements\\/requirements\\.[a-z]+\\.txt$/"],
+    "managerFilePatterns": ["/requirements\\/requirements\\.(?:common|insights|standalone)\\.txt$/"],
     "schedule": ["at any time"],
     "addLabels": ["dependencies", "python"]
   },
@@ -23,7 +23,8 @@
   "ignoreDeps": [
     "django-ansible-base",
     "django-auth-ldap",
-    "django-crum"
+    "django-crum",
+    "setuptools"
   ],
 
   "packageRules": [
