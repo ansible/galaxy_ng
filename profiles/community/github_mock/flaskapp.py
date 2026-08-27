@@ -22,8 +22,14 @@ from flask import jsonify
 from flask import request
 from flask import redirect
 
+from galaxy_v1 import galaxy_v1
+
 
 app = Flask(__name__)
+
+# also mock just enough of the galaxy.ansible.com /api/v1/ endpoints for the
+# legacy role sync task so community integration tests run hermetically.
+app.register_blueprint(galaxy_v1)
 
 # for mutable users
 db_name = 'user_database.db'
@@ -523,4 +529,4 @@ def admin_modify_user(userid=None, login=None):
 
 if __name__ == '__main__':
     create_tables()
-    app.run(host='0.0.0.0', port=8082, debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('GITHUB_MOCK_PORT', '8082')), debug=True)

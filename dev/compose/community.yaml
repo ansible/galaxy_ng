@@ -57,6 +57,12 @@ x-common-env: &common-env
   SOCIAL_AUTH_GITHUB_SECRET: 'abcd1234'
 
   PULP_GALAXY_ENABLE_LEGACY_ROLES: 'true'
+
+  # point the legacy role sync (POST /api/v1/sync/) at the local galaxy v1 mock
+  # (served by the github mock container) so community sync tests are hermetic
+  # and don't depend on the live galaxy.ansible.com service.
+  PULP_GALAXY_LEGACY_ROLE_SYNC_URL: 'http://github:8082/api/v1/roles/'
+
   PULP_GALAXY_FEATURE_FLAGS__execution_environments: 'false'
   PULP_GALAXY_FEATURE_FLAGS__ai_deny_index: 'true'
   PULP_GALAXY_FEATURE_FLAGS__display_repositories: 'false'

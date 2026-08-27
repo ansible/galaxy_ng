@@ -236,6 +236,12 @@ GALAXY_API_SYNCLIST_NAME_FORMAT = "{account_name}-synclist"
 # Require approval for incoming content, which uses a staging repository
 GALAXY_REQUIRE_CONTENT_APPROVAL = True
 
+# Default upstream v1 API url used by the legacy role sync task
+# (POST /api/v1/sync/). Overridable per-request via the serializer ``baseurl``
+# field, and globally via the PULP_GALAXY_LEGACY_ROLE_SYNC_URL env var -- for
+# example to point sync at a mock upstream in CI/dev so tests stay hermetic.
+GALAXY_LEGACY_ROLE_SYNC_URL = "https://galaxy.ansible.com/api/v1/roles/"
+
 # Local rest framework settings
 # -----------------------------
 

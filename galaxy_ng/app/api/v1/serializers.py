@@ -1,5 +1,6 @@
 import datetime
 
+from django.conf import settings
 from rest_framework import serializers
 
 from pulpcore.plugin.util import get_url
@@ -540,11 +541,16 @@ class LegacyTaskSerializer:
         return {}
 
 
+def _default_legacy_sync_baseurl():
+    """Resolve the upstream sync url at request time so env/dynaconf overrides apply."""
+    return settings.GALAXY_LEGACY_ROLE_SYNC_URL
+
+
 class LegacySyncSerializer(serializers.Serializer):
 
     baseurl = serializers.CharField(
         required=False,
-        default='https://galaxy.ansible.com/api/v1/roles/'
+        default=_default_legacy_sync_baseurl
     )
     github_user = serializers.CharField(required=False)
     role_name = serializers.CharField(required=False)
