@@ -9,7 +9,14 @@
   },
 
   "pip-compile": {
-    "schedule": ["every weekday"],
+    "managerFilePatterns": ["/requirements\\/requirements\\.[a-z]+\\.txt$/"],
+    "schedule": ["at any time"],
+    "addLabels": ["dependencies", "python"]
+  },
+
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["at any time"],
     "addLabels": ["dependencies", "python"]
   },
 
