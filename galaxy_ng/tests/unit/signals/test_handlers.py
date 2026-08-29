@@ -534,30 +534,33 @@ class TestDABAssignmentSignals:
     """Test DAB assignment signal handlers."""
 
     @patch("galaxy_ng.app.signals.handlers.rbac_signal_in_progress")
+    @patch("galaxy_ng.app.signals.handlers._existing_pulp_role_names", return_value=set())
     @patch("galaxy_ng.app.signals.handlers._apply_dab_assignment")
     def test_copy_dab_user_role_assignment_regular_role(
-        self, mock_apply_assignment, mock_signal_check
+        self, mock_apply_assignment, mock_existing_names, mock_signal_check
     ):
         """Test DAB user role assignment for regular role."""
-        from galaxy_ng.app.signals.handlers import copy_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import copy_dab_assignments
 
         mock_signal_check.return_value = False
 
         mock_instance = Mock()
         mock_instance.role_definition.name = "test.role"
 
-        copy_dab_user_role_assignment(sender=Mock(), instance=mock_instance, created=True)
+        copy_dab_assignments(sender=Mock(), assignments=[mock_instance], content_objects={})
 
-        mock_apply_assignment.assert_called_once_with(mock_instance)
+        # The batch handler passes the pre-resolved set of existing Pulp role names.
+        mock_apply_assignment.assert_called_once_with(mock_instance, set())
 
     @patch("galaxy_ng.app.signals.handlers.rbac_signal_in_progress")
+    @patch("galaxy_ng.app.signals.handlers._existing_pulp_role_names", return_value=set())
     @patch("galaxy_ng.app.signals.handlers._apply_dab_assignment")
     def test_copy_dab_user_role_assignment_shared_team_role(
-        self, mock_apply_assignment, mock_signal_check
+        self, mock_apply_assignment, mock_existing_names, mock_signal_check
     ):
         """Test DAB user role assignment for shared team role."""
         from galaxy_ng.app.signals.handlers import (
-            copy_dab_user_role_assignment,
+            copy_dab_assignments,
             RoleUserAssignment,
             TEAM_ROLES,
         )
@@ -575,7 +578,9 @@ class TestDABAssignmentSignals:
                 return obj is mock_instance and cls is RoleUserAssignment
 
             mock_isinstance.side_effect = isinstance_side_effect
-            copy_dab_user_role_assignment(sender=Mock(), instance=mock_instance, created=True)
+            copy_dab_assignments(
+                sender=Mock(), assignments=[mock_instance], content_objects={}
+            )
 
             mock_instance.content_object.group.user_set.add.assert_called_once_with(
                 mock_instance.user

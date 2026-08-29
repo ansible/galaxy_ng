@@ -31,7 +31,7 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
         self, mock_dab_signals, mock_signal_in_progress
     ):
         """Test that Team Member role assignment adds user to group."""
-        from galaxy_ng.app.signals.handlers import copy_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import copy_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
 
         # Mock signal not in progress
@@ -53,7 +53,7 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
         self.assertNotIn(self.user, self.group.user_set.all())
 
         # Call signal handler
-        copy_dab_user_role_assignment(None, assignment, created=True)
+        copy_dab_assignments(None, [assignment], {})
 
         # Verify user was added to group
         self.assertIn(self.user, self.group.user_set.all())
@@ -64,7 +64,7 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
         self, mock_dab_signals, mock_signal_in_progress
     ):
         """Test that non-Team Member role assignment doesn't add user to group."""
-        from galaxy_ng.app.signals.handlers import copy_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import copy_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
 
         # Mock signal not in progress
@@ -87,8 +87,8 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
 
         # Mock _apply_dab_assignment to verify it's called
         with patch("galaxy_ng.app.signals.handlers._apply_dab_assignment") as mock_apply:
-            copy_dab_user_role_assignment(None, assignment, created=True)
-            mock_apply.assert_called_once_with(assignment)
+            copy_dab_assignments(None, [assignment], {})
+            mock_apply.assert_called_once_with(assignment, set())
 
         # Verify user was not added to group directly
         self.assertNotIn(self.user, self.group.user_set.all())
@@ -100,7 +100,7 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
         self, mock_assignment_model, mock_dab_signals, mock_signal_in_progress
     ):
         """Test that Team Member role deletion keeps user in group when other assignments exist."""
-        from galaxy_ng.app.signals.handlers import delete_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import delete_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
 
         # Mock signal not in progress
@@ -123,11 +123,13 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
         assignment.content_object = self.team
         assignment.object_id = self.team.id
 
-        # Mock other assignments exist
-        mock_assignment_model.objects.filter.return_value.exists.return_value = True
+        # Mock that another team-role assignment survives the batch: the batched
+        # survivor query returns this user/object pair.
+        mock_assignment_model.objects.filter.return_value.exclude.return_value \
+            .values_list.return_value = [(assignment.user_id, assignment.object_id)]
 
         # Call signal handler
-        delete_dab_user_role_assignment(None, assignment)
+        delete_dab_assignments(None, [assignment], {})
 
         # Verify user was NOT removed from group
         self.assertIn(self.user, self.group.user_set.all())
@@ -138,7 +140,7 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
         self, mock_dab_signals, mock_signal_in_progress
     ):
         """Test that Team Member role deletion with no content_object is handled gracefully."""
-        from galaxy_ng.app.signals.handlers import delete_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import delete_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
 
         # Mock signal not in progress
@@ -159,8 +161,8 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
 
         # Mock _unapply_dab_assignment to verify it's called
         with patch("galaxy_ng.app.signals.handlers._unapply_dab_assignment") as mock_unapply:
-            delete_dab_user_role_assignment(None, assignment)
-            mock_unapply.assert_called_once_with(assignment)
+            delete_dab_assignments(None, [assignment], {})
+            mock_unapply.assert_called_once_with(assignment, set())
 
     @patch("galaxy_ng.app.signals.handlers.rbac_signal_in_progress")
     @patch("galaxy_ng.app.signals.handlers.RoleDefinition")
@@ -202,7 +204,7 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
     @patch("galaxy_ng.app.signals.handlers.rbac_signal_in_progress")
     def test_signal_handler_skips_when_signal_in_progress(self, mock_signal_in_progress):
         """Test that signal handlers skip processing when rbac signal is in progress."""
-        from galaxy_ng.app.signals.handlers import copy_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import copy_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
 
         # Mock signal in progress
@@ -212,7 +214,7 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
         assignment = Mock(spec=RoleUserAssignment)
 
         # Call signal handler - should return early without processing
-        result = copy_dab_user_role_assignment(None, assignment, created=True)
+        result = copy_dab_assignments(None, [assignment], {})
 
         # Verify it returned early (None)
         self.assertIsNone(result)
@@ -228,7 +230,7 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
     @patch("galaxy_ng.app.signals.handlers.dab_rbac_signals")
     def test_copy_dab_team_role_assignment(self, mock_dab_signals, mock_signal_in_progress):
         """Test that team role assignments are properly handled."""
-        from galaxy_ng.app.signals.handlers import copy_dab_team_role_assignment
+        from galaxy_ng.app.signals.handlers import copy_dab_assignments
         from ansible_base.rbac.models import RoleTeamAssignment
 
         # Mock signal not in progress
@@ -241,14 +243,14 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
 
         # Mock _apply_dab_assignment to verify it's called
         with patch("galaxy_ng.app.signals.handlers._apply_dab_assignment") as mock_apply:
-            copy_dab_team_role_assignment(None, assignment, created=True)
-            mock_apply.assert_called_once_with(assignment)
+            copy_dab_assignments(None, [assignment], {})
+            mock_apply.assert_called_once_with(assignment, set())
 
     @patch("galaxy_ng.app.signals.handlers.rbac_signal_in_progress")
     @patch("galaxy_ng.app.signals.handlers.dab_rbac_signals")
     def test_delete_dab_team_role_assignment(self, mock_dab_signals, mock_signal_in_progress):
         """Test that team role assignment deletions are properly handled."""
-        from galaxy_ng.app.signals.handlers import delete_dab_team_role_assignment
+        from galaxy_ng.app.signals.handlers import delete_dab_assignments
         from ansible_base.rbac.models import RoleTeamAssignment
 
         # Mock signal not in progress
@@ -261,8 +263,8 @@ class TestTeamMemberRoleSignalHandlers(TestCase):
 
         # Mock _unapply_dab_assignment to verify it's called
         with patch("galaxy_ng.app.signals.handlers._unapply_dab_assignment") as mock_unapply:
-            delete_dab_team_role_assignment(None, assignment)
-            mock_unapply.assert_called_once_with(assignment)
+            delete_dab_assignments(None, [assignment], {})
+            mock_unapply.assert_called_once_with(assignment, set())
 
 
 class TestTeamAdminRoleSignalHandlers(TestCase):
@@ -300,7 +302,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         From DAB managed.py:
         Team Admin: "Can manage a single team and inherits all role assignments to the team"
         """
-        from galaxy_ng.app.signals.handlers import copy_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import copy_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
 
         # Disable loop prevention so the handler executes normally
@@ -326,7 +328,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         )
 
         # Trigger the signal handler that processes new role assignments
-        copy_dab_user_role_assignment(None, assignment, created=True)
+        copy_dab_assignments(None, [assignment], {})
 
         # Team Admin should add user to Django Group to enable role inheritance
         self.assertIn(
@@ -348,7 +350,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         When Team Admin is removed, they should stay in the group
         because Team Member still grants membership.
         """
-        from galaxy_ng.app.signals.handlers import delete_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import delete_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
 
         # Disable loop prevention so the handler executes normally
@@ -371,11 +373,13 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         assignment.content_object = self.team
         assignment.object_id = self.team.id
 
-        # Mock that user still has other team roles (e.g., Team Member remains)
-        mock_assignment_model.objects.filter.return_value.exists.return_value = True
+        # Mock that user still has other team roles (e.g., Team Member remains): the
+        # batched survivor query returns this user/object pair.
+        mock_assignment_model.objects.filter.return_value.exclude.return_value \
+            .values_list.return_value = [(assignment.user_id, assignment.object_id)]
 
         # Trigger the delete handler for Team Admin role
-        delete_dab_user_role_assignment(None, assignment)
+        delete_dab_assignments(None, [assignment], {})
 
         # User should remain in group because they still have Team Member role
         self.assertIn(
@@ -396,7 +400,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         Scenario: User only has Team Admin (no Team Member).
         When Team Admin is removed, they should be removed from the group.
         """
-        from galaxy_ng.app.signals.handlers import delete_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import delete_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
 
         # Disable loop prevention so the handler executes normally
@@ -404,8 +408,10 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         mock_dab_signals.return_value.__enter__ = Mock()
         mock_dab_signals.return_value.__exit__ = Mock()
 
-        # Mock that user has NO other team roles (Team Admin is their only team role)
-        mock_filter.return_value.exists.return_value = False
+        # Mock that user has NO other team roles (Team Admin is their only team role).
+        # The handler excludes the batch's own PKs before checking for survivors, so the
+        # batched survivor query returns no surviving pairs.
+        mock_filter.return_value.exclude.return_value.values_list.return_value = []
 
         # Start with user in the group (simulating they currently have Team Admin)
         self.group.user_set.add(self.user)
@@ -423,7 +429,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         assignment.object_id = self.team.id
 
         # Trigger the delete handler
-        delete_dab_user_role_assignment(None, assignment)
+        delete_dab_assignments(None, [assignment], {})
 
         # User should be removed from group since they have no other team roles
         self.assertNotIn(
@@ -442,7 +448,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
 
         This ensures both roles provide inheritance of team's permissions.
         """
-        from galaxy_ng.app.signals.handlers import copy_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import copy_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
 
         team_member_role = "Team Member"
@@ -464,7 +470,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         assignment_member.user = self.user
         assignment_member.content_object = self.team
 
-        copy_dab_user_role_assignment(None, assignment_member, created=True)
+        copy_dab_assignments(None, [assignment_member], {})
         self.assertIn(self.user, self.group.user_set.all())
 
         # Assign Team Admin to second user and verify they're also added to group
@@ -475,7 +481,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         assignment_admin.user = team_admin_user
         assignment_admin.content_object = self.team
 
-        copy_dab_user_role_assignment(None, assignment_admin, created=True)
+        copy_dab_assignments(None, [assignment_admin], {})
         self.assertIn(team_admin_user, self.group.user_set.all())
 
         # Verify both users are in the same Django Group for inheritance
@@ -497,7 +503,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         - Team Admin does NOT sync to Pulp RBAC (DAB-only role)
         - No validation errors occur during assignment
         """
-        from galaxy_ng.app.signals.handlers import copy_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import copy_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
 
         with (
@@ -519,7 +525,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
 
             # Verify Team Admin does NOT attempt Pulp sync
             with patch("galaxy_ng.app.signals.handlers._apply_dab_assignment") as mock_apply:
-                copy_dab_user_role_assignment(None, assignment, created=True)
+                copy_dab_assignments(None, [assignment], {})
 
                 # ASSERT: Team Admin should NOT sync to Pulp
                 mock_apply.assert_not_called()
@@ -543,7 +549,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         Even if a Pulp Role named "Team Admin" exists in the database, the signal
         handler should not attempt synchronization.
         """
-        from galaxy_ng.app.signals.handlers import copy_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import copy_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
         from pulpcore.plugin.models.role import Role
         from django.core.exceptions import BadRequest
@@ -570,7 +576,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         assignment.content_object = self.team
 
         # Signal handler should use Django Groups, not Pulp sync
-        copy_dab_user_role_assignment(None, assignment, created=True)
+        copy_dab_assignments(None, [assignment], {})
 
         # Verify user was added to Django Group for role inheritance
         self.assertIn(
@@ -602,7 +608,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         The signal handler should not attempt to sync to Pulp regardless of whether
         a Pulp Role exists or not.
         """
-        from galaxy_ng.app.signals.handlers import copy_dab_user_role_assignment
+        from galaxy_ng.app.signals.handlers import copy_dab_assignments
         from ansible_base.rbac.models import RoleUserAssignment
         from pulpcore.plugin.models.role import Role
 
@@ -625,7 +631,7 @@ class TestTeamAdminRoleSignalHandlers(TestCase):
         assignment.content_object = self.team
 
         # Signal handler should use Django Groups, not attempt Pulp sync
-        copy_dab_user_role_assignment(None, assignment, created=True)
+        copy_dab_assignments(None, [assignment], {})
 
         # Verify user was added to Django Group for role inheritance
         self.assertIn(

@@ -38,6 +38,10 @@ from ansible_base.rbac.models import (
     RoleTeamAssignment,
 )
 from ansible_base.rbac.triggers import dab_post_migrate
+from ansible_base.rbac.triggers import (
+    dab_rbac_assignments_created,
+    dab_rbac_assignments_pre_delete,
+)
 from ansible_base.rbac import permission_registry
 from ansible_base.resource_registry.signals.handlers import no_reverse_sync
 
@@ -492,83 +496,192 @@ def _get_pulp_role_kwargs(assignment):
     return (role_name, entity), kwargs
 
 
-def _apply_dab_assignment(assignment):
+def _apply_dab_assignment(assignment, existing_role_names=None):
     role_name = ROLEDEF_TO_PULP.get(
         assignment.role_definition.name,
         assignment.role_definition.name
     )
-    if not Role.objects.filter(name=role_name).exists():
-        return  # some platform roles will not have matching pulp roles
+    # some platform roles will not have matching pulp roles. When ``existing_role_names``
+    # is supplied (the batch path) membership is checked against the pre-resolved set to
+    # avoid a per-row query; otherwise fall back to a direct existence check.
+    if existing_role_names is not None:
+        role_exists = role_name in existing_role_names
+    else:
+        role_exists = Role.objects.filter(name=role_name).exists()
+    if not role_exists:
+        return
     args, kwargs = _get_pulp_role_kwargs(assignment)
     assign_role(*args, **kwargs)
 
 
-def _unapply_dab_assignment(assignment):
+def _unapply_dab_assignment(assignment, existing_role_names=None):
     role_name = ROLEDEF_TO_PULP.get(
         assignment.role_definition.name,
         assignment.role_definition.name
     )
-    if not Role.objects.filter(name=role_name).exists():
-        return  # some platform roles will not have matching pulp roles
+    # See _apply_dab_assignment for the ``existing_role_names`` fast path.
+    if existing_role_names is not None:
+        role_exists = role_name in existing_role_names
+    else:
+        role_exists = Role.objects.filter(name=role_name).exists()
+    if not role_exists:
+        return
     args, kwargs = _get_pulp_role_kwargs(assignment)
     remove_role(*args, **kwargs)
 
 
-@receiver(post_save, sender=RoleUserAssignment)
-def copy_dab_user_role_assignment(sender, instance, created, **kwargs):
-    """When a dab role is granted to a user, grant the equivalent pulp role."""
+def _existing_pulp_role_names(assignments):
+    """Resolve, in a single query, which of a batch's roles exist as Pulp Roles.
+
+    Returns the subset of the batch's mapped Pulp role names that actually exist as
+    ``Role`` objects, so the per-row apply/unapply helpers can check set membership
+    instead of issuing one ``exists()`` query each.
+    """
+    names = set()
+    for assignment in assignments:
+        role_name = ROLEDEF_TO_PULP.get(
+            assignment.role_definition.name,
+            assignment.role_definition.name
+        )
+        # Guard against non-string names (e.g. unspec'd mocks) reaching the DB query.
+        if isinstance(role_name, str):
+            names.add(role_name)
+    if not names:
+        return set()
+    return set(Role.objects.filter(name__in=names).values_list("name", flat=True))
+
+
+def _surviving_team_membership(team_user_assignments, batch_pks):
+    """Return the ``(user_id, object_id)`` pairs that still have a team-role grant.
+
+    One query for the whole batch: for the users/objects involved in the team-role
+    user assignments being deleted, find which pairs still have a surviving team-role
+    assignment (excluding the rows in this delete batch, whose DB rows still exist
+    because the signal fires ``pre_delete``).
+    """
+    if not team_user_assignments:
+        return set()
+    user_ids = {instance.user_id for instance in team_user_assignments}
+    object_ids = {instance.object_id for instance in team_user_assignments}
+    return set(
+        RoleUserAssignment.objects.filter(
+            role_definition__name__in=TEAM_ROLES,
+            user_id__in=user_ids,
+            object_id__in=object_ids,
+        ).exclude(pk__in=batch_pks).values_list("user_id", "object_id")
+    )
+
+
+def _content_object_for(instance, content_objects):
+    """Resolve the content object for an assignment.
+
+    Prefer the pre-fetched ``content_objects`` dict provided by the bulk signal
+    (which is populated on the bulk_give/bulk_remove paths, including the JWT bulk
+    path), and fall back to the assignment's own GFK ``content_object``.
+    """
+    if content_objects:
+        obj = content_objects.get((instance.content_type_id, instance.object_id))
+        if obj is not None:
+            return obj
+    return instance.content_object
+
+
+def copy_dab_assignments(sender, assignments, content_objects, **kwargs):
+    """Mirror a batch of newly-created DAB role assignments into Pulp / Django Groups.
+
+    Connected to the DAB bulk ``dab_rbac_assignments_created`` signal, which fires once
+    per grant operation for the whole batch -- including the JWT/SSO bulk_create path
+    that skips Django's per-row ``post_save`` signal.
+
+    The batch is inspected as a whole so the shared lookups run once: Pulp role
+    existence is resolved in a single query, and team-role Group membership adds are
+    coalesced per Django Group.
+    """
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
-        if instance.role_definition.name in ('Organization Admin', 'Organization Member'):
-            return  # exception to not synchronize these roles to any old roles
-        if instance.role_definition.name in TEAM_ROLES and isinstance(instance, RoleUserAssignment):
-            # Add user to the team's Django Group to inherit all permissions assigned to the team
-            instance.content_object.group.user_set.add(instance.user)
-            return
-        _apply_dab_assignment(instance)
+        existing_role_names = _existing_pulp_role_names(assignments)
+        group_adds = {}  # group.pk -> (group, set(users))
+        for instance in assignments:
+            role_name = instance.role_definition.name
+            if role_name in ('Organization Admin', 'Organization Member'):
+                continue  # exception to not synchronize these roles to any old roles
+            if role_name in TEAM_ROLES and isinstance(instance, RoleUserAssignment):
+                # Add user to the team's Django Group to inherit all permissions
+                # assigned to the team.
+                group = _content_object_for(instance, content_objects).group
+                group_adds.setdefault(group.pk, (group, set()))[1].add(instance.user)
+                continue
+            _apply_dab_assignment(instance, existing_role_names)
+        for group, users in group_adds.values():
+            group.user_set.add(*users)
 
 
-@receiver(post_delete, sender=RoleUserAssignment)
-def delete_dab_user_role_assignment(sender, instance, **kwargs):
-    """When a dab role is revoked from a user, revoke the equivalent pulp role."""
+def delete_dab_assignments(sender, assignments, content_objects, **kwargs):
+    """Un-mirror a batch of to-be-deleted DAB role assignments from Pulp / Django Groups.
+
+    Connected to the DAB bulk ``dab_rbac_assignments_pre_delete`` signal, which fires
+    once per remove operation, before the rows are deleted, for the whole batch.
+
+    Like the create handler, shared lookups run once per batch: Pulp role existence and
+    the "another team-role grant survives" check are each a single query, and Group
+    membership removals are coalesced per Django Group.
+    """
     if rbac_signal_in_progress():
         return
     with dab_rbac_signals():
-        if instance.role_definition.name in ('Organization Admin', 'Organization Member'):
-            return  # exception to not synchronize these roles to any old roles
-        # Team roles grant inheritance via Django Group membership, not Pulp sync
-        if instance.role_definition.name in TEAM_ROLES and \
-                isinstance(instance, RoleUserAssignment) and \
-                instance.content_object:
-            # Only remove from group if no other team roles grant membership
-            other_assignment_qs = RoleUserAssignment.objects.filter(
-                role_definition__name__in=TEAM_ROLES,
-                user=instance.user,
-                object_id=instance.object_id,
+        existing_role_names = _existing_pulp_role_names(assignments)
+        # PKs of the user assignments being deleted in this batch, so the "other
+        # assignment survives" check can exclude rows that are themselves being removed
+        # (their DB rows still exist because this is pre_delete).
+        batch_pks = [
+            instance.pk for instance in assignments
+            if isinstance(instance, RoleUserAssignment)
+        ]
+
+        # Partition the batch: team-role user assignments un-mirror via Django Group
+        # membership (resolved to (instance, group) pairs); everything else un-mirrors
+        # from Pulp. A team assignment whose content object cannot be resolved falls
+        # through to the Pulp path, matching the pre-batch behavior.
+        team_group_ops = []  # list of (instance, group)
+        to_unapply = []
+        for instance in assignments:
+            role_name = instance.role_definition.name
+            if role_name in ('Organization Admin', 'Organization Member'):
+                continue  # exception to not synchronize these roles to any old roles
+            content_object = (
+                _content_object_for(instance, content_objects)
+                if role_name in TEAM_ROLES and isinstance(instance, RoleUserAssignment)
+                else None
             )
-            if not other_assignment_qs.exists():
-                instance.content_object.group.user_set.remove(instance.user)
-            return
-        _unapply_dab_assignment(instance)
+            if content_object is not None:
+                team_group_ops.append((instance, content_object.group))
+            else:
+                to_unapply.append(instance)
+
+        for instance in to_unapply:
+            _unapply_dab_assignment(instance, existing_role_names)
+
+        survivors = _surviving_team_membership(
+            [instance for instance, _group in team_group_ops], batch_pks
+        )
+        group_removes = {}  # group.pk -> (group, set(users))
+        for instance, group in team_group_ops:
+            # Only remove from group if no other team role assignment (that is not
+            # itself part of this delete batch) still grants membership.
+            if (instance.user_id, instance.object_id) in survivors:
+                continue
+            group_removes.setdefault(group.pk, (group, set()))[1].add(instance.user)
+        for group, users in group_removes.values():
+            group.user_set.remove(*users)
 
 
-@receiver(post_save, sender=RoleTeamAssignment)
-def copy_dab_team_role_assignment(sender, instance, created, **kwargs):
-    """When a dab role is granted to a team, grant the equivalent pulp role."""
-    if rbac_signal_in_progress():
-        return
-    with dab_rbac_signals():
-        _apply_dab_assignment(instance)
-
-
-@receiver(post_delete, sender=RoleTeamAssignment)
-def delete_dab_team_role_assignment(sender, instance, **kwargs):
-    """When a dab role is revoked from a team, revoke the equivalent pulp role."""
-    if rbac_signal_in_progress():
-        return
-    with dab_rbac_signals():
-        _unapply_dab_assignment(instance)
+dab_rbac_assignments_created.connect(
+    copy_dab_assignments, dispatch_uid='galaxy_dab_assignments_created'
+)
+dab_rbac_assignments_pre_delete.connect(
+    delete_dab_assignments, dispatch_uid='galaxy_dab_assignments_pre_delete'
+)
 
 
 # Connect User.groups to the role in DAB
