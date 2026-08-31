@@ -13,7 +13,7 @@ requirements = [
     "pulp_ansible>=0.30.0,<0.31",
     "pulp-container>=2.27.10,<2.28",
     "pyjwt[crypto]>=2.13.0",  # minimum version enforced to address AAP-78030
-    "django>=5.2.12,<5.3",
+    "django>=5.2.17,<5.3",  # minimum version enforced to address AAP-85800
     "django-prometheus>=2.0.0",
     "social-auth-core>=4.4.2",
     "social-auth-app-django>=5.2.0",
@@ -40,6 +40,7 @@ requirements = [
     # Needed for compatibility with DAB:
     # https://github.com/ansible-automation-platform/django-ansible-base/blob/devel/requirements/requirements.in#L7
     "djangorestframework<3.16",
+    "gitpython>=3.1.55",  # minimum version enforced to address AAP-86813, AAP-88589
 ]
 
 

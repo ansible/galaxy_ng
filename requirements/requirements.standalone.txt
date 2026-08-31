@@ -104,7 +104,7 @@ distro==1.9.0
     #   ansible-lint
     #   bindep
     #   galaxy-ng (setup.py)
-django==5.2.14
+django==5.2.17
     # via
     #   django-ansible-base
     #   django-auth-ldap
@@ -125,7 +125,7 @@ django==5.2.14
     #   insights-analytics-collector
     #   pulpcore
     #   social-auth-app-django
-django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@9db7237883e071724eb927b4dc56966d0ec28106
+django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@491014d453928c4bfea935aaccd4e0458e44417d
     # via galaxy-ng (setup.py)
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
@@ -192,8 +192,9 @@ galaxy-importer==0.4.39
     #   pulp-ansible
 gitdb==4.0.12
     # via gitpython
-gitpython==3.1.50
+gitpython==3.1.59
     # via
+    #   galaxy-ng (setup.py)
     #   pulp-ansible
     #   pulpcore
 googleapis-common-protos==1.75.0
