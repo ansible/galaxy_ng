@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 GOLDEN_NAME = settings.GALAXY_API_DEFAULT_DISTRIBUTION_BASE_PATH
 STAGING_NAME = settings.GALAXY_API_STAGING_DISTRIBUTION_BASE_PATH
-SIGNING_SERVICE_NAME = settings.get("GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default")
+SIGNING_SERVICE_NAME = getattr(settings, "GALAXY_COLLECTION_SIGNING_SERVICE", "ansible-default")
 
 
 def get_created_collection_versions():

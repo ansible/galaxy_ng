@@ -17,6 +17,8 @@ x-common-env: &common-env
   PULP_REDIS_PORT: 6379
   PULP_REDIS_PASSWORD: ""
 
+  PULP_SECRET_KEY: "galaxy-ng-secret-key"
+
   # no spying
   PULP_ANALYTICS: 'false'
 

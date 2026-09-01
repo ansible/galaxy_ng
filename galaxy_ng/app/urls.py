@@ -74,16 +74,16 @@ urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(rbac_service_urls)))
 urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(feature_flags_urls)))
 # urlpatterns.append(path(f"{API_PATH_PREFIX}/", include(dab_rbac_urls)))
 
-if settings.get("API_ROOT") != "/pulp/":
+if getattr(settings, "API_ROOT", None) != "/pulp/":
     urlpatterns.append(
         path("pulp/api/<path:api_path>", views.PulpAPIRedirectView.as_view(), name="pulp_redirect")
     )
 
-if settings.get("SOCIAL_AUTH_KEYCLOAK_KEY"):
+if getattr(settings, "SOCIAL_AUTH_KEYCLOAK_KEY", None):
     urlpatterns.append(url("", include("social_django.urls", namespace="social")))
     urlpatterns.append(
         path("login/", lambda request: redirect("/login/keycloak/", permanent=False))
     )
 
-if settings.get("SOCIAL_AUTH_GITHUB_KEY"):
+if getattr(settings, "SOCIAL_AUTH_GITHUB_KEY", None):
     urlpatterns.append(url("", include("social_django.urls", namespace="github")))

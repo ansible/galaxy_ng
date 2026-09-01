@@ -9,9 +9,9 @@ version = "4.12.0dev"
 
 requirements = [
     "galaxy-importer>=0.4.31,<0.5.0",
-    "pulpcore>=3.105.12,<3.106",
+    "pulpcore>=3.105.13,<3.106",
     "pulp_ansible>=0.30.0,<0.31",
-    "pulp-container>=2.27.10,<2.28",
+    "pulp-container>=2.27.11,<2.28",
     "pyjwt[crypto]>=2.13.0",  # minimum version enforced to address AAP-78030
     "django>=5.2.17,<5.3",  # minimum version enforced to address AAP-85800
     "django-prometheus>=2.0.0",
