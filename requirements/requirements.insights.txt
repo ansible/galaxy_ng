@@ -129,7 +129,7 @@ django==5.2.17
     #   insights-analytics-collector
     #   pulpcore
     #   social-auth-app-django
-django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@9db7237883e071724eb927b4dc56966d0ec28106
+django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@e5a492d23705be7a6a22a9047ac3e4a0b3a25493
     # via galaxy-ng (setup.py)
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
@@ -262,7 +262,9 @@ multidict==6.7.1
 mypy-extensions==1.1.0
     # via black
 nh3==0.3.5
-    # via galaxy-importer
+    # via
+    #   django-ansible-base
+    #   galaxy-importer
 oauthlib==3.3.1
     # via
     #   requests-oauthlib
@@ -408,6 +410,8 @@ referencing==0.37.0
     #   ansible-lint
     #   jsonschema
     #   jsonschema-specifications
+regex==2026.9.3
+    # via django-ansible-base
 requests==2.33.1
     # via
     #   azure-core
