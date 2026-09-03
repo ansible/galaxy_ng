@@ -1,6 +1,21 @@
 # This Dockerfile is meant to extend the main Dockerfile
 # Moving files to the required places
 # Installing extra development libraries and tools
+
+# Build a PQC-capable sq (Sequoia PGP) CLI. EPEL el9 only ships sequoia-sq 1.3.1,
+# which treats ML-DSA (post-quantum) keys as "Unknown algo 30": pulp's
+# `add-signing-service --backend sq` shells out to `sq cert export`, which then
+# returns empty and fails with "Malformed Cert: No data". sq >= 1.4
+# (sequoia-openpgp 2.x) understands ML-DSA. Built on ubi9 so the binary is
+# glibc-compatible with base_img; the openssl backend avoids the nettle dep.
+FROM registry.access.redhat.com/ubi9 AS sqbuild
+RUN set -ex; \
+    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+    dnf -y --disableplugin=subscription-manager install \
+        cargo rust clang gcc openssl-devel sqlite-devel capnproto pkgconf-pkg-config && \
+    cargo install sequoia-sq --version 1.4.0 \
+        --no-default-features --features crypto-openssl --root /usr/local
+
 FROM base_img
 
 ARG GNUPGHOME
@@ -11,7 +26,12 @@ ENV GNUPGHOME="${GNUPGHOME}"
 ENV GUNICORN_CMD_ARGS="--no-control-socket"
 
 USER root
-RUN LANG=C dnf -y --disableplugin=subscription-manager install nc
+RUN set -ex; \
+    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+    LANG=C dnf -y --disableplugin=subscription-manager install nc sqlite-libs
+
+# PQC-capable sq built in the sqbuild stage above (see comment there).
+COPY --from=sqbuild /usr/local/bin/sq /usr/local/bin/sq
 
 USER galaxy
 RUN ${VIRTUAL_ENV}/bin/python3 -m pip install debugpy hupper ipython ipdb rpdb django-extensions pulp-cli

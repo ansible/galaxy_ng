@@ -342,6 +342,7 @@ services:
         # Setup signing services;
         gpg --list-secret-keys;
         /src/galaxy_ng/dev/compose/signing/setup_signing_services.sh;
+        /src/galaxy_ng/dev/compose/signing/setup_signing_services_sq.sh;
         echo 'Signing Services';
         curl -s -u $$DJANGO_SUPERUSER_USERNAME:$$DJANGO_SUPERUSER_PASSWORD http://api:8000/api/galaxy/pulp/api/v3/signing-services/?fields=name,script,pubkey_fingerprint | python -m json.tool;
 

@@ -86,7 +86,7 @@ click==8.3.3
     # via
     #   black
     #   pulpcore
-cryptography==46.0.7
+cryptography==50.0.1
     # via
     #   ansible-core
     #   ansible-lint
@@ -129,7 +129,7 @@ django==5.2.17
     #   insights-analytics-collector
     #   pulpcore
     #   social-auth-app-django
-django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@491014d453928c4bfea935aaccd4e0458e44417d
+django-ansible-base[feature-flags,jwt-consumer] @ git+https://github.com/ansible/django-ansible-base@9db7237883e071724eb927b4dc56966d0ec28106
     # via galaxy-ng (setup.py)
 django-auth-ldap==4.0.0
     # via galaxy-ng (setup.py)
@@ -336,7 +336,7 @@ pulp-container==2.27.11
     # via galaxy-ng (setup.py)
 pulp-glue==0.39.1
     # via pulpcore
-pulpcore==3.105.16
+pulpcore==3.105.17
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -368,7 +368,7 @@ pyjwt[crypto]==2.13.0
     #   galaxy-ng (setup.py)
     #   pulp-container
     #   social-auth-core
-pyopenssl==26.2.0
+pyopenssl==26.4.0
     # via
     #   galaxy-ng (setup.py)
     #   pulpcore
@@ -376,12 +376,12 @@ pyparsing==3.3.2
     # via
     #   drf-access-policy
     #   pulpcore
-pysequoia==0.1.34
-    # via pulp-container
+pysequoia==0.1.35
+    # via
+    #   pulp-container
+    #   pulpcore
 python-dateutil==2.9.0.post0
     # via botocore
-python-gnupg==0.5.6
-    # via pulpcore
 python-ipware==3.0.0
     # via django-ipware
 python-ldap==3.4.7
