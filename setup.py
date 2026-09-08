@@ -40,7 +40,7 @@ requirements = [
     # Needed for compatibility with DAB:
     # https://github.com/ansible-automation-platform/django-ansible-base/blob/devel/requirements/requirements.in#L7
     "djangorestframework<3.16",
-    "gitpython>=3.1.55",  # minimum version enforced to address AAP-86813, AAP-88589
+    "gitpython>=3.1.57",  # minimum version enforced to address AAP-86813, AAP-88586, AAP-88589
 ]
 
 
