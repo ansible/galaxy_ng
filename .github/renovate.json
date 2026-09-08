@@ -46,10 +46,9 @@
       "addLabels": ["dependencies", "python"]
     },
     {
-      "description": "Minor and major Python updates always require review",
-      "matchManagers": ["pip-compile"],
+      "description": "Only permit patch dependency updates",
       "matchUpdateTypes": ["minor", "major"],
-      "automerge": false
+      "enabled": false
     },
 
     {
