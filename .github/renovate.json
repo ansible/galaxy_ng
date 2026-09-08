@@ -15,7 +15,7 @@
   },
 
   "lockFileMaintenance": {
-    "enabled": true,
+    "enabled": false,
     "schedule": ["at any time"],
     "addLabels": ["dependencies", "python"]
   },
@@ -46,7 +46,8 @@
       "addLabels": ["dependencies", "python"]
     },
     {
-      "description": "Only permit patch dependency updates",
+      "description": "Disable pip-compile minor and major updates",
+      "matchManagers": ["pip-compile"],
       "matchUpdateTypes": ["minor", "major"],
       "enabled": false
     },
