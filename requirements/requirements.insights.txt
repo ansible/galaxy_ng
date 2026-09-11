@@ -450,7 +450,7 @@ social-auth-core==4.9.1
     # via
     #   galaxy-ng (setup.py)
     #   social-auth-app-django
-sqlparse==0.5.5
+sqlparse==0.6.0
     # via
     #   django
     #   django-ansible-base
