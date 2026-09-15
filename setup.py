@@ -40,9 +40,8 @@ requirements = [
     # Needed for compatibility with DAB:
     # https://github.com/ansible-automation-platform/django-ansible-base/blob/devel/requirements/requirements.in#L7
     "djangorestframework<3.16",
-    "gitpython>=3.1.59",  # minimum version enforced to address AAP-86813, AAP-88586, AAP-88589
+    "gitpython>=3.1.60",  # minimum version enforced to address AAP-92294, AAP-92292,AAP-92284
 ]
-
 
 # https://softwareengineering.stackexchange.com/questions/223634/what-is-meant-by-now-you-have-two-problems
 def strip_package_name(spec):
