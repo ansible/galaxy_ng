@@ -9,7 +9,10 @@
   },
 
   "pip-compile": {
-    "managerFilePatterns": ["/requirements\\/requirements\\.(?:common|insights|standalone)\\.txt$/"],
+    "fileMatch": ["/requirements\\/requirements\\.(?:common|insights|standalone)\\.txt$/"],
+    "lockFileMaintenance": {
+      "enabled": false
+    },
     "schedule": ["at any time"],
     "addLabels": ["dependencies", "python"]
   },
