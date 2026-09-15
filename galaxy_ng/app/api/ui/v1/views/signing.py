@@ -7,12 +7,30 @@ from rest_framework.response import Response
 
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app.api.ui.v1.serializers import CollectionSignSerializer
 from galaxy_ng.app.tasks import call_sign_task
 
 
 class CollectionSignView(api_base.APIView):
     action = "sign"
     permission_classes = [access_policy.CollectionAccessPolicy]
+
+    # Used only by DRF's metadata machinery (SimpleMetadata.determine_actions) to
+    # describe the 'POST' action in OPTIONS responses. post() below parses the
+    # request manually and never calls get_serializer(); this does not change
+    # its validation or behavior.
+    serializer_class = CollectionSignSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        kwargs.setdefault("context", self.get_serializer_context())
+        return self.serializer_class(*args, **kwargs)
+
+    def get_serializer_context(self):
+        return {
+            "request": self.request,
+            "format": getattr(self, "format_kwarg", None),
+            "view": self,
+        }
 
     def post(self, request, *args, **kwargs):
         """Creates a signature for the content units specified in the request.

@@ -27,6 +27,12 @@ class TestCollectionAccessPolicyV3CanCopyOrMove(BaseTestCase):
             "source_path": "staging",
             "dest_path": "published",
         }
+        # These tests call v3_can_copy_or_move() directly, bypassing has_permission()'s
+        # metadata-probe remapping, so simulate a genuine (non-probe) request context.
+        # A real view without this attribute set would have getattr(...) default to
+        # False; a bare Mock() auto-vivifies any accessed attribute as a truthy Mock,
+        # so it must be set explicitly here.
+        self.view._is_metadata_probe = False
 
     def test_global_permission_short_circuit(self):
         """Test that global permission bypasses object-level check."""

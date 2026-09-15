@@ -137,6 +137,7 @@ jobs:
           pip install -r integration_requirements.txt
 
       - name: Run integration tests
+        timeout-minutes: 60
         run: |
           pytest -v -r sx --color=yes -m '${{ matrix.env.HUB_TEST_MARKS }}' galaxy_ng/tests/integration
         env:

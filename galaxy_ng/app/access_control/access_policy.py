@@ -130,6 +130,108 @@ class AccessPolicyBase(AccessPolicyFromSettings):
 
     NAME = None
 
+    def _candidate_actions_for_metadata(self, request, view):
+        """
+        Return the real action name(s) whose statements should decide an OPTIONS
+        ('metadata') request, in priority order, so drf-access-policy reuses the
+        viewset's existing rules instead of falling through to the deny-all catch-all.
+
+        view.action_map is the exact {http_method: action_name} table DRF's router
+        built for this URL (e.g. {'get': 'retrieve', 'put': 'update'}, or
+        {'post': 'sign'} for a custom @action route) -- using it, rather than
+        guessing from the HTTP verb, means custom actions like 'sign'/'download'/
+        'move_content' get their own statements applied instead of being collapsed
+        into 'retrieve'/'create'/'update'.
+        """
+        action_map = getattr(view, "action_map", None) or {}
+        method = request.method.lower()
+
+        # Nested clone_request(request, 'PUT'/'POST') calls that
+        # SimpleMetadata.determine_actions() issues against this same view while
+        # view.action is still 'metadata' -- resolve to exactly the action
+        # registered for that method on this URL.
+        if method in action_map:
+            return [action_map[method]]
+
+        # The outer OPTIONS request itself: request.method is 'options', which is
+        # never a registered action key. Prefer GET's action, mirroring controller's
+        # check_options_permissions -> check_get_permissions.
+        if "get" in action_map:
+            return [action_map["get"]]
+
+        # Write-only custom routes (e.g. a POST-only 'sign' action) have no GET
+        # equivalent to borrow. Allow metadata through if the user can perform ANY
+        # action registered on this URL -- the nested clone_request checks above
+        # still independently re-verify each action by its own exact-match lookup,
+        # so this only controls whether metadata is visible at all, not what gets
+        # disclosed in it.
+        return list(action_map.values()) or ["list"]
+
+    def has_permission(self, request, view):
+        """
+        Override permission check to remap OPTIONS 'metadata' action to real actions.
+
+        DRF maps OPTIONS requests to a 'metadata' action that isn't in viewset
+        access-policy statements. This method temporarily remaps view.action to
+        candidate real actions (from the view's action_map) so existing statements
+        are evaluated instead of falling through to the deny-all catch-all.
+        """
+        # Plain (non-ViewSet) APIViews, e.g. TokenView/LoginView/LogoutView, have no
+        # `action` attribute at all -- only ViewSetMixin-based views set it.
+        if getattr(view, "action", None) != "metadata":
+            return super().has_permission(request, view)
+        original_action = view.action
+        # Flag the view so condition methods can reliably detect a metadata probe via
+        # _is_metadata_probe(request, view), instead of guessing from request.method/
+        # request.data. DRF's SimpleMetadata.determine_actions() probes each action by
+        # calling check_permissions() with a *cloned* request whose method is a real
+        # verb (e.g. 'POST'), so request.method alone can't distinguish a probe from a
+        # genuine request -- and for endpoints where the real body is always empty
+        # (e.g. v3 move/copy, which take source/dest from the URL), "empty request.data"
+        # can't either.
+        view._is_metadata_probe = True
+        try:
+            for candidate in self._candidate_actions_for_metadata(request, view):
+                view.action = candidate
+                if super().has_permission(request, view):
+                    return True
+            return False
+        finally:
+            view.action = original_action
+            view._is_metadata_probe = False
+
+    def has_object_permission(self, request, view, obj):
+        """
+        Override object permission check to remap OPTIONS 'metadata' action.
+
+        Mirrors has_permission() above for symmetry. Testing suggests this metadata
+        branch appears unreachable in practice: by the time has_permission's loop
+        calls any condition that triggers get_object() → has_object_permission(),
+        view.action has already been reassigned to a candidate action (never still
+        "metadata"). Kept defensively for future DRF compatibility.
+        """
+        # NOTE: This metadata-remapping logic mirrors has_permission() above for
+        # symmetry, but based on DRF's OPTIONS flow, this branch appears unreachable
+        # in practice: by the time has_permission's loop calls any condition that
+        # triggers get_object() → has_object_permission(), view.action has already
+        # been reassigned to a candidate action (never still "metadata"). Kept
+        # defensively in case future DRF versions or custom viewsets call this
+        # directly during OPTIONS without going through has_permission first.
+        if getattr(view, "action", None) != "metadata":
+            return super().has_object_permission(request, view, obj)
+
+        original_action = view.action
+        view._is_metadata_probe = True
+        try:
+            for candidate in self._candidate_actions_for_metadata(request, view):
+                view.action = candidate
+                if super().has_object_permission(request, view, obj):
+                    return True
+            return False
+        finally:
+            view.action = original_action
+            view._is_metadata_probe = False
+
     @classmethod
     def get_access_policy(cls, view):
         statements = GALAXY_STATEMENTS
@@ -242,8 +344,16 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         path = view.kwargs.get("distro_base_path", view.kwargs.get("path", None))
 
         if path:
-            distro = ansible_models.AnsibleDistribution.objects.get(base_path=path)
+            try:
+                distro = ansible_models.AnsibleDistribution.objects.get(base_path=path)
+            except ansible_models.AnsibleDistribution.DoesNotExist:
+                # An unknown distro_base_path (e.g. a probe request to a path that
+                # doesn't exist) has no repo content to view; deny rather than 500.
+                return False
             repo = distro.repository
+            if repo is None:
+                # Distribution is configured for repository_version/publication, not repository
+                return False
             repo = repo.cast()
 
             if repo.private:
@@ -340,6 +450,26 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         if request.user.has_perm(permission):
             return True
 
+        # Metadata probes (OPTIONS requests via determine_actions) have empty request.data
+        # and should not validate the body. The source repo is knowable from view.get_object(),
+        # so check permission on it; destination repos are unknown from URL alone and can't be
+        # checked. If the source repo permission is denied, POST should not appear in metadata.
+        if self._is_metadata_probe(request, view):
+            try:
+                obj = view.get_object()
+                if isinstance(obj, ansible_models.AnsibleRepository):
+                    # Check source repo permission; destination repos are unknown
+                    return request.user.has_perm(permission, obj)
+                else:
+                    # CollectionVersion or other object with .repository attribute
+                    if obj.repository is None:
+                        return False
+                    repo = obj.repository.cast()
+                    return request.user.has_perm(permission, repo)
+            except Exception:
+                # If object resolution fails, deny the action
+                return False
+
         # accumulate all the objects to check for permission
         repos_to_check = []
         # add source repo to the list of repos to check
@@ -368,6 +498,26 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         """
         if request.user.has_perm(permission):
             return True
+
+        # Metadata probes (OPTIONS requests via determine_actions) have empty request.data
+        # and can't determine destination repos from URL kwargs. Check only the source repo
+        # permission (which is always present as a URL kwarg).
+        if self._is_metadata_probe(request, view):
+            try:
+                src_repo = ansible_models.AnsibleDistribution.objects.get(
+                    base_path=view.kwargs["source_path"]
+                ).repository
+                if src_repo is None:
+                    return False
+                src_repo_cast = src_repo.cast()
+                return request.user.has_perm(permission, src_repo_cast)
+            except (
+                ansible_models.AnsibleDistribution.DoesNotExist,
+                AttributeError,
+                KeyError,
+                TypeError,
+            ):
+                return False
 
         # Get source and dest repos from view kwargs
         try:
@@ -436,7 +586,81 @@ class AccessPolicyBase(AccessPolicyFromSettings):
             request.user, "galaxy.upload_to_namespace", namespace
         )
 
+    @staticmethod
+    def _is_metadata_probe(request, view=None):
+        """
+        Detect metadata probes: either the outer OPTIONS request, or one of DRF's
+        internal per-action probes issued by SimpleMetadata.determine_actions() (which
+        calls check_permissions() with a *cloned* request whose method is a real verb,
+        e.g. 'POST' -- request.method alone can't tell those apart from a genuine
+        request). has_permission()/has_object_permission() flag `view._is_metadata_probe`
+        while remapping view.action for exactly this reason; prefer that flag when a
+        view is available. Falls back to the request.method check for the (rare) case
+        this is called without a view.
+        """
+        if view is not None:
+            return getattr(view, "_is_metadata_probe", False)
+        return request.method == 'OPTIONS'
+
+    @staticmethod
+    def _get_repo_and_pipeline(path):
+        """Resolve the target repository and its 'pipeline' label from a distro_base_path."""
+        distro = ansible_models.AnsibleDistribution.objects.get(base_path=path)
+        if distro.repository is None:
+            raise ansible_models.AnsibleDistribution.DoesNotExist(
+                "Distribution has no repository (configured for repository_version or publication)"
+            )
+        repo = distro.repository.cast()
+        return repo, repo.pulp_labels.get("pipeline", None)
+
     def can_create_collection(self, request, view, permission):
+        """
+        Check if user can upload a collection to the target namespace and repository.
+
+        The outer OPTIONS request (used to gate whether OPTIONS itself returns 200)
+        stays lenient -- authenticated is enough -- since this viewset registers no
+        other action to fall back on. DRF separately clones OPTIONS to POST with an
+        empty body (via determine_actions) to decide whether 'POST' should appear in
+        the metadata's `actions` dict; that empty-body POST clone gets the precise
+        check instead. The target namespace can't be determined there without an
+        uploaded file (it's parsed from the filename), so we replicate as much of
+        the real permission logic as the URL alone allows: the target repository
+        *is* known from distro_base_path, so repo-pipeline rules are enforced
+        exactly, and only the namespace check is approximated with "can this user
+        upload to at least one namespace".
+
+        For actual POST uploads, validates namespace from the collection filename,
+        checks upload_to_namespace permission, and enforces repository pipeline rules
+        (staging repos allow all uploads; non-pipeline repos require modify permission).
+        """
+        if request.method == 'OPTIONS':
+            return request.user.is_authenticated
+
+        if request.method == 'POST' and not request.data:
+            if not request.user.is_authenticated:
+                return False
+
+            try:
+                repo, pipeline = self._get_repo_and_pipeline(view._get_path())
+            except ansible_models.AnsibleDistribution.DoesNotExist:
+                return False
+
+            if pipeline == "staging":
+                # Real uploads to a staging repo are gated purely by namespace
+                # permission, but the target namespace is unknown until a file
+                # is actually uploaded. Approximate with "owns some namespace".
+                return get_objects_for_user(
+                    request.user, "galaxy.upload_to_namespace", qs=models.Namespace.objects.all()
+                ).exists()
+
+            elif pipeline is None:
+                return has_model_or_object_permissions(
+                    request.user, "ansible.modify_ansible_repo_content", repo
+                )
+
+            # any other pipeline value rejects uploads unconditionally
+            return False
+
         data = view._get_data(request)
         try:
             namespace = models.Namespace.objects.get(name=data["filename"].namespace)
@@ -452,8 +676,7 @@ class AccessPolicyBase(AccessPolicyFromSettings):
 
         path = view._get_path()
         try:
-            repo = ansible_models.AnsibleDistribution.objects.get(base_path=path).repository.cast()
-            pipeline = repo.pulp_labels.get("pipeline", None)
+            repo, pipeline = self._get_repo_and_pipeline(path)
 
             # if uploading to a staging repo, don't check any additional perms
             if pipeline == "staging":
@@ -473,6 +696,56 @@ class AccessPolicyBase(AccessPolicyFromSettings):
             raise NotFound(_("Distribution does not exist."))
 
     def can_sign_collections(self, request, view, permission):
+        """
+        Check if user can sign collections in the target repository.
+
+        The outer OPTIONS request (used to gate whether OPTIONS itself returns 200)
+        stays lenient -- authenticated is enough -- since this view registers no
+        other action to fall back on. DRF separately clones OPTIONS to POST with an
+        empty body (via determine_actions) to decide whether 'POST' should appear
+        in the metadata's `actions` dict; that empty-body POST clone gets the
+        precise check instead. The target repository/namespace are normally read
+        from the request body, which is empty on that clone -- but this view's URL
+        can embed the repository (and sometimes the namespace) directly as kwargs,
+        so when present we run the same exact checks the real POST does. If the URL
+        doesn't include a repository path (the bare /collection_signing/ endpoint,
+        which requires it in the body), we can't determine anything and deny.
+
+        For actual POST requests, validates modify_ansible_repo_content permission
+        on the target repository. If the payload specifies a namespace filter,
+        additionally requires upload_to_namespace permission on that namespace.
+        """
+        if request.method == 'OPTIONS':
+            return request.user.is_authenticated
+
+        if request.method == 'POST' and not request.data:
+            if not request.user.is_authenticated:
+                return False
+
+            path = view.kwargs.get("path")
+            if not path:
+                # distro_base_path only available in the body for this URL variant;
+                # the target repository can't be determined during OPTIONS.
+                return False
+
+            try:
+                distro = ansible_models.AnsibleDistribution.objects.get(base_path=path)
+                if distro.repository is None:
+                    # Distribution is configured for repository_version/publication, not repository
+                    return False
+                repository = distro.repository.cast()
+            except ansible_models.AnsibleDistribution.DoesNotExist:
+                return False
+
+            can_modify_repo = has_model_or_object_permissions(
+                request.user, "ansible.modify_ansible_repo_content", repository
+            )
+
+            # Real POST only validates namespace if it comes from request.data (which is
+            # empty during a metadata probe). URL-embedded namespace is never checked in
+            # the real POST logic, so we can't safely approximate it here either.
+            return can_modify_repo
+
         # Repository is required on the CollectionSign payload
         # Assumed that if user can modify repo they can sign everything in it
         repository = view.get_repository(request)
@@ -519,6 +792,10 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         when signatures are required.
         """
         from pulp_ansible.app.serializers import CollectionVersionCopyMoveSerializer
+
+        # Metadata probes have empty request.data and can't be validated
+        if self._is_metadata_probe(request, view):
+            return True
 
         repo = view.get_object()
         repo_version = repo.latest_version()
@@ -592,6 +869,9 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         return True
 
     def require_requirements_yaml(self, request, view, action):
+        # Metadata probes have empty request.data and can't be validated
+        if self._is_metadata_probe(request, view):
+            return True
 
         if remote := request.data.get("remote"):
             with contextlib.suppress(ansible_models.CollectionRemote.DoesNotExist):

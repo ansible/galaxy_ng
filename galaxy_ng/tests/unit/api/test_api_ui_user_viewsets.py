@@ -746,6 +746,28 @@ class TestUiUserViewSet(BaseTestCase):
             _test_user_get(expected=status.HTTP_200_OK)
         '''
 
+    def test_user_options_standalone(self):
+        """
+        Regression check for the OPTIONS/'metadata' RBAC remap in AccessPolicyBase:
+        a user who is denied GET list/retrieve on this viewset must still be denied
+        OPTIONS on those same routes, not accidentally granted access.
+        """
+        with self.settings(GALAXY_DEPLOYMENT_MODE=DeploymentMode.STANDALONE.value):
+            # test user can't OPTIONS the list route
+            self.client.force_authenticate(user=self.user)
+            response = self.client.options(self.user_url)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+            # test user can't OPTIONS their own detail route either
+            url = "{}{}/".format(self.user_url, self.user.id)
+            response = self.client.options(url)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+            # admin user can always OPTIONS
+            self.client.force_authenticate(user=self.admin_user)
+            response = self.client.options(self.user_url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def _test_create_or_update(self, method_call, url, new_user_data, crud_status, auth_user):
         self.client.force_authenticate(user=auth_user)
         # set user with invalid password

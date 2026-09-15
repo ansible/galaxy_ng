@@ -36,10 +36,15 @@ from .search import (
     SearchResultsSerializer
 )
 
+from .signing import (
+    CollectionSignSerializer,
+)
+
 __all__ = (
     # collection
     'CollectionDetailSerializer',
     'CollectionListSerializer',
+    'CollectionSignSerializer',
     'CollectionVersionBaseSerializer',
     'CollectionVersionDetailSerializer',
     'CollectionVersionSerializer',
