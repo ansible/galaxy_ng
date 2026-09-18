@@ -74,6 +74,7 @@ _LOCKED_ROLES = {
             "Create, delete and change remote registries."
         ),
         "permissions": {
+            "container.change_containerrepository",
             "container.delete_containerrepository",
             "galaxy.add_containerregistryremote",
             "galaxy.change_containerregistryremote",

@@ -72,6 +72,12 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
+    retain_repo_versions = serializers.IntegerField(
+        source="repository.retain_repo_versions",
+        required=False,
+        allow_null=True,
+        min_value=0,
+    )
     pulp_href = IdentityField(view_name='distributions-container/container-detail')
 
     # This serializer is purposfully refraining from using pulp fields directly
@@ -94,7 +100,15 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
             "updated_at",
         )
 
-        fields = read_only_fields
+        fields = (*read_only_fields, "retain_repo_versions")
+
+    def update(self, instance, validated_data):
+        repository_data = validated_data.pop("repository", {})
+        if "retain_repo_versions" in repository_data:
+            instance.repository.retain_repo_versions = repository_data["retain_repo_versions"]
+            instance.repository.save(update_fields=("retain_repo_versions",))
+
+        return super().update(instance, validated_data)
 
     def get_namespace(self, distro) -> str:
         return distro.namespace.name

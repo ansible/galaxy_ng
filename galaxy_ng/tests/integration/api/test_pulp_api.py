@@ -46,6 +46,25 @@ def test_pulp_api_redirect(galaxy_client):
     assert not response["results"][0]["pulp_href"].startswith("/pulp/")
 
 
+@pytest.mark.deployment_standalone
+@pytest.mark.pulp_api
+@pytest.mark.min_hub_version("4.7dev")
+def test_ee_repository_retention_can_be_configured(galaxy_client, local_container):
+    gc = galaxy_client("ee_admin")
+    name = local_container.get_container()["name"]
+    url = f"v3/plugin/execution-environments/repositories/{name}/"
+
+    repository = gc.get(url)
+    assert repository["retain_repo_versions"] is None
+
+    updated = gc.patch(url, body={"retain_repo_versions": 5})
+    assert updated["retain_repo_versions"] == 5
+    assert gc.get(url)["retain_repo_versions"] == 5
+
+    updated = gc.patch(url, body={"retain_repo_versions": None})
+    assert updated["retain_repo_versions"] is None
+
+
 @pytest.mark.parametrize(
     "url",
     [

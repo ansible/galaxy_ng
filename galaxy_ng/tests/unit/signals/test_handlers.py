@@ -23,6 +23,7 @@ def mock_django_imports():
             "django.urls.exceptions": Mock(),
             "rest_framework.exceptions": Mock(),
             "pulp_ansible.app.models": Mock(),
+            "pulp_container.app.models": Mock(),
             "pulpcore.plugin.models": Mock(),
             "pulpcore.plugin.models.role": Mock(),
             "pulpcore.plugin.util": Mock(),
@@ -84,6 +85,55 @@ class TestAnsibleRepositorySignals:
         )
 
         assert mock_instance.retain_repo_versions == 5
+        mock_instance.save.assert_not_called()
+
+
+class TestContainerRepositorySignals:
+    """Test ContainerRepository signal handlers."""
+
+    @patch("galaxy_ng.app.signals.handlers.ContainerRepository")
+    def test_ensure_retain_repo_versions_on_repository_created(self, mock_repo_model):
+        """Test that retain_repo_versions is set to 1 when repository is created."""
+        from galaxy_ng.app.signals.handlers import ensure_retain_repo_versions_on_repository
+
+        mock_instance = Mock()
+        mock_instance.retain_repo_versions = None
+
+        ensure_retain_repo_versions_on_repository(
+            sender=mock_repo_model, instance=mock_instance, created=True
+        )
+
+        assert mock_instance.retain_repo_versions == 1
+        mock_instance.save.assert_called_once()
+
+    @patch("galaxy_ng.app.signals.handlers.ContainerRepository")
+    def test_ensure_retain_repo_versions_on_repository_not_created(self, mock_repo_model):
+        """Test that retain_repo_versions is not modified when repository is updated."""
+        from galaxy_ng.app.signals.handlers import ensure_retain_repo_versions_on_repository
+
+        mock_instance = Mock()
+        mock_instance.retain_repo_versions = None
+
+        ensure_retain_repo_versions_on_repository(
+            sender=mock_repo_model, instance=mock_instance, created=False
+        )
+
+        assert mock_instance.retain_repo_versions is None
+        mock_instance.save.assert_not_called()
+
+    @patch("galaxy_ng.app.signals.handlers.ContainerRepository")
+    def test_ensure_retain_repo_versions_on_repository_already_set(self, mock_repo_model):
+        """Test that retain_repo_versions is not modified when already set."""
+        from galaxy_ng.app.signals.handlers import ensure_retain_repo_versions_on_repository
+
+        mock_instance = Mock()
+        mock_instance.retain_repo_versions = 0
+
+        ensure_retain_repo_versions_on_repository(
+            sender=mock_repo_model, instance=mock_instance, created=True
+        )
+
+        assert mock_instance.retain_repo_versions == 0
         mock_instance.save.assert_not_called()
 
 

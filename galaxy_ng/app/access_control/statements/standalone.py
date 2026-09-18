@@ -309,6 +309,12 @@ STANDALONE_STATEMENTS = {
             "effect": "allow",
         },
         {
+            "action": "partial_update",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:container.change_containerrepository",
+        },
+        {
             "action": "destroy",
             "principal": "authenticated",
             "effect": "allow",

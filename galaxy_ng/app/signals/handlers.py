@@ -25,6 +25,7 @@ from pulp_ansible.app.models import (
     Collection,
     AnsibleNamespaceMetadata,
 )
+from pulp_container.app.models import ContainerRepository
 from galaxy_ng.app.constants import ROLE_DESCRIPTION
 from galaxy_ng.app.models import Namespace, User, Team
 from galaxy_ng.app.migrations._dab_rbac import copy_roles_to_role_definitions
@@ -60,6 +61,7 @@ ROLEDEF_TO_PULP = {
 
 
 @receiver(post_save, sender=AnsibleRepository)
+@receiver(post_save, sender=ContainerRepository)
 def ensure_retain_repo_versions_on_repository(sender, instance, created, **kwargs):
     """Ensure repository has retain_repo_versions set when created.
     retain_repo_versions defaults to 1 when not set.

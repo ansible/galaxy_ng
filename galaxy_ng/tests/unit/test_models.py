@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from django.test import TestCase
 from pulp_ansible.app.models import AnsibleRepository, Collection
+from pulp_container.app.models import ContainerRepository
 
 from django.conf import settings
 from galaxy_ng.app.api.resource_api import RESOURCE_LIST
@@ -42,6 +43,11 @@ class TestSignalCreateRepository(TestCase):
         self.assertEqual(updated.name, "test3_2")
         self.assertEqual(updated.retain_repo_versions, 99)
 
+    def test_create_container_repository_ensure_retain_repo_versions(self):
+        """On creation a container repository defaults retain_repo_versions to 1."""
+        repository = ContainerRepository.objects.create(name="container-test")
+
+        self.assertEqual(repository.retain_repo_versions, 1)
 
 class TestNamespaceResourceSync(TestCase):
     def test_skip_reverse_resource_sync_flag_is_set(self):
