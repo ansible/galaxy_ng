@@ -11,7 +11,7 @@
   "pip-compile": {
     "managerFilePatterns": [
       "/^setup\\.py$/",
-      "/requirements/requirements\\.(?:insights|standalone)\\.in$/"
+      "/requirements/requirements\\.(?:insights|standalone)\\.txt$/"
     ],
     "lockFileMaintenance": {
       "enabled": false
