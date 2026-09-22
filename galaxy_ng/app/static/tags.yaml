@@ -761,3 +761,18 @@
   - Tasks
 "v3_tasks_get_tasks":
   - Tasks
+
+# Pulp Container Signing (new)
+"container_repository_push_sign":
+  - Container/Execution Environments
+  - Signing
+"container_repository_sync_sign":
+  - Container/Execution Environments
+  - Signing
+
+# Pulp Container Content (new)
+"content_container_signatures_list":
+  - Container/Execution Environments
+  - Signing
+"content_container_tags_list":
+  - Container/Execution Environments

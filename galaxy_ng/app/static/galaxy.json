@@ -23745,6 +23745,362 @@
           }
         }
       }
+    },
+    "/api/galaxy/pulp/api/v3/content/container/signatures/": {
+      "get": {
+        "operationId": "content_container_signatures_list",
+        "description": "List container signatures",
+        "summary": "List container signatures",
+        "tags": [
+          "Container/Execution Environments",
+          "Signing"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "repository_version",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by repository version"
+          },
+          {
+            "in": "query",
+            "name": "manifest",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by manifest"
+          },
+          {
+            "in": "query",
+            "name": "key_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by key ID"
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by signature name"
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "The initial index from which to return the results.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of signatures",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "next": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "previous": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "pulp_href": {
+                            "type": "string"
+                          },
+                          "manifest": {
+                            "type": "string"
+                          },
+                          "key_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "x-ai-description": "List and filter container signatures with support for repository_version, manifest, key_id, and name filters"
+      }
+    },
+    "/api/galaxy/pulp/api/v3/content/container/tags/": {
+      "get": {
+        "operationId": "content_container_tags_list",
+        "description": "List container tags",
+        "summary": "List container tags",
+        "tags": [
+          "Container/Execution Environments"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "repository_version",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by repository version"
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by tag name"
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "The initial index from which to return the results.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of tags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "next": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "previous": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "pulp_href": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "tagged_manifest": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "x-ai-description": "List and filter container tags with support for repository_version and name filters"
+      }
+    },
+    "/api/galaxy/pulp/api/v3/repositories/container/container/{id}/sign/": {
+      "post": {
+        "operationId": "container_repository_sync_sign",
+        "description": "Sign a synced container repository",
+        "summary": "Sign synced container repository",
+        "tags": [
+          "Container/Execution Environments",
+          "Signing"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Container repository ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "manifest_signing_service": {
+                    "type": "string",
+                    "description": "Name of the signing service"
+                  },
+                  "future_base_path": {
+                    "type": "string",
+                    "description": "Optional future base path"
+                  }
+                },
+                "required": [
+                  "manifest_signing_service"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Async task created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "task": {
+                      "type": "string",
+                      "description": "Task href"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "x-ai-description": "Sign a synced container repository with a manifest signing service"
+      }
+    },
+    "/api/galaxy/pulp/api/v3/repositories/container/container-push/{id}/sign/": {
+      "post": {
+        "operationId": "container_repository_push_sign",
+        "description": "Sign a pushed container repository",
+        "summary": "Sign pushed container repository",
+        "tags": [
+          "Container/Execution Environments",
+          "Signing"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Container push repository ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "manifest_signing_service": {
+                    "type": "string",
+                    "description": "Href to the signing service"
+                  },
+                  "future_base_path": {
+                    "type": "string",
+                    "description": "Optional future base path"
+                  }
+                },
+                "required": [
+                  "manifest_signing_service"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Async task created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "task": {
+                      "type": "string",
+                      "description": "Task href"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "x-ai-description": "Sign a pushed container repository with a manifest signing service"
+      }
     }
   },
   "components": {

@@ -580,3 +580,11 @@
   Remove a user role assignment for cross-service communication
 "v3_tasks_get_tasks": >-
   List tasks
+"container_repository_push_sign": >-
+  Sign a pushed container repository with a manifest signing service
+"container_repository_sync_sign": >-
+  Sign a synced container repository with a manifest signing service
+"content_container_signatures_list": >-
+  List and filter container signatures with support for repository_version, manifest, key_id, and name filters
+"content_container_tags_list": >-
+  List and filter container tags with support for repository_version and name filters
