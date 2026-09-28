@@ -157,6 +157,8 @@ objects:
             value: ${ENABLE_SIGNING}
           - name: GNUPGHOME
             value: ${GNUPGHOME}
+          - name: PULP_SECRET_KEY
+            value: ${PULP_SECRET_KEY}
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs/database_fields.symmetric.key
@@ -256,6 +258,8 @@ objects:
             value: ${ANSIBLE_COLLECT_DOWNLOAD_COUNT}
           - name: TRIGGER_RESTART
             value: ${TRIGGER_RESTART}
+          - name: PULP_SECRET_KEY
+            value: ${PULP_SECRET_KEY}
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs/database_fields.symmetric.key
@@ -335,6 +339,8 @@ objects:
             value: ${GNUPGHOME}
           - name: TRIGGER_RESTART
             value: ${TRIGGER_RESTART}
+          - name: PULP_SECRET_KEY
+            value: ${PULP_SECRET_KEY}
         volumeMounts:
           - name: pulp-key
             mountPath: /etc/pulp/certs/database_fields.symmetric.key
@@ -411,6 +417,8 @@ objects:
             value: ${GNUPGHOME}
           - name: TRIGGER_RESTART
             value: ${TRIGGER_RESTART}
+          - name: PULP_SECRET_KEY
+            value: ${PULP_SECRET_KEY}
         volumeMounts:
           - name: importer-config
             mountPath: /etc/galaxy-importer
@@ -490,6 +498,8 @@ parameters:
   value: "true"
 - name: TRIGGER_RESTART
   value: "0"
+- name: PULP_SECRET_KEY
+  value: "change_me"
 
 # signing requirements
 - name: ENABLE_SIGNING
