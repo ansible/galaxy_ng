@@ -479,6 +479,8 @@
   - Config
 
 # Pulp Repositories Container
+"pulp_v3_repositories_container_container_get_id":
+  - Container/Execution Environments
 "pulp_v3_repositories_container_container_push_get_container_push":
   - Container/Execution Environments
 "pulp_v3_repositories_container_container_push_get_id":

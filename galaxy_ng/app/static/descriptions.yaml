@@ -132,6 +132,8 @@
   Sign ansible repository collections
 "pulp_v3_repositories_ansible_sync": >-
   Sync ansible repository from remote
+"pulp_v3_repositories_container_container_get_id": >-
+  Get container repository by ID
 "pulp_v3_repositories_container_container_push_get_container_push": >-
   List container push repositories
 "pulp_v3_repositories_container_container_push_get_id": >-

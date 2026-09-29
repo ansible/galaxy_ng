@@ -23960,6 +23960,71 @@
         "x-ai-description": "List and filter container tags with support for repository_version and name filters"
       }
     },
+    "/api/galaxy/pulp/api/v3/repositories/container/container/{id}/": {
+      "get": {
+        "operationId": "pulp_v3_repositories_container_container_get_id",
+        "description": "Get container repository by ID",
+        "summary": "Inspect a container repository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "A UUID string identifying this container repository.",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "A list of fields to include in the response."
+          },
+          {
+            "in": "query",
+            "name": "exclude_fields",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "A list of fields to exclude from the response."
+          }
+        ],
+        "tags": [
+          "Container/Execution Environments"
+        ],
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/container.ContainerRepositoryResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Get container repository by ID"
+      }
+    },
     "/api/galaxy/pulp/api/v3/repositories/container/container/{id}/sign/": {
       "post": {
         "operationId": "container_repository_sync_sign",
