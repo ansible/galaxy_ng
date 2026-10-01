@@ -81,7 +81,8 @@ x-common-env: &common-env
   # When enabled, restricts access to OpenAPI spec, Swagger UI and redoc docs
   PULP_GALAXY_API_SPEC_REQUIRE_AUTHENTICATION: 'false'
 
-  # Unpin dependencies on setup.py if set to 0
+  # Set to 1 to install editable local checkouts with --no-deps.
+  # Set to 0 to let pip resolve their declared dependencies.
   LOCK_REQUIREMENTS: 0
 
   # DEV EDITABLE STUFF

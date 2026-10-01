@@ -139,9 +139,10 @@ $ git clone https://github.com/ansible/galaxy_ng ~/projects/galaxy_ng
 ```
 
 > **IMPORTANT** Ensure all the repos are checked out to compatible branches.
-> for example. you may be on galaxy_ng:main and reading `setup.py` you
-> see that it requires `pulp_ansible>2.10,<3` then ensure you checkout `pulp_ansible`
-> to a compatible branch.
+> For example, if the package metadata requires `pulp_ansible>2.10,<3`, ensure
+> that the `pulp_ansible` checkout is on a compatible branch. If you intentionally
+> use a local checkout with a different version, set `LOCK_REQUIREMENTS=1` so
+> editable installs use `--no-deps` and pip does not replace the local package.
 
 Start the compose setting the desired editable paths.
 
@@ -188,8 +189,12 @@ rm -rf galaxy_ng.egg-info
 
 Solution 2:
 
-- Ensure `LOCK_REQUIREMENTS` is set to `0`
-- Ensure all your local checkouts are checked out to compatible branches
+- Ensure all your local checkouts are checked out to compatible branches.
+
+If you intentionally use incompatible local dependency versions, set
+`LOCK_REQUIREMENTS=1` and include every required local dependency in
+`DEV_SOURCE_PATH`. This installs the editable checkouts with `--no-deps`; you
+are responsible for installing them in a compatible order.
 
 ### LLB definition error
 

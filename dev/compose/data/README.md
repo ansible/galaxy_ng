@@ -77,7 +77,7 @@ docker run --rm --network compose_default \
   -e PULP_ANSIBLE_BASE_ROLES_REQUIRE_VIEW=false \
   -e PULP_GALAXY_FEATURE_FLAGS__dab_resource_registry=false \
   -e PULP_GALAXY_AUTHENTICATION_CLASSES="['galaxy_ng.app.auth.auth.RHIdentityAuthentication']" \
-  -e LOCK_REQUIREMENTS=0 \
+  -e LOCK_REQUIREMENTS="${LOCK_REQUIREMENTS:-1}" \
   -e PULP_ANALYTICS=false \
   -e PULP_DEFAULT_FILE_STORAGE="pulpcore.app.models.storage.FileSystem" \
   -e DEV_SOURCE_PATH="${DEV_SOURCE_PATH}" \

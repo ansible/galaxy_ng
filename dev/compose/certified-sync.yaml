@@ -58,7 +58,8 @@ x-common-env: &common-env
   HUB_TEST_MARKS: sync
   HUB_USE_MOVE_ENDPOINT: 'true'
 
-  # Unpin dependencies on setup.py if set to 0
+  # Set to 1 to install editable local checkouts with --no-deps.
+  # Set to 0 to let pip resolve their declared dependencies.
   LOCK_REQUIREMENTS: 0
 
   # DEV EDITABLE STUFF

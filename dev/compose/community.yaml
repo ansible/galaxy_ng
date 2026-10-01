@@ -96,7 +96,8 @@ x-common-env: &common-env
   HUB_TEST_MARKS: 'deployment_community'
   HUB_API_ROOT: 'http://localhost:5001/api/'
 
-  # Unpin dependencies on setup.py if set to 0
+  # Set to 1 to install editable local checkouts with --no-deps.
+  # Set to 0 to let pip resolve their declared dependencies.
   LOCK_REQUIREMENTS: 0
 
   # DEV EDITABLE STUFF
