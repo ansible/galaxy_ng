@@ -1,0 +1,450 @@
+# Consolidated OpenAPI Spec Management
+#
+# Combines three concerns into one workflow:
+# 1. PR schema review: diffs PR branch vs base branch to surface API changes
+# 2. Central drift check: compares local spec against aap-openapi-specs
+# 3. Spec sync: on push to main (aap-openapi-specs devel) or stable-* except
+#    stable-2.4, copies galaxy.json to aap-openapi-specs and opens or updates
+#    a PR. workflow_dispatch runs the same sync for the selected branch.
+#
+# The static spec lives at galaxy_ng/app/static/galaxy.json.
+# stable-2.4 is excluded: that branch does not exist in aap-openapi-specs.
+
+name: OpenAPI Spec
+
+on:
+  pull_request:
+    branches:
+      - main
+      - 'stable-*'
+      - '!stable-2.4'
+    paths:
+      - 'galaxy_ng/app/static/galaxy.json'
+  push:
+    branches:
+      - main
+      - 'stable-*'
+      - '!stable-2.4'
+    paths:
+      - 'galaxy_ng/app/static/galaxy.json'
+  workflow_dispatch:
+
+jobs:
+  # ── PR review: intra-repo diff + central drift ──────────────────────
+  review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: source
+
+      - name: Checkout base branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: Check spec files exist
+        id: specs
+        run: |
+          SOURCE="source/galaxy_ng/app/static/galaxy.json"
+          BASE="base/galaxy_ng/app/static/galaxy.json"
+          echo "source_exists=$( [ -f "$SOURCE" ] && echo true || echo false )" >> $GITHUB_OUTPUT
+          echo "base_exists=$( [ -f "$BASE" ] && echo true || echo false )" >> $GITHUB_OUTPUT
+
+      - name: Install oasdiff
+        if: steps.specs.outputs.source_exists == 'true'
+        env:
+          OASDIFF_VERSION: "1.33.0"
+          OASDIFF_SHA256_AMD64: "43a4e328e2d13ba1552d760aa68d2485c75c5621f309f6ff64ae895188345247"
+          OASDIFF_SHA256_ARM64: "4ae3c362d6074d919aada2dea82d0ee84366591600384455d0bdc658ddf8f7ae"
+        run: |
+          case "$(uname -m)" in
+            x86_64) arch=amd64; expected="$OASDIFF_SHA256_AMD64" ;;
+            aarch64) arch=arm64; expected="$OASDIFF_SHA256_ARM64" ;;
+            *) echo "::error::Unsupported architecture $(uname -m)"; exit 1 ;;
+          esac
+          archive="oasdiff_${OASDIFF_VERSION}_linux_${arch}.tar.gz"
+          url="https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/${archive}"
+          curl -fsSL -o "/tmp/${archive}" "$url"
+          echo "${expected}  /tmp/${archive}" | sha256sum -c -
+          sudo tar -xzf "/tmp/${archive}" -C /usr/local/bin oasdiff
+          sudo chmod 0755 /usr/local/bin/oasdiff
+          oasdiff --version
+
+      # Intra-repo diff (PR vs base)
+      - name: Diff PR against base branch
+        if: steps.specs.outputs.source_exists == 'true' && steps.specs.outputs.base_exists == 'true'
+        id: pr_diff
+        run: |
+          source/.github/scripts/compare_openapi_specs.sh \
+            --structured \
+            base/galaxy_ng/app/static/galaxy.json \
+            source/galaxy_ng/app/static/galaxy.json \
+            /tmp/pr_diff.md || EXIT_CODE=$?
+          if [ "${EXIT_CODE:-0}" = "2" ]; then
+            echo "::error::Failed to compare OpenAPI specs"
+            exit 1
+          fi
+
+      - name: Check for breaking changes in PR
+        if: steps.pr_diff.outputs.has_changes == 'true'
+        id: pr_breaking
+        run: |
+          BREAKING_OUTPUT=$(oasdiff breaking \
+            base/galaxy_ng/app/static/galaxy.json \
+            source/galaxy_ng/app/static/galaxy.json \
+            --format markdown 2>&1) || true
+          if echo "$BREAKING_OUTPUT" | grep -qE ':(warning|x):'; then
+            echo "has_breaking=true" >> $GITHUB_OUTPUT
+            echo "$BREAKING_OUTPUT" > /tmp/pr_breaking.md
+          else
+            echo "has_breaking=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Central drift check (local vs aap-openapi-specs)
+      - name: Determine central branch
+        id: branch_map
+        run: |
+          SOURCE_BRANCH="${{ github.base_ref }}"
+          if [[ "$SOURCE_BRANCH" == "main" ]]; then
+            echo "target_branch=devel" >> $GITHUB_OUTPUT
+          else
+            echo "target_branch=$SOURCE_BRANCH" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check central branch
+        if: github.repository_owner == 'ansible-automation-platform'
+        id: central_branch
+        env:
+          TOKEN: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
+          BRANCH: ${{ steps.branch_map.outputs.target_branch }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "status=no_token" >> "$GITHUB_OUTPUT"
+            echo "Sync token unavailable — skipping central drift check"
+            exit 0
+          fi
+          auth=$(printf 'x-access-token:%s' "$TOKEN" | base64 -w 0)
+          set +e
+          git -c "http.extraHeader=AUTHORIZATION: basic ${auth}" \
+            ls-remote --exit-code --heads \
+            https://github.com/ansible-automation-platform/aap-openapi-specs.git \
+            "refs/heads/${BRANCH}" >/dev/null 2>/tmp/ls-remote.err
+          code=$?
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo "status=ok" >> "$GITHUB_OUTPUT"
+          elif [ "$code" -eq 2 ]; then
+            echo "status=missing" >> "$GITHUB_OUTPUT"
+            echo "::warning::Branch '${BRANCH}' does not exist in aap-openapi-specs. Skipping drift check."
+          else
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "::warning::Could not access aap-openapi-specs (authentication or network). Skipping drift check."
+          fi
+
+      - name: Checkout aap-openapi-specs
+        if: steps.central_branch.outputs.status == 'ok'
+        id: checkout_central
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ansible-automation-platform/aap-openapi-specs
+          ref: ${{ steps.branch_map.outputs.target_branch }}
+          path: spec-repo
+          token: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
+
+      - name: Diff against central spec
+        if: steps.checkout_central.outcome == 'success'
+        id: drift_diff
+        run: |
+          CENTRAL="spec-repo/galaxy.json"
+          LOCAL="source/galaxy_ng/app/static/galaxy.json"
+          if [ ! -f "$LOCAL" ]; then
+            echo "drift_detected=false" >> "$GITHUB_OUTPUT"
+            echo "Local spec not found — skipping drift check"
+            exit 0
+          fi
+          if [ ! -f "$CENTRAL" ]; then
+            echo "drift_detected=false" >> "$GITHUB_OUTPUT"
+            echo "Central spec not found — skipping drift check"
+            exit 0
+          fi
+          source/.github/scripts/compare_openapi_specs.sh \
+            --structured "$CENTRAL" "$LOCAL" /tmp/drift_diff.md || EXIT_CODE=$?
+          if [ "${EXIT_CODE:-0}" = "2" ]; then
+            echo "::error::Failed to compare against central spec"
+            exit 1
+          fi
+
+      - name: Check for breaking changes vs central
+        if: steps.drift_diff.outputs.drift_detected == 'true'
+        id: drift_breaking
+        run: |
+          BREAKING_OUTPUT=$(oasdiff breaking \
+            spec-repo/galaxy.json \
+            source/galaxy_ng/app/static/galaxy.json \
+            --format markdown 2>&1) || true
+          if echo "$BREAKING_OUTPUT" | grep -qE ':(warning|x):'; then
+            echo "has_breaking=true" >> $GITHUB_OUTPUT
+            echo "$BREAKING_OUTPUT" > /tmp/drift_breaking.md
+          else
+            echo "has_breaking=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Post a single unified comment
+      - name: Prepare comment
+        if: steps.pr_diff.outputs.has_changes == 'true' || steps.drift_diff.outputs.drift_detected == 'true'
+        id: comment
+        run: |
+          {
+            echo 'body<<EOF'
+            source/.github/scripts/prepare_openapi_comment.sh \
+              "${{ steps.pr_diff.outputs.has_changes }}" \
+              "${{ steps.pr_breaking.outputs.has_breaking }}" \
+              /tmp/pr_diff.md \
+              /tmp/pr_breaking.md \
+              "${{ steps.drift_diff.outputs.drift_detected }}" \
+              "${{ steps.drift_breaking.outputs.has_breaking }}" \
+              /tmp/drift_diff.md \
+              /tmp/drift_breaking.md \
+              "${{ steps.branch_map.outputs.target_branch }}"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+      - name: Find existing comment
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        id: find_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- openapi-spec-review -->'
+
+      - name: Post or update comment
+        if: steps.pr_diff.outputs.has_changes == 'true' || steps.drift_diff.outputs.drift_detected == 'true'
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- openapi-spec-review -->
+            ${{ steps.comment.outputs.body }}
+          edit-mode: replace
+
+      - name: Clear resolved comment
+        if: >-
+          steps.find_comment.outputs.comment-id &&
+          steps.pr_diff.outputs.has_changes == 'false' &&
+          steps.drift_diff.outputs.drift_detected == 'false'
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- openapi-spec-review -->
+            ## OpenAPI Spec Review
+
+            No schema changes relative to the base branch, and no drift from `aap-openapi-specs`.
+          edit-mode: replace
+
+      - name: Clear resolved comment without drift check
+        if: >-
+          steps.find_comment.outputs.comment-id &&
+          steps.pr_diff.outputs.has_changes == 'false' &&
+          steps.drift_diff.outputs.drift_detected != 'true' &&
+          steps.drift_diff.outputs.drift_detected != 'false'
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- openapi-spec-review -->
+            ## OpenAPI Spec Review
+
+            No schema changes relative to the base branch.
+          edit-mode: replace
+
+  # ── Sync spec to central repo on merge ───────────────────────────────
+  sync:
+    if: >-
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+      && github.repository_owner == 'ansible-automation-platform'
+      && github.ref_name != 'stable-2.4'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout galaxy_ng
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Verify spec exists
+        run: |
+          SPEC="galaxy_ng/app/static/galaxy.json"
+          if [ ! -f "$SPEC" ]; then
+            echo "::error::Spec file not found at $SPEC"
+            exit 1
+          fi
+
+      - name: Map branch to spec repo
+        id: branch_map
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "target_branch=devel" >> $GITHUB_OUTPUT
+          else
+            echo "target_branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check central branch
+        id: central_branch
+        env:
+          TOKEN: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
+          BRANCH: ${{ steps.branch_map.outputs.target_branch }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::OPENAPI_SPEC_SYNC_TOKEN is not set"
+            exit 1
+          fi
+          auth=$(printf 'x-access-token:%s' "$TOKEN" | base64 -w 0)
+          set +e
+          git -c "http.extraHeader=AUTHORIZATION: basic ${auth}" \
+            ls-remote --exit-code --heads \
+            https://github.com/ansible-automation-platform/aap-openapi-specs.git \
+            "refs/heads/${BRANCH}" >/dev/null 2>/tmp/ls-remote.err
+          code=$?
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo "status=ok" >> "$GITHUB_OUTPUT"
+          elif [ "$code" -eq 2 ]; then
+            echo "::error::Branch '${BRANCH}' does not exist in aap-openapi-specs."
+            exit 1
+          else
+            echo "::error::Failed to access aap-openapi-specs (authentication or network)."
+            exit 1
+          fi
+
+      - name: Checkout aap-openapi-specs
+        if: steps.central_branch.outputs.status == 'ok'
+        id: checkout_spec_repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ansible-automation-platform/aap-openapi-specs
+          ref: ${{ steps.branch_map.outputs.target_branch }}
+          path: spec-repo
+          token: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
+
+      - name: Compare specs
+        id: compare
+        run: |
+          LOCAL="galaxy_ng/app/static/galaxy.json"
+          CENTRAL="spec-repo/galaxy.json"
+          if [ ! -f "$CENTRAL" ]; then
+            echo "has_diff=true" >> $GITHUB_OUTPUT
+            echo "is_new=true" >> $GITHUB_OUTPUT
+          elif diff -q "$LOCAL" "$CENTRAL" > /dev/null; then
+            echo "has_diff=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_diff=true" >> $GITHUB_OUTPUT
+            echo "is_new=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update spec and open PR
+        if: steps.compare.outputs.has_diff == 'true'
+        working-directory: spec-repo
+        env:
+          GH_TOKEN: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
+          GPG_PRIVATE_KEY: ${{ secrets.OPENAPI_SPEC_SYNC_GPG_PRIVATE_KEY }}
+          SPEC_REPO: ansible-automation-platform/aap-openapi-specs
+          SPEC_PR_REVIEW_TEAM: ${{ secrets.OPENAPI_SPEC_PR_REVIEW_TEAM }}
+          SPEC_BRANCH: ${{ steps.branch_map.outputs.target_branch }}
+          SOURCE_BRANCH: ${{ github.ref_name }}
+          SOURCE_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          cp "../galaxy_ng/app/static/galaxy.json" "galaxy.json"
+
+          # aap-api-bot (https://github.com/aap-api-bot) opens the PR via
+          # OPENAPI_SPEC_SYNC_TOKEN and signs the commit so it can merge.
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import 2>/dev/null
+          GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
+          if [ -z "$GPG_KEY_ID" ]; then
+            echo "::error::Failed to import GPG key or extract key ID"
+            exit 1
+          fi
+          git config user.name "aap-api-bot"
+          git config user.email "aap-api-bot@redhat.com"
+          git config commit.gpgsign true
+          git config user.signingkey "$GPG_KEY_ID"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${SPEC_REPO}.git"
+
+          BRANCH_NAME="auto/update-galaxy-${SPEC_BRANCH}"
+
+          EXISTING_PR=$(gh pr list \
+            --repo "$SPEC_REPO" \
+            --head "$BRANCH_NAME" \
+            --base "$SPEC_BRANCH" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+
+          if [ -z "$EXISTING_PR" ]; then
+            git push origin --delete "$BRANCH_NAME" 2>/dev/null || true
+          fi
+
+          git checkout -b "$BRANCH_NAME"
+          git add "galaxy.json"
+
+          if [ "${{ steps.compare.outputs.is_new }}" == "true" ]; then
+            COMMIT_MSG="Add Galaxy NG OpenAPI spec for ${SPEC_BRANCH}"
+          else
+            COMMIT_MSG="Update Galaxy NG OpenAPI spec for ${SPEC_BRANCH}"
+          fi
+
+          git commit -m "${COMMIT_MSG}
+
+          Synced from ${{ github.repository }}@${{ github.sha }}
+          Source branch: ${SOURCE_BRANCH} -> ${SPEC_BRANCH}
+
+          Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+
+          git push --force origin "$BRANCH_NAME"
+
+          PR_TITLE="[${SPEC_BRANCH}] Update Galaxy NG spec from merged commit"
+          PR_BODY="$(cat <<EOF
+          ## Summary
+          Automated OpenAPI spec sync from Galaxy NG.
+
+          **Source:** \`${{ github.repository }}@${{ github.sha }}\`
+          **Source Branch:** \`${SOURCE_BRANCH}\`
+          **Spec Branch:** \`${SPEC_BRANCH}\`
+          **Component:** Galaxy NG (Automation Hub)
+          **Spec File:** \`galaxy.json\`
+
+          ## Source Commit
+          \`\`\`
+          ${SOURCE_COMMIT_MESSAGE:-Manual workflow dispatch}
+          \`\`\`
+
+          ---
+          :robot: Generated by the OpenAPI spec sync workflow.
+          EOF
+          )"
+
+          if [ -n "$EXISTING_PR" ]; then
+            gh pr edit "$EXISTING_PR" --repo "$SPEC_REPO" --body "$PR_BODY"
+            echo "Updated existing PR #${EXISTING_PR}"
+          else
+            gh pr create \
+              --repo "$SPEC_REPO" \
+              --title "$PR_TITLE" \
+              --body "$PR_BODY" \
+              --base "$SPEC_BRANCH" \
+              --head "$BRANCH_NAME" \
+              --reviewer "$SPEC_PR_REVIEW_TEAM"
+            echo "Created PR in spec repo"
+          fi
