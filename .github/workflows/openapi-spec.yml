@@ -120,45 +120,34 @@ jobs:
             echo "target_branch=$SOURCE_BRANCH" >> $GITHUB_OUTPUT
           fi
 
-      - name: Check central branch
+      - name: Check token available
         if: github.repository_owner == 'ansible-automation-platform'
-        id: central_branch
+        id: check_token
         env:
           TOKEN: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
-          BRANCH: ${{ steps.branch_map.outputs.target_branch }}
         run: |
           if [ -z "$TOKEN" ]; then
-            echo "status=no_token" >> "$GITHUB_OUTPUT"
-            echo "Sync token unavailable — skipping central drift check"
-            exit 0
-          fi
-          auth=$(printf 'x-access-token:%s' "$TOKEN" | base64 -w 0)
-          set +e
-          git -c "http.extraHeader=AUTHORIZATION: basic ${auth}" \
-            ls-remote --exit-code --heads \
-            https://github.com/ansible-automation-platform/aap-openapi-specs.git \
-            "refs/heads/${BRANCH}" >/dev/null 2>/tmp/ls-remote.err
-          code=$?
-          set -e
-          if [ "$code" -eq 0 ]; then
-            echo "status=ok" >> "$GITHUB_OUTPUT"
-          elif [ "$code" -eq 2 ]; then
-            echo "status=missing" >> "$GITHUB_OUTPUT"
-            echo "::warning::Branch '${BRANCH}' does not exist in aap-openapi-specs. Skipping drift check."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::OPENAPI_SPEC_SYNC_TOKEN not set — skipping drift check."
           else
-            echo "status=error" >> "$GITHUB_OUTPUT"
-            echo "::warning::Could not access aap-openapi-specs (authentication or network). Skipping drift check."
+            echo "available=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Checkout aap-openapi-specs
-        if: steps.central_branch.outputs.status == 'ok'
+        if: steps.check_token.outputs.available == 'true'
         id: checkout_central
+        continue-on-error: true
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ansible-automation-platform/aap-openapi-specs
           ref: ${{ steps.branch_map.outputs.target_branch }}
           path: spec-repo
           token: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
+
+      - name: Warn if central checkout failed
+        if: steps.checkout_central.outcome == 'failure'
+        run: |
+          echo "::warning::Could not checkout aap-openapi-specs branch '${{ steps.branch_map.outputs.target_branch }}'. Skipping drift check."
 
       - name: Diff against central spec
         if: steps.checkout_central.outcome == 'success'
@@ -301,43 +290,21 @@ jobs:
             echo "target_branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Check central branch
-        id: central_branch
-        env:
-          TOKEN: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
-          BRANCH: ${{ steps.branch_map.outputs.target_branch }}
-        run: |
-          if [ -z "$TOKEN" ]; then
-            echo "::error::OPENAPI_SPEC_SYNC_TOKEN is not set"
-            exit 1
-          fi
-          auth=$(printf 'x-access-token:%s' "$TOKEN" | base64 -w 0)
-          set +e
-          git -c "http.extraHeader=AUTHORIZATION: basic ${auth}" \
-            ls-remote --exit-code --heads \
-            https://github.com/ansible-automation-platform/aap-openapi-specs.git \
-            "refs/heads/${BRANCH}" >/dev/null 2>/tmp/ls-remote.err
-          code=$?
-          set -e
-          if [ "$code" -eq 0 ]; then
-            echo "status=ok" >> "$GITHUB_OUTPUT"
-          elif [ "$code" -eq 2 ]; then
-            echo "::error::Branch '${BRANCH}' does not exist in aap-openapi-specs."
-            exit 1
-          else
-            echo "::error::Failed to access aap-openapi-specs (authentication or network)."
-            exit 1
-          fi
-
       - name: Checkout aap-openapi-specs
-        if: steps.central_branch.outputs.status == 'ok'
         id: checkout_spec_repo
+        continue-on-error: true
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ansible-automation-platform/aap-openapi-specs
           ref: ${{ steps.branch_map.outputs.target_branch }}
           path: spec-repo
           token: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
+
+      - name: Fail if checkout failed
+        if: steps.checkout_spec_repo.outcome == 'failure'
+        run: |
+          echo "::error::Branch '${{ steps.branch_map.outputs.target_branch }}' does not exist in aap-openapi-specs or access denied."
+          exit 1
 
       - name: Compare specs
         id: compare
