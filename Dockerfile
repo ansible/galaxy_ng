@@ -1,3 +1,17 @@
+# --- Builder: compile pysequoia (dralley fork) wheel with crypto-policy support ---
+FROM registry.access.redhat.com/ubi9 AS pysequoia-builder
+
+RUN dnf -y --disableplugin=subscription-manager install \
+        clang gcc git-core python3.12 python3.12-pip python3.12-devel openssl-devel && \
+    dnf -y --disableplugin=subscription-manager clean all
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+RUN python3.12 -m pip wheel --no-cache-dir --wheel-dir /wheels \
+    git+https://github.com/dralley/pysequoia.git@d6dce71daa90d11c0059ec086794b5a7927d599d
+
+# --- Main image ---
 FROM registry.access.redhat.com/ubi9
 
 ARG GIT_COMMIT
@@ -32,6 +46,28 @@ RUN set -ex; \
     ${PYTHON} -m pip install -r /tmp/requirements.txt && \
     ${DNF} autoremove ${INSTALL_PKGS_BUILD} && \
     ${DNF} clean all --enablerepo='*'
+
+# Replace upstream pysequoia with the dralley fork (adds StandardPolicy +
+# system crypto-policy support).  The wheel is bind-mounted from the builder
+# stage so it leaves no trace in the final image layers.
+RUN --mount=type=bind,from=pysequoia-builder,source=/wheels,target=/tmp/pysequoia-wheels \
+    ${VIRTUAL_ENV}/bin/pip install --no-cache-dir --no-index \
+        --force-reinstall /tmp/pysequoia-wheels/pysequoia*.whl
+
+# Patch pulpcore to use system crypto-policy when verifying signatures.
+# Without this, gpg_verify() uses the built-in default policy which rejects
+# keys with SHA-1 self-signatures (e.g. the Ansible Automation Hub 1 key).
+RUN UTIL_PY=$(find ${VIRTUAL_ENV} -path '*/pulpcore/app/util.py' -print -quit) && \
+    sed -i \
+        -e 's/from pysequoia import Cert, Sig, verify/from pysequoia import Cert, Sig, StandardPolicy, verify/' \
+        -e 's/result = verify(file=detached_data, store=store, signature=sig)/result = verify(file=detached_data, store=store, signature=sig, policy=StandardPolicy.from_system_config())/' \
+        -e 's/result = verify(bytes=sig_data, store=store)/result = verify(bytes=sig_data, store=store, policy=StandardPolicy.from_system_config())/' \
+        "$UTIL_PY"
+
+# Additive crypto-policy for sequoia: DEFAULT + SHA-1 allowed.
+# Keys created with GnuPG v2.0.x used SHA-1 for self-signatures;
+# without this config pysequoia rejects them.
+COPY docker/etc/sequoia-sha1.config /etc/crypto-policies/back-ends/sequoia.config
 
 COPY . /app
 
