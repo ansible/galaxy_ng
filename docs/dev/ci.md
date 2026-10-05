@@ -15,7 +15,7 @@ The main CI workflows are located in `.github/workflows/`:
 
 The CI pipeline runs unit tests across multiple Python versions using GitHub Actions matrix builds.
 
-**Current Python versions tested**: 3.11, 3.12
+**Current Python versions tested**: 3.12, 3.13
 
 ### Adding a New Python Version
 
@@ -24,7 +24,6 @@ To add support for a new Python version (e.g., 3.13):
 1. **Update `tox.ini`** in the repository root:
    ```ini
    env_list =
-       py311
        py312
        py313  # Add new version
    ```
@@ -32,7 +31,7 @@ To add support for a new Python version (e.g., 3.13):
 2. **Update `.github/workflows/ci_full.yml`**:
    ```yaml
    matrix:
-     python-version: ["3.11", "3.12", "3.13"]  # Add new version
+     python-version: ["3.12", "3.13"]  # Add new version
    ```
 
 That's it! The rest of the configuration is designed to be extensible:
@@ -51,7 +50,7 @@ The CI uploads test coverage artifacts only from Python 3.12 (the latest support
 - **Simplifies SonarCloud integration**: SonarCloud only needs one coverage report for analysis.
 - **Future-focused**: Using the latest Python version ensures our coverage analysis reflects modern Python behavior and features.
 
-If you need coverage from a specific Python version for debugging, you can always run tox locally: `tox -e py311` generates `coverage.xml` locally.
+If you need coverage from a specific Python version for debugging, you can always run tox locally: `tox -e py312` generates `coverage.xml` locally.
 
 ### Changing the Python Version for Coverage/SonarCloud/jUnit Reporting
 
@@ -78,11 +77,11 @@ This variable is referenced by:
 To test with a specific Python version locally:
 
 ```bash
-# Test with Python 3.11
-tox -e py311
-
 # Test with Python 3.12
 tox -e py312
+
+# Test with Python 3.13
+tox -e py313
 
 # Run all environments
 tox

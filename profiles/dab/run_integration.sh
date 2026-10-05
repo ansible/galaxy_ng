@@ -3,7 +3,7 @@ set -e
 VENVPATH=/tmp/gng_testing
 PIP=${VENVPATH}/bin/pip
 if  [[ ! -d $VENVPATH ]]; then
-    virtualenv --python=$(which python3.11) $VENVPATH
+    virtualenv --python=$(which python3.12) $VENVPATH
     $PIP install -r integration_requirements.txt
     if [[ -d ../galaxykit ]]; then
         cd ..

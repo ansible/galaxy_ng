@@ -12,7 +12,7 @@ setup(
     author="Red Hat, Inc.",
     author_email="info@ansible.com",
     url="https://github.com/ansible/galaxy_ng/",
-    python_requires=">=3.11",
+    python_requires=">=3.12",
     setup_requires=["wheel"],
     install_requires=[
         "galaxy-importer>=0.4.31,<0.5.0",
@@ -57,8 +57,8 @@ setup(
         "Framework :: Django",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
     ),
     entry_points={"pulpcore.plugin": ["galaxy_ng = galaxy_ng:default_app_config"]},
 )
