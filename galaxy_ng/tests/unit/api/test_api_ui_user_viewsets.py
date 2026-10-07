@@ -81,6 +81,7 @@ class TestUiV2UserViewSet(BaseTestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response["Content-Type"], "application/json")
+        self.assertIn("detail", response.data)
 
     def test_user_update_success_when_not_connected_to_resource_server(self):
         """Test that user update works when not connected to resource server"""
