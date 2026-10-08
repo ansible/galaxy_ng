@@ -878,7 +878,10 @@ class AccessPolicyBase(AccessPolicyFromSettings):
                 remote = ansible_models.CollectionRemote.objects.get(pk=extract_pk(remote))
         if not remote:
             obj = view.get_object()
-            remote = obj.remote.cast()
+            if isinstance(obj, ansible_models.CollectionRemote):
+                remote = obj
+            else:
+                remote = obj.remote.cast()
             if remote is None:
                 return True
 
@@ -945,6 +948,62 @@ class CollectionAccessPolicy(AccessPolicyBase):
 
 class CollectionRemoteAccessPolicy(AccessPolicyBase):
     NAME = "CollectionRemoteViewSet"
+
+    def can_sync_collection_remote(self, request, view, action, permission):
+        """
+        Collection sync writes into the distribution's repository. Require remote
+        change plus repository sync perms matching pulp repositories/ansible/ansible:
+        modify_ansible_repo_content or change_ansiblerepository.
+        """
+        user = request.user
+        change_remote_perm = "ansible.change_collectionremote"
+        change_repo_perm = "ansible.change_ansiblerepository"
+
+        if user.has_perm(change_remote_perm) and (
+            user.has_perm(permission) or user.has_perm(change_repo_perm)
+        ):
+            return True
+
+        path = view.kwargs.get("path")
+        if not path:
+            return False
+
+        try:
+            distro = ansible_models.AnsibleDistribution.objects.get(base_path=path)
+        except ansible_models.AnsibleDistribution.DoesNotExist:
+            return False
+
+        if not distro.repository or not distro.repository.remote:
+            return False
+
+        try:
+            remote = distro.repository.remote.ansible_collectionremote
+            repo = distro.repository.cast()
+        except (AttributeError, TypeError):
+            return False
+
+        has_repo_sync_perm = (
+            has_model_or_object_permissions(user, permission, repo)
+            or has_model_or_object_permissions(user, change_repo_perm, repo)
+        )
+        return (
+            has_model_or_object_permissions(user, change_remote_perm, remote)
+            and has_repo_sync_perm
+        )
+
+
+class AnsibleRepositoryAccessPolicy(AccessPolicyBase):
+    NAME = "AnsibleRepositoryViewSet"
+
+    def scope_queryset(self, view, qs):
+        # Standalone statements are a flat list, so queryset_scoping cannot be
+        # declared next to them the way pulp.py does. Apply the same repository
+        # visibility filter pulp uses for repositories/ansible/ansible to every
+        # action — not just list. Scoping only list lets retrieve/update/destroy
+        # resolve a private repo the caller cannot view and return 403, which
+        # discloses that the name exists (a 404 would be returned for a name
+        # that does not).
+        return self.scope_by_view_repository_permissions(view, qs, is_generic=False)
 
 
 class UserAccessPolicy(AccessPolicyBase):

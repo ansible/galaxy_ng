@@ -2407,17 +2407,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ansible.CollectionRemote"
+                "$ref": "#/components/schemas/ansible.CollectionRemoteCreate"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/ansible.CollectionRemote"
+                "$ref": "#/components/schemas/ansible.CollectionRemoteCreate"
               }
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/ansible.CollectionRemote"
+                "$ref": "#/components/schemas/ansible.CollectionRemoteCreate"
               }
             }
           },
@@ -2635,6 +2635,7 @@
       },
       "delete": {
         "operationId": "v1_ui_remotes_delete",
+        "description": "Trigger an asynchronous delete task",
         "summary": "Delete a collection remote",
         "parameters": [
           {
@@ -2660,12 +2661,18 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "No response body"
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationResponse"
+                }
+              }
+            },
+            "description": ""
           }
         },
-        "x-ai-description": "Delete collection remote",
-        "description": "Delete collection remote"
+        "x-ai-description": "Delete collection remote"
       }
     },
     "/api/galaxy/_ui/v1/repo/{distro_base_path}/": {
@@ -24241,6 +24248,348 @@
         ],
         "x-ai-description": "Sign a pushed container repository with a manifest signing service"
       }
+    },
+    "/api/galaxy/_ui/v1/repositories/": {
+      "get": {
+        "operationId": "v1_ui_repositories_get_repositories",
+        "summary": "List repositories",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "The initial index from which to return the results.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "A list of fields to include in the response."
+          },
+          {
+            "in": "query",
+            "name": "exclude_fields",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "A list of fields to exclude from the response."
+          }
+        ],
+        "tags": [
+          "Content Sync"
+        ],
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAnsibleRepositoryResponseList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "List Ansible repositories",
+        "description": "List Ansible repositories"
+      },
+      "post": {
+        "operationId": "v1_ui_repositories_post",
+        "description": "Create an Ansible repository",
+        "summary": "Create a repository",
+        "tags": [
+          "Content Sync"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnsibleRepository"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/AnsibleRepository"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AnsibleRepository"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnsibleRepositoryResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Create an Ansible repository"
+      }
+    },
+    "/api/galaxy/_ui/v1/repositories/{name}/": {
+      "get": {
+        "operationId": "v1_ui_repositories_get_name",
+        "summary": "Inspect a repository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "A list of fields to include in the response."
+          },
+          {
+            "in": "query",
+            "name": "exclude_fields",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "A list of fields to exclude from the response."
+          }
+        ],
+        "tags": [
+          "Content Sync"
+        ],
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnsibleRepositoryResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Get repository by name",
+        "description": "Get repository by name"
+      },
+      "put": {
+        "operationId": "v1_ui_repositories_put",
+        "description": "Trigger an asynchronous repository update task",
+        "summary": "Update a repository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Content Sync"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnsibleRepository"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/AnsibleRepository"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AnsibleRepository"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Update repository"
+      },
+      "patch": {
+        "operationId": "v1_ui_repositories_patch",
+        "description": "Trigger an asynchronous partial repository update task",
+        "summary": "Update a repository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Content Sync"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedAnsibleRepository"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedAnsibleRepository"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedAnsibleRepository"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Partially update repository"
+      },
+      "delete": {
+        "operationId": "v1_ui_repositories_delete",
+        "description": "Trigger an asynchronous task to delete a repository.",
+        "summary": "Delete a repository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Content Sync"
+        ],
+        "security": [
+          {
+            "tokenAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-ai-description": "Delete repository"
+      }
     }
   },
   "components": {
@@ -24412,8 +24761,38 @@
           }
         }
       },
-      "AnsibleRepositoryResponse": {
+      "RemoteSyncTask": {
         "type": "object",
+        "description": "Latest Pulp sync task for a remote, or an empty object when the remote has never synced. Null when no remote is attached.",
+        "additionalProperties": true,
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true
+          }
+        }
+      },
+      "AnsibleRepositoryNestedResponse": {
+        "type": "object",
+        "description": "Thin repository shape nested on collection remotes GET. Write/detail fields live on AnsibleRepositoryResponse.",
         "properties": {
           "name": {
             "type": "string"
@@ -24444,13 +24823,128 @@
             "format": "date-time"
           },
           "last_sync_task": {
-            "type": "string",
-            "readOnly": true
+            "readOnly": true,
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RemoteSyncTask"
+              }
+            ]
           }
         },
         "required": [
           "created_at",
           "name",
+          "updated_at"
+        ]
+      },
+      "AnsibleRepositoryResponse": {
+        "type": "object",
+        "description": "Galaxy /_ui/v1/repositories/ detail shape (Pulp repository fields plus Galaxy extras).",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "next_version": {
+            "type": "integer",
+            "format": "int64",
+            "maximum": 2147483647,
+            "minimum": 0
+          },
+          "distributions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnsibleDistributionResponse"
+            },
+            "readOnly": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_sync_task": {
+            "readOnly": true,
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RemoteSyncTask"
+              }
+            ]
+          },
+          "pulp_href": {
+            "type": "string",
+            "format": "uri",
+            "readOnly": true
+          },
+          "prn": {
+            "type": "string",
+            "readOnly": true,
+            "description": "The Pulp Resource Name (PRN)."
+          },
+          "pulp_created": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "Timestamp of creation. Same instant as created_at."
+          },
+          "pulp_last_updated": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "Timestamp of last update. Same instant as updated_at."
+          },
+          "versions_href": {
+            "type": "string",
+            "format": "uri",
+            "readOnly": true
+          },
+          "latest_version_href": {
+            "type": "string",
+            "format": "uri",
+            "readOnly": true
+          },
+          "private": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "pulp_labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "retain_repo_versions": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "gpgkey": {
+            "type": "string",
+            "nullable": true
+          },
+          "last_synced_metadata_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "created_at",
+          "name",
+          "pulp_href",
           "updated_at"
         ]
       },
@@ -37086,13 +37580,18 @@
             "description": "A PEM encoded CA certificate used to validate the server certificate presented by the remote server."
           },
           "last_sync_task": {
-            "type": "string",
-            "readOnly": true
+            "readOnly": true,
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RemoteSyncTask"
+              }
+            ]
           },
           "repositories": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AnsibleRepositoryResponse"
+              "$ref": "#/components/schemas/AnsibleRepositoryNestedResponse"
             },
             "readOnly": true
           },
@@ -40848,6 +41347,283 @@
         },
         "required": [
           "role_definition"
+        ]
+      },
+      "AnsibleRepository": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1
+          },
+          "private": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "An optional remote to use by default when syncing."
+          },
+          "pulp_labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "retain_repo_versions": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true,
+            "description": "Retain X versions of the repository. Default is null which retains all versions.",
+            "minimum": 1
+          },
+          "gpgkey": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "description": "Gpg public key to verify collection signatures against"
+          },
+          "last_synced_metadata_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Last synced metadata time."
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "PaginatedAnsibleRepositoryResponseList": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer",
+                "example": 123
+              }
+            }
+          },
+          "links": {
+            "type": "object",
+            "properties": {
+              "first": {
+                "type": "string",
+                "nullable": true
+              },
+              "previous": {
+                "type": "string",
+                "nullable": true
+              },
+              "next": {
+                "type": "string",
+                "nullable": true
+              },
+              "last": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnsibleRepositoryResponse"
+            }
+          }
+        }
+      },
+      "PatchedAnsibleRepository": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1
+          },
+          "private": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "An optional remote to use by default when syncing."
+          },
+          "pulp_labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "retain_repo_versions": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true,
+            "description": "Retain X versions of the repository. Default is null which retains all versions.",
+            "minimum": 1
+          },
+          "gpgkey": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "description": "Gpg public key to verify collection signatures against"
+          },
+          "last_synced_metadata_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Last synced metadata time."
+          }
+        }
+      },
+      "ansible.CollectionRemoteCreate": {
+        "type": "object",
+        "description": "A serializer for Collection Remotes.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The unique name of the remote."
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The URL of an external content source."
+          },
+          "auth_url": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "description": "The URL to receive a session token from, e.g. used with Automation Hub.",
+            "maxLength": 255
+          },
+          "token": {
+            "type": "string",
+            "writeOnly": true,
+            "nullable": true,
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "policy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PolicyDb6Enum"
+              }
+            ],
+            "default": "immediate",
+            "description": "The policy to use when downloading content.\n\n* `immediate` - immediate\n* `When syncing, download all metadata and content now.` - When syncing, download all metadata and content now."
+          },
+          "requirements_file": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "description": "The string version of Collection requirements yaml."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "description": "Remote user."
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "nullable": true,
+            "minLength": 1,
+            "description": "Remote password."
+          },
+          "tls_validation": {
+            "type": "boolean",
+            "description": "If True, TLS peer validation must be performed."
+          },
+          "client_key": {
+            "type": "string",
+            "writeOnly": true,
+            "nullable": true,
+            "minLength": 1,
+            "description": "A PEM encoded private key used for authentication."
+          },
+          "client_cert": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "description": "A PEM encoded client certificate used for authentication."
+          },
+          "ca_cert": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "description": "A PEM encoded CA certificate used to validate the server certificate presented by the remote server."
+          },
+          "download_concurrency": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true,
+            "description": "Total number of simultaneous connections. If not set then the default value will be used.",
+            "minimum": 1
+          },
+          "proxy_url": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "description": "The proxy URL. Format: scheme://host:port"
+          },
+          "proxy_username": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "description": "User for proxy authentication."
+          },
+          "proxy_password": {
+            "type": "string",
+            "writeOnly": true,
+            "nullable": true,
+            "minLength": 1,
+            "description": "Password for proxy authentication."
+          },
+          "rate_limit": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true,
+            "description": "Limits requests per second for each concurrent downloader"
+          },
+          "signed_only": {
+            "type": "boolean",
+            "description": "Sync only collections that have a signature"
+          },
+          "sync_highest_versions": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "description": "The number of highest versions of each collection to sync. Unset or null syncs all versions. 1 syncs only the highest version."
+          }
+        },
+        "required": [
+          "name",
+          "url"
         ]
       }
     },

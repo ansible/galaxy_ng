@@ -4,6 +4,7 @@ from django.contrib.auth import password_validation
 from django.utils.translation import gettext_lazy as _
 
 from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
+from ansible_base.lib.serializers.mixins import CleanTextMixin
 
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models.auth import Group
@@ -57,7 +58,10 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return []
 
 
-class UserCreateUpdateDeleteSerializer(UserDetailSerializer):
+class UserCreateUpdateDeleteSerializer(CleanTextMixin, UserDetailSerializer):
+    # password is a write-only, hashed credential — never rendered — so free-text
+    # validation is irrelevant and would only reject legitimate strong passwords.
+    excluded_fields = frozenset({'password'})
 
     groups = serializers.ListField(
         child=serializers.DictField(), required=False, default=[], write_only=True,
@@ -203,7 +207,7 @@ class UserCreateUpdateDeleteSerializer(UserDetailSerializer):
         return instance
 
 
-class GroupSerializer(serializers.ModelSerializer):
+class GroupSerializer(CleanTextMixin, serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = [
@@ -212,7 +216,7 @@ class GroupSerializer(serializers.ModelSerializer):
         ]
 
 
-class OrganizationSerializer(serializers.ModelSerializer):
+class OrganizationSerializer(CleanTextMixin, serializers.ModelSerializer):
 
     id = serializers.SerializerMethodField()
     resource = serializers.SerializerMethodField()
@@ -235,7 +239,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         }
 
 
-class TeamSerializer(serializers.ModelSerializer):
+class TeamSerializer(CleanTextMixin, serializers.ModelSerializer):
 
     group = serializers.SerializerMethodField()
     organization = serializers.SerializerMethodField()

@@ -357,6 +357,20 @@ PULP_ANSIBLE_VIEWSETS = {
                 "condition": "has_ansible_repo_perms:ansible.manage_roles_ansiblerepository",
             },
         ],
+        # Same pattern as pulp_container/namespaces: Pulp's after_create hook
+        # assigns Hub's owner role so a user with only add_ansiblerepository
+        # can manage the repository they created. UI _ui/v1/repositories
+        # create hits this too — get_viewset_for_model looks up this viewset.
+        "creation_hooks": [
+            {
+                "function": "add_roles_for_object_creator",
+                "parameters": {
+                    "roles": [
+                        "galaxy.ansible_repository_owner",
+                    ],
+                },
+            }
+        ],
         "queryset_scoping": {
             "function": "scope_by_view_repository_permissions",
             "parameters": {
@@ -515,7 +529,21 @@ PULP_ANSIBLE_VIEWSETS = {
                 "effect": "allow",
                 "condition": "has_model_or_obj_perms:ansible.manage_roles_collectionremote",
             },
-        ]
+        ],
+        # Same pattern as pulp_container/namespaces: Pulp's after_create hook
+        # assigns Hub's owner role so a user with only add_collectionremote
+        # can manage the remote they created. UI _ui/v1/remotes create hits
+        # this too — get_viewset_for_model looks up this viewset.
+        "creation_hooks": [
+            {
+                "function": "add_roles_for_object_creator",
+                "parameters": {
+                    "roles": [
+                        "galaxy.collection_remote_owner",
+                    ],
+                },
+            }
+        ],
     },
     "content/ansible/collection_versions": {
         "statements": [

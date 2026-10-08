@@ -11,6 +11,9 @@ from pulpcore.plugin import serializers as core_serializers
 from pulp_container.app import models as container_models
 from pulp_container.app import serializers as container_serializers
 
+from ansible_base.lib.serializers.mixins import CleanTextMixin
+from ansible_base.lib.utils.validation import DEFAULT_NAME_FIELDS
+
 from galaxy_ng.app import models
 from galaxy_ng.app.api import utils
 
@@ -20,8 +23,17 @@ VALID_REMOTE_REGEX = r"^[A-Za-z0-9._-]*(/[A-Za-z0-9._-]*)?$"
 
 
 class ContainerRemoteSerializer(
+    CleanTextMixin,
     container_serializers.ContainerRemoteSerializer,
 ):
+    # Despite Meta's read_only declarations below, `name` is inherited as a writable
+    # declared field from pulp_container's base serializer (Meta.read_only_fields /
+    # extra_kwargs only affect fields DRF auto-builds, not already-declared ones), so
+    # it IS validated here. validate_name() below permits one '/' (e.g. "org/image"),
+    # which Tier 1's allowlist rejects outright -- demote `name` to Tier 2 so the
+    # mixin doesn't conflict with the existing, already-strict character validator.
+    name_fields = DEFAULT_NAME_FIELDS - {'name'}
+
     id = serializers.UUIDField(source='pulp_id', required=False, read_only=True)
     created_at = serializers.DateTimeField(source='pulp_created', read_only=True, required=False)
     updated_at = serializers.DateTimeField(
@@ -146,8 +158,19 @@ class ContainerRemoteSerializer(
 
 
 class ContainerRegistryRemoteSerializer(
+    CleanTextMixin,
     core_serializers.RemoteSerializer,
 ):
+    # Credentials/certs aren't rendered anywhere and carry no XSS risk; excluding
+    # them avoids false positives on PEM/base64 content unrelated to free text.
+    excluded_fields = frozenset({
+        'password', 'proxy_password', 'client_key', 'client_cert', 'ca_cert',
+    })
+    # `username` authenticates against a third-party registry, not a Hub account, so
+    # Tier 1's strict resource-name charset is too narrow for arbitrary external
+    # usernames (e.g. `user+test@example.com`). Route it through Tier 2 instead.
+    name_fields = DEFAULT_NAME_FIELDS - {'username'}
+
     id = serializers.UUIDField(source='pk', required=False)
     created_at = serializers.DateTimeField(source='pulp_created', required=False)
     updated_at = serializers.DateTimeField(source='pulp_last_updated', required=False)

@@ -2,6 +2,7 @@
 
 See: https://issues.redhat.com/browse/AAH-957
 """
+
 import logging
 import pytest
 import requests
@@ -21,7 +22,7 @@ from .rbac_actions.utils import (
     ReusableContainerRegistry,
     ReusableRemoteContainer,
     ReusableLocalContainer,
-    ReusableAnsibleRepository
+    ReusableAnsibleRepository,
 )
 
 from .rbac_actions.auth import (
@@ -61,7 +62,6 @@ from .rbac_actions.collection_rbac import (
     copy_collection_version,
     copy_multiple_collection_version,
     move_collection_version,
-
     # ansible repository
     view_ansible_repository,
     add_ansible_repository,
@@ -78,19 +78,16 @@ from .rbac_actions.collection_rbac import (
     private_collection_version_list,
     view_private_repository_version,
     private_repo_v3,
-
     # ansible repository version
     view_ansible_repository_version,
     rebuild_metadata_ansible_repository_version,
     repair_ansible_repository_version,
     delete_ansible_repository_version,
-
     # ansible distribution
     view_ansible_distribution,
     add_ansible_distribution,
     change_ansible_distribution,
     delete_ansible_distribution,
-
     # ansible collection remote
     view_ansible_remote,
     add_ansible_remote,
@@ -105,13 +102,11 @@ from .rbac_actions.exec_env import (
     create_ee_remote,
     update_ee_remote,
     sync_remote_ee,
-
     # Registries
     delete_ee_registry,
     index_ee_registry,
     update_ee_registry,
     create_ee_registry,
-
     # Containers
     delete_ee,
     change_ee_description,
@@ -120,11 +115,10 @@ from .rbac_actions.exec_env import (
     create_ee_in_existing_namespace,
     push_updates_to_existing_ee,
     change_ee_tags,
-
     # Container namespace
     ee_namespace_list_roles,
     ee_namespace_add_role,
-    ee_namespace_remove_role
+    ee_namespace_remove_role,
 )
 from ..utils.tools import generate_random_string
 
@@ -148,7 +142,6 @@ GLOBAL_ACTIONS = {
     add_pulp_groups,
     delete_pulp_groups,
     view_pulp_groups,
-
     # COLLECTIONS
     create_collection_namespace,
     change_collection_namespace,
@@ -173,19 +166,16 @@ GLOBAL_ACTIONS = {
     copy_collection_version,
     copy_multiple_collection_version,
     move_collection_version,
-
     # EEs
     # Remotes
     create_ee_remote,
     update_ee_remote,
     sync_remote_ee,
-
     # Registries
     delete_ee_registry,
     index_ee_registry,
     update_ee_registry,
     create_ee_registry,
-
     # Containers
     delete_ee,
     change_ee_description,
@@ -197,10 +187,8 @@ GLOBAL_ACTIONS = {
     ee_namespace_list_roles,
     ee_namespace_add_role,
     ee_namespace_remove_role,
-
     # MISC
     view_tasks,
-
     # ansible repository
     view_ansible_repository,
     add_ansible_repository,
@@ -212,19 +200,16 @@ GLOBAL_ACTIONS = {
     collection_repo_list_roles,
     collection_repo_add_role,
     collection_repo_remove_role,
-
     # ansible repository version
     view_ansible_repository_version,
     rebuild_metadata_ansible_repository_version,
     repair_ansible_repository_version,
     delete_ansible_repository_version,
-
     # ansible distribution
     view_ansible_distribution,
     add_ansible_distribution,
     change_ansible_distribution,
     delete_ansible_distribution,
-
     # ansible collection remote
     view_ansible_remote,
     add_ansible_remote,
@@ -252,7 +237,6 @@ OBJECT_ACTIONS = {
     private_collection_version_list,
     view_private_repository_version,
     private_repo_v3,
-
     # ee
     change_ee_description,
     change_ee_readme,
@@ -262,7 +246,7 @@ OBJECT_ACTIONS = {
     sync_remote_ee,
     ee_namespace_list_roles,
     ee_namespace_add_role,
-    ee_namespace_remove_role
+    ee_namespace_remove_role,
 }
 
 OBJECT_ROLES_TO_TEST = {
@@ -303,7 +287,6 @@ OBJECT_ROLES_TO_TEST = {
         copy_collection_version,
         copy_multiple_collection_version,
         move_collection_version,
-
         # ansible repository version
         view_ansible_repository_version,
         rebuild_metadata_ansible_repository_version,
@@ -312,14 +295,12 @@ OBJECT_ROLES_TO_TEST = {
         collection_repo_list_roles,
         collection_repo_add_role,
         collection_repo_remove_role,
-
         # ansible distribution
         view_ansible_distribution,
         add_ansible_distribution,
         change_ansible_distribution,
         delete_ansible_distribution,
     },
-
     # EEs
     "galaxy.execution_environment_publisher": {
         create_ee_remote,
@@ -333,7 +314,7 @@ OBJECT_ROLES_TO_TEST = {
         change_ee_tags,
         ee_namespace_list_roles,
         ee_namespace_add_role,
-        ee_namespace_remove_role
+        ee_namespace_remove_role,
     },
     "galaxy.execution_environment_namespace_owner": {
         update_ee_remote,
@@ -345,7 +326,7 @@ OBJECT_ROLES_TO_TEST = {
         sync_remote_ee,
         ee_namespace_list_roles,
         ee_namespace_add_role,
-        ee_namespace_remove_role
+        ee_namespace_remove_role,
     },
     "galaxy.execution_environment_collaborator": {
         update_ee_remote,
@@ -355,8 +336,6 @@ OBJECT_ROLES_TO_TEST = {
         change_ee_tags,
         sync_remote_ee,
     },
-
-
 }
 
 ROLES_TO_TEST = {
@@ -384,7 +363,6 @@ ROLES_TO_TEST = {
         copy_collection_version,
         copy_multiple_collection_version,
         move_collection_version,
-
         # ansible repository
         view_ansible_repository,
         add_ansible_repository,
@@ -396,19 +374,16 @@ ROLES_TO_TEST = {
         collection_repo_list_roles,
         collection_repo_add_role,
         collection_repo_remove_role,
-
         # ansible repository version
         view_ansible_repository_version,
         rebuild_metadata_ansible_repository_version,
         repair_ansible_repository_version,
         delete_ansible_repository_version,
-
         # ansible distribution
         view_ansible_distribution,
         add_ansible_distribution,
         change_ansible_distribution,
         delete_ansible_distribution,
-
         # ansible collection remote
         view_ansible_remote,
         add_ansible_remote,
@@ -417,19 +392,16 @@ ROLES_TO_TEST = {
         collection_remote_list_roles,
         collection_remote_add_role,
         collection_remote_remove_role,
-
         # EEs
         # Remotes
         create_ee_remote,
         update_ee_remote,
         sync_remote_ee,
-
         # Registries
         delete_ee_registry,
         index_ee_registry,
         update_ee_registry,
         create_ee_registry,
-
         # Containers
         delete_ee,
         change_ee_description,
@@ -438,12 +410,10 @@ ROLES_TO_TEST = {
         create_ee_in_existing_namespace,
         push_updates_to_existing_ee,
         change_ee_tags,
-
         # Container namespace
         ee_namespace_list_roles,
         ee_namespace_add_role,
-        ee_namespace_remove_role
-
+        ee_namespace_remove_role,
     },
     "galaxy.collection_admin": {
         create_collection_namespace,
@@ -467,7 +437,6 @@ ROLES_TO_TEST = {
         copy_collection_version,
         copy_multiple_collection_version,
         move_collection_version,
-
         # ansible repository
         view_ansible_repository,
         add_ansible_repository,
@@ -479,19 +448,16 @@ ROLES_TO_TEST = {
         collection_repo_list_roles,
         collection_repo_add_role,
         collection_repo_remove_role,
-
         # ansible repository version
         view_ansible_repository_version,
         rebuild_metadata_ansible_repository_version,
         repair_ansible_repository_version,
         delete_ansible_repository_version,
-
         # ansible distribution
         view_ansible_distribution,
         add_ansible_distribution,
         change_ansible_distribution,
         delete_ansible_distribution,
-
         # ansible collection remote
         view_ansible_remote,
         add_ansible_remote,
@@ -506,7 +472,6 @@ ROLES_TO_TEST = {
         launch_collection_sync,
         approve_collections,
         reject_collections,
-
         # ansible repository
         view_ansible_repository,
         add_ansible_repository,
@@ -523,7 +488,6 @@ ROLES_TO_TEST = {
         copy_collection_version,
         copy_multiple_collection_version,
         move_collection_version,
-
         # ansible repository version
         view_ansible_repository_version,
         rebuild_metadata_ansible_repository_version,
@@ -532,13 +496,11 @@ ROLES_TO_TEST = {
         collection_repo_list_roles,
         collection_repo_add_role,
         collection_repo_remove_role,
-
         # ansible distribution
         view_ansible_distribution,
         add_ansible_distribution,
         change_ansible_distribution,
         delete_ansible_distribution,
-
         # ansible collection remote
         view_ansible_remote,
         add_ansible_remote,
@@ -548,16 +510,23 @@ ROLES_TO_TEST = {
         collection_remote_add_role,
         collection_remote_remove_role,
     },
+    # allow/deny form documents intentional gaps (e.g. sync needs repo perms too).
     "galaxy.collection_remote_owner": {
-        configure_collection_sync,
-        launch_collection_sync,
-        view_ansible_remote,
-        add_ansible_remote,
-        change_ansible_remote,
-        delete_ansible_remote,
-        collection_remote_list_roles,
-        collection_remote_add_role,
-        collection_remote_remove_role,
+        "allow": {
+            configure_collection_sync,
+            view_ansible_remote,
+            add_ansible_remote,
+            change_ansible_remote,
+            delete_ansible_remote,
+            collection_remote_list_roles,
+            collection_remote_add_role,
+            collection_remote_remove_role,
+        },
+        "deny": {
+            # Sync writes into the distribution's repository. Remote ownership
+            # alone is not enough; callers also need repository permission.
+            launch_collection_sync,
+        },
     },
     "galaxy.execution_environment_admin": {
         # EEs
@@ -565,13 +534,11 @@ ROLES_TO_TEST = {
         create_ee_remote,
         update_ee_remote,
         sync_remote_ee,
-
         # Registries
         delete_ee_registry,
         index_ee_registry,
         update_ee_registry,
         create_ee_registry,
-
         # Containers
         delete_ee,
         change_ee_description,
@@ -580,12 +547,10 @@ ROLES_TO_TEST = {
         create_ee_in_existing_namespace,
         push_updates_to_existing_ee,
         change_ee_tags,
-
         # Container namespace
         ee_namespace_list_roles,
         ee_namespace_add_role,
-        ee_namespace_remove_role
-
+        ee_namespace_remove_role,
     },
     "galaxy.group_admin": {
         add_groups,
@@ -602,7 +567,7 @@ ROLES_TO_TEST = {
         change_users,
         delete_users,
     },
-    "galaxy.task_admin": {}
+    "galaxy.task_admin": {},
 }
 ROLES_TO_TEST.update(OBJECT_ROLES_TO_TEST)
 
@@ -625,6 +590,26 @@ DENIED_FOR_ALL_USERS = {
 REUSABLE_EXTRA = {}
 
 
+def _role_allows(role_spec):
+    """Return the set of actions expected to pass for a role entry."""
+    if isinstance(role_spec, dict):
+        return role_spec.get("allow", set())
+    return role_spec
+
+
+def _role_denies(role_spec):
+    """Return actions explicitly expected to fail for a role entry."""
+    if isinstance(role_spec, dict):
+        return role_spec.get("deny", set())
+    return set()
+
+
+def _role_action_names(role_spec):
+    """Return names of actions declared on a role entry (allows and explicit denies)."""
+    actions = _role_allows(role_spec).union(_role_denies(role_spec))
+    return {action.__name__ for action in actions}
+
+
 # initialize the extra objects once for all the tests. This saves ~20 seconds per test
 def _get_reusable_extras(gc):
     global REUSABLE_EXTRA
@@ -639,12 +624,17 @@ def _get_reusable_extras(gc):
             "remote_ee": ReusableRemoteContainer(gen_string(), _registry_pk),
             "local_ee": ReusableLocalContainer(gen_string(), gc),
             "custom_staging_repo": ReusableAnsibleRepository(
-                f"repo-test-{generate_random_string()}", is_staging=True),
+                f"repo-test-{generate_random_string()}", is_staging=True
+            ),
             "custom_repo": ReusableAnsibleRepository(
-                f"repo-test-{generate_random_string()}", is_staging=False),
+                f"repo-test-{generate_random_string()}", is_staging=False
+            ),
             "private_repo": ReusableAnsibleRepository(
-                f"repo-test-{generate_random_string()}", is_staging=False, is_private=True,
-                add_collection=True),
+                f"repo-test-{generate_random_string()}",
+                is_staging=False,
+                is_private=True,
+                add_collection=True,
+            ),
         }
 
     return REUSABLE_EXTRA
@@ -658,16 +648,22 @@ def test_global_role_actions(role, subtests, galaxy_client):
 
     user = create_user(USERNAME, PASSWORD)
     group = create_group_for_user(user, role)
-    group_id = group['id']
+    group_id = group["id"]
 
-    expected_allows = ROLES_TO_TEST[role]
+    role_spec = ROLES_TO_TEST[role]
+    expected_allows = _role_allows(role_spec)
+    expected_denies = _role_denies(role_spec)
+    # Explicit denials must not also be listed as allows.
+    assert expected_allows.isdisjoint(expected_denies)
     gc = galaxy_client("admin", ignore_cache=True)
     extra = _get_reusable_extras(gc)
 
     # Test global actions
     for action in GLOBAL_ACTIONS:
         with subtests.test(action=action):
-            expect_pass = action in expected_allows or action in ACTIONS_FOR_ALL_USERS
+            expect_pass = (
+                action in expected_allows or action in ACTIONS_FOR_ALL_USERS
+            ) and action not in expected_denies
             action(user, PASSWORD, expect_pass, extra)
 
     # cleanup user, group
@@ -693,7 +689,7 @@ def test_object_role_actions(role, subtests, galaxy_client):
     user = create_user(USERNAME, PASSWORD)
     # create group without any global roles
     group = create_group_for_user(user)
-    group_id = group['id']
+    group_id = group["id"]
 
     def _apply_roles():
         # assign object roles
@@ -719,7 +715,8 @@ def test_object_role_actions(role, subtests, galaxy_client):
     if role == "galaxy.ansible_repository_owner":
         expected_allows = expected_allows.union({upload_collection_to_custom_repo})
         expected_allows = expected_allows.union(
-            OBJECT_ROLES_TO_TEST["galaxy.collection_namespace_owner"])
+            OBJECT_ROLES_TO_TEST["galaxy.collection_namespace_owner"]
+        )
 
     # Test global actions
     for action in OBJECT_ACTIONS:
@@ -744,7 +741,7 @@ def test_role_actions_for_admin(subtests, galaxy_client):
     for action in GLOBAL_ACTIONS:
         with subtests.test(action=action):
             expect_pass = action not in DENIED_FOR_ALL_USERS
-            action({'username': ADMIN_USER}, ADMIN_PASSWORD, expect_pass, extra)
+            action({"username": ADMIN_USER}, ADMIN_PASSWORD, expect_pass, extra)
 
 
 @pytest.mark.rbac_roles
@@ -759,11 +756,10 @@ def test_all_actions_are_tested():
     role_actions = set()
 
     for role in ROLES_TO_TEST:
-        role_actions = role_actions.union([action.__name__ for action in ROLES_TO_TEST[role]])
+        role_actions = role_actions.union(_role_action_names(ROLES_TO_TEST[role]))
 
     for role in OBJECT_ROLES_TO_TEST:
-        role_actions = role_actions.union(
-            [action.__name__ for action in OBJECT_ROLES_TO_TEST[role]])
+        role_actions = role_actions.union(_role_action_names(OBJECT_ROLES_TO_TEST[role]))
 
     # assert that all of the actions declared on the roles are also declared
     # in the global set of tests

@@ -7,11 +7,13 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from ansible_base.lib.serializers.mixins import CleanTextMixin
+
 from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.constants import PERMISSIONS
 
 
-class GroupSerializer(serializers.ModelSerializer):
+class GroupSerializer(CleanTextMixin, serializers.ModelSerializer):
 
     class Meta:
         model = auth_models.Group
@@ -21,7 +23,11 @@ class GroupSerializer(serializers.ModelSerializer):
         )
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(CleanTextMixin, serializers.ModelSerializer):
+    # password is a write-only, hashed credential — never rendered — so free-text
+    # validation is irrelevant and would only reject legitimate strong passwords.
+    excluded_fields = frozenset({'password'})
+
     auth_provider = serializers.SerializerMethodField()
 
     class Meta:

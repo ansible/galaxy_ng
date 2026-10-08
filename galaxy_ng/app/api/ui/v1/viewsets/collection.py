@@ -12,11 +12,13 @@ from pulp_ansible.app import viewsets as pulp_ansible_viewsets
 from pulp_ansible.app.models import (
     AnsibleCollectionDeprecated,
     AnsibleDistribution,
+    AnsibleRepository,
     CollectionVersion,
     Collection,
     CollectionRemote,
 )
 from pulp_ansible.app.models import CollectionImport as PulpCollectionImport
+from pulpcore.app.viewsets import AsyncRemoveMixin
 from rest_framework import mixins
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
@@ -25,7 +27,10 @@ import semantic_version
 from galaxy_ng.app.api import base as api_base
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api.ui.v1 import serializers, versioning
-from galaxy_ng.app.api.v3.serializers.sync import CollectionRemoteSerializer
+from galaxy_ng.app.api.v3.serializers.sync import (
+    CollectionRemoteCreateSerializer,
+    CollectionRemoteSerializer,
+)
 
 
 class CollectionByCollectionVersionFilter(pulp_ansible_viewsets.CollectionVersionFilter):
@@ -305,8 +310,37 @@ class CollectionImportViewSet(api_base.GenericViewSet,
         return Response(data)
 
 
-class CollectionRemoteViewSet(api_base.ModelViewSet):
+class CollectionRemoteViewSet(AsyncRemoveMixin, api_base.ModelViewSet):
+    """Hub UI wrapper around pulp_ansible's CollectionRemote model.
+
+    This is not pulp's CollectionRemoteViewSet. It uses galaxy auth/pagination
+    and CollectionRemoteSerializer (a subclass of pulp's serializer), so create
+    still goes through pulp's serializer.save(). List/retrieve/update existed
+    first; create/delete were added so the UI can manage remotes here (and hit
+    CleanTextMixin) instead of /pulp/api/v3/remotes/ansible/collection/. Delete
+    uses pulpcore's AsyncRemoveMixin so the remote and linked repositories are
+    reserved, matching pulp_ansible CollectionRemoteViewSet and preventing a
+    race with sync.
+    """
     queryset = CollectionRemote.objects.all().order_by('name')
     serializer_class = CollectionRemoteSerializer
 
     permission_classes = [access_policy.CollectionRemoteAccessPolicy]
+    # Cascaded remote deletes are too heavy to run in the gunicorn worker.
+    ALLOW_NON_BLOCKING_DELETE = False
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CollectionRemoteCreateSerializer
+        return super().get_serializer_class()
+
+    def async_reserved_resources(self, instance):
+        # Match pulp_ansible CollectionRemoteViewSet.async_reserved_resources.
+        if instance is None:
+            return []
+        lock = [instance]
+        repos = AnsibleRepository.objects.filter(
+            remote_id=instance.pk, last_synced_metadata_time__isnull=False
+        )
+        lock.extend(repos)
+        return lock

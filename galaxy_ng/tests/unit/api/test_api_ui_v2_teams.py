@@ -1,10 +1,12 @@
 import logging
+from unittest import mock
 from unittest.mock import patch
 
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from galaxy_ng.app.models import auth as auth_models
+from galaxy_ng.app.models.auth import Group
 from galaxy_ng.app.models.organization import Organization, Team
 from .base import BaseTestCase, MockSettings
 
@@ -319,3 +321,135 @@ class TestUiV2TeamViewSet(BaseTestCase):
         # Verify the team uses the existing organization
         team = Team.objects.get(name="test_team")
         self.assertEqual(team.organization.id, existing_org.id)
+
+
+@mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True)
+class TestUiV2TeamViewSetEnhancedInputValidation(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.client = APIClient()
+        self.admin_user = auth_models.User.objects.create(username="admin", is_superuser=True)
+        self.team_url = "/api/galaxy/_ui/v2/teams/"
+        self.resource_server_kwargs = {"IS_CONNECTED_TO_RESOURCE_SERVER": False}
+
+    def _post_team(self, team_data):
+        self.client.force_authenticate(user=self.admin_user)
+        settings_mock = MockSettings(self.resource_server_kwargs)
+        with patch('galaxy_ng.app.api.ui.v2.views.settings', settings_mock):
+            return self.client.post(self.team_url, team_data, format="json")
+
+    def test_create_succeeds_with_default_organization(self, mock_get_setting):
+        """Existing Default org must not be rejected by UniqueValidator."""
+        Organization.objects.get_or_create(name="Default")
+        response = self._post_team({"name": "team_under_default"})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        team = Team.objects.get(name="team_under_default")
+        self.assertEqual(team.organization.name, "Default")
+        self.assertEqual(team.group.name, "Default::team_under_default")
+
+    def test_create_succeeds_with_existing_organization(self, mock_get_setting):
+        """Reuse of an existing org name must not fail uniqueness checks."""
+        existing_org = Organization.objects.create(name="ExistingOrg")
+        org_count_before = Organization.objects.count()
+
+        response = self._post_team({
+            "name": "team_under_existing",
+            "organization": "ExistingOrg",
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(Organization.objects.count(), org_count_before)
+        team = Team.objects.get(name="team_under_existing")
+        self.assertEqual(team.organization.id, existing_org.id)
+
+    def test_unsafe_team_name_rejected_on_create(self, mock_get_setting):
+        response = self._post_team({"name": "<script>alert(1)</script>"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_unsafe_organization_name_rejected_on_create(self, mock_get_setting):
+        """New prohibited organization names must still be rejected."""
+        response = self._post_team({
+            "name": "safe_team_name",
+            "organization": "<script>alert(1)</script>",
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertIn("organization", response.data)
+        self.assertNotIn("name", response.data)
+
+    def test_invalid_organization_name_error_keyed_under_organization(self, mock_get_setting):
+        """Org name validation failures must not look like team-name errors."""
+        response = self._post_team({
+            "name": "ok",
+            "organization": "Bad (Org)",
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertIn("organization", response.data)
+        self.assertNotIn("name", response.data)
+
+    def test_create_succeeds_under_grandfathered_organization_name(self, mock_get_setting):
+        """Existing org with a prohibited name must be treated as unchanged."""
+        legacy_name = "<script>alert(1)</script>"
+        existing_org = Organization.objects.create(name=legacy_name)
+        org_count_before = Organization.objects.count()
+
+        response = self._post_team({
+            "name": "team_under_legacy_org",
+            "organization": legacy_name,
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(Organization.objects.count(), org_count_before)
+        team = Team.objects.get(name="team_under_legacy_org")
+        self.assertEqual(team.organization.id, existing_org.id)
+        self.assertEqual(team.organization.name, legacy_name)
+
+    def test_failed_validation_creates_no_organization_team_or_group(self, mock_get_setting):
+        org_count = Organization.objects.count()
+        team_count = Team.objects.count()
+        group_count = Group.objects.count()
+
+        response = self._post_team({
+            "name": "<script>alert(1)</script>",
+            "organization": "BrandNewOrg",
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(Organization.objects.count(), org_count)
+        self.assertEqual(Team.objects.count(), team_count)
+        self.assertEqual(Group.objects.count(), group_count)
+        self.assertFalse(Organization.objects.filter(name="BrandNewOrg").exists())
+
+        response = self._post_team({
+            "name": "another_safe_team",
+            "organization": "<script>alert(1)</script>",
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(Organization.objects.count(), org_count)
+        self.assertEqual(Team.objects.count(), team_count)
+        self.assertEqual(Group.objects.count(), group_count)
+
+    def test_duplicate_team_name_rejected_on_create(self, mock_get_setting):
+        team_data = {"name": "duplicate_team_name", "organization": "DupOrg"}
+        response = self._post_team(team_data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+        response = self._post_team(team_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertIn("already exists", str(response.data).lower())
+        self.assertEqual(Team.objects.filter(name="duplicate_team_name").count(), 1)
+        self.assertEqual(Organization.objects.filter(name="DupOrg").count(), 1)
+
+    def test_duplicate_team_does_not_leave_new_organization(self, mock_get_setting):
+        """Duplicate rejection must not persist a newly created organization."""
+        Organization.objects.create(name="FirstOrg")
+        Team.objects.create(
+            name="shared_team_name",
+            organization=Organization.objects.get(name="FirstOrg"),
+        )
+        org_count = Organization.objects.count()
+
+        response = self._post_team({
+            "name": "shared_team_name",
+            "organization": "OrphanOrg",
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(Team.objects.filter(name="shared_team_name").count(), 1)
+        self.assertEqual(Organization.objects.count(), org_count)
+        self.assertFalse(Organization.objects.filter(name="OrphanOrg").exists())

@@ -8,6 +8,8 @@ from pulp_ansible.app.models import AnsibleRepository, Collection
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from ansible_base.lib.serializers.mixins import CleanTextMixin
+
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import GroupPermissionField
 
@@ -21,7 +23,7 @@ class SyncListCollectionSummarySerializer(serializers.Serializer):
     name = serializers.CharField(max_length=64)
 
 
-class SyncListSerializer(serializers.ModelSerializer):
+class SyncListSerializer(CleanTextMixin, serializers.ModelSerializer):
     namespaces = serializers.SlugRelatedField(
         many=True, slug_field="name", queryset=models.Namespace.objects.all()
     )

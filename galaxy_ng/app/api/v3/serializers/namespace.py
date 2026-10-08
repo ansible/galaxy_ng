@@ -11,6 +11,9 @@ from rest_framework import fields
 
 from pulpcore.plugin.serializers import IdentityField, ModelSerializer as PulpModelSerializer
 
+from ansible_base.lib.serializers.mixins import CleanTextMixin
+from ansible_base.lib.utils.validation import DEFAULT_NAME_FIELDS
+
 from galaxy_ng.app import models
 from galaxy_ng.app.tasks import dispatch_create_pulp_namespace_metadata
 from galaxy_ng.app.access_control.fields import (
@@ -53,7 +56,62 @@ class ScopedErrorListSerializer(serializers.ListSerializer):
             raise
 
 
-class NamespaceLinkSerializer(serializers.ModelSerializer):
+class NamespaceLinkListSerializer(ScopedErrorListSerializer):
+    """Bind matching stored NamespaceLink rows during many=True validation.
+
+    DRF does not set child.instance when validating nested list writes, so
+    CleanTextMixin's grandfather rule would treat every submitted link as new
+    text. Match stored rows by (name, url) so an unchanged legacy link is not
+    re-rejected on an unrelated namespace update (for example a description-only
+    PUT that echoes the existing links).
+
+    Matching both name and url is intentional whole-row grandfathering: if
+    either field changes (including a URL-only edit on a link whose name is
+    still legacy-invalid), child.instance stays unset and CleanTextMixin
+    revalidates every submitted field.
+    """
+
+    def run_validation(self, *args, **kwargs):
+        self._stored_links_index = self._build_stored_links_index()
+        try:
+            return super().run_validation(*args, **kwargs)
+        finally:
+            self._stored_links_index = None
+            self.child.instance = None
+
+    def run_child_validation(self, data):
+        self.child.instance = None
+        stored = getattr(self, '_stored_links_index', None) or {}
+        if isinstance(data, dict):
+            name = data.get('name')
+            url = data.get('url')
+            if isinstance(name, str) and isinstance(url, str):
+                matches = stored.get((name, url))
+                if matches:
+                    self.child.instance = matches.pop()
+        try:
+            return super().run_child_validation(data)
+        finally:
+            self.child.instance = None
+
+    def _build_stored_links_index(self):
+        index = {}
+        namespace = getattr(self.parent, 'instance', None)
+        links = getattr(namespace, 'links', None) if namespace is not None else None
+        if links is None:
+            return index
+        for link in links.all():
+            index.setdefault((link.name, link.url), []).append(link)
+        return index
+
+
+class NamespaceLinkSerializer(CleanTextMixin, serializers.ModelSerializer):
+    # Link captions are display labels ("Docs (EN)", "Q&A", "GitHub / Docs"), not
+    # resource identifiers. Tier 1's strict allowlist rejects those characters;
+    # demote `name` to Tier 2 so captions still block HTML/script/template/control
+    # characters without rejecting legitimate punctuation.
+    name_fields = DEFAULT_NAME_FIELDS - {'name'}
+
     # Using a CharField instead of a URLField so that we can add a custom error
     # message that includes the submitted URL
     url = serializers.CharField(
@@ -64,7 +122,7 @@ class NamespaceLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.NamespaceLink
         fields = ('name', 'url')
-        list_serializer_class = ScopedErrorListSerializer
+        list_serializer_class = NamespaceLinkListSerializer
         scoped_error_name = 'links'
 
     # adds the URL to the error so the user can figure out which link the error
@@ -75,7 +133,15 @@ class NamespaceLinkSerializer(serializers.ModelSerializer):
         return url
 
 
-class NamespaceSerializer(PulpModelSerializer):
+class NamespaceSerializer(CleanTextMixin, PulpModelSerializer):
+    # Markdown profile content (platform-ui PageFormMarkdown). Exclude so
+    # legitimate markdown (HTML-ish constructs, template-like fences, etc.) is
+    # not rejected by Tier 2 free-text validation.
+    excluded_fields = frozenset({'resources'})
+    # Note: avatar_url is backed by the model's `_avatar_url` column (see
+    # models.Namespace.avatar_url property), so CleanTextMixin's model-field
+    # auto-discovery never matches it against this serializer's `avatar_url`
+    # attrs key and it is not validated here.
     links = NamespaceLinkSerializer(many=True, required=False)
     groups = GroupPermissionField(required=False)
     users = UserPermissionField(required=False)

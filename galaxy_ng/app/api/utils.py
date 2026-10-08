@@ -3,11 +3,13 @@ import re
 import socket
 from typing import NamedTuple
 
+from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from rest_framework import serializers
+from pulpcore.app.util import get_domain_pk
 from pulpcore.plugin import models as pulp_models
 
 from requests.adapters import HTTPAdapter
@@ -101,6 +103,43 @@ class SocketHTTPAdapter(HTTPAdapter):
 
     def get_connection(self, url, proxies=None):
         return SocketHTTPConnectionPool(self.socket_file)
+
+
+def validate_unique_pulp_resource_name(model, name, instance=None):
+    """Reject duplicate pulp resource names within the active domain."""
+    qs = model.objects.filter(name=name, pulp_domain_id=get_domain_pk())
+    if instance is not None:
+        qs = qs.exclude(pk=instance.pk)
+    if qs.exists():
+        raise serializers.ValidationError(
+            _('A resource with this name already exists.')
+        )
+
+
+class UniqueNameIntegrityMixin:
+    """Translate uniqueness IntegrityError into a serializer ValidationError.
+
+    Mirrors pulpcore.app.serializers.ModelSerializer.save: a concurrent
+    request can pass the pre-insert unique check and then fail at the DB
+    constraint. Re-running validation turns that into a normal 400.
+
+    The nested atomic() savepoint keeps the outer request transaction usable
+    after Postgres aborts the failed INSERT/UPDATE.
+    """
+
+    def save(self, **kwargs):
+        try:
+            with transaction.atomic():
+                return super().save(**kwargs)
+        except IntegrityError as e:
+            if "unique" in str(e).lower():
+                # Prefer field-level unique ValidationError when the row is visible.
+                # If validation passes, fall back to a generic uniqueness error.
+                self.run_validation(self.initial_data)
+                raise serializers.ValidationError(
+                    {'name': [_('A resource with this name already exists.')]}
+                )
+            raise
 
 
 def get_write_only_fields(serializer, obj, extra_data=None):

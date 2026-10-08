@@ -22,6 +22,7 @@ router.register(
 router.register('tags', viewsets.TagsViewSet, basename='tags')
 router.register('synclists', viewsets.SyncListViewSet, basename='synclists')
 router.register('remotes', viewsets.CollectionRemoteViewSet, basename='remotes')
+router.register('repositories', viewsets.AnsibleRepositoryViewSet, basename='repositories')
 router.register('distributions', viewsets.DistributionViewSet, basename='distributions')
 router.register('my-distributions', viewsets.MyDistributionViewSet, basename='my-distributions')
 

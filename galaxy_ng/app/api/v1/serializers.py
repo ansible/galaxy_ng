@@ -5,12 +5,16 @@ from rest_framework import serializers
 
 from pulpcore.plugin.util import get_url
 
+from ansible_base.lib.serializers.mixins import CleanTextMixin
+from ansible_base.lib.utils.validation import DEFAULT_NAME_FIELDS
+
 from galaxy_ng.app.models.auth import User
 from galaxy_ng.app.models.namespace import Namespace
 from galaxy_ng.app.utils.rbac import get_v3_namespace_owners
 from galaxy_ng.app.api.v1.models import LegacyNamespace
 from galaxy_ng.app.api.v1.models import LegacyRole, LegacyRoleTag
 from galaxy_ng.app.api.v1.models import LegacyRoleDownloadCount
+from galaxy_ng.app.api.v1.serializer_mixins import PlainSerializerCleanTextMixin, FakeModel
 from galaxy_ng.app.api.v1.utils import sort_versions
 
 from galaxy_ng.app.utils.galaxy import (
@@ -196,7 +200,7 @@ class LegacyUserSerializer(serializers.ModelSerializer):
         return None
 
 
-class LegacyRoleSerializer(serializers.ModelSerializer):
+class LegacyRoleSerializer(CleanTextMixin, serializers.ModelSerializer):
 
     # core cli uses this field to emit the list of
     # results from a role search so it must exit
@@ -375,9 +379,36 @@ class LegacyRoleSerializer(serializers.ModelSerializer):
         return 0
 
 
-class LegacyRoleRepositoryUpdateSerializer(serializers.Serializer):
+class LegacyRoleRepositoryUpdateSerializer(PlainSerializerCleanTextMixin, serializers.Serializer):
     name = serializers.CharField(required=False, allow_blank=False, max_length=50)
     original_name = serializers.CharField(required=False, allow_blank=False, max_length=50)
+
+    class Meta:
+        model = FakeModel('LegacyRoleRepositoryUpdate')
+
+    def _is_unchanged(self, field_name, value):
+        """Compare against the parent role's full_metadata, not model attributes.
+
+        Nested repository values are stored on LegacyRole.full_metadata, and this
+        serializer is not given that instance. get_summary_fields synthesizes
+        name/original_name from top-level github_repo when the nested value is
+        missing, null, or empty, so the comparison uses that same effective value.
+        Malformed metadata returns False rather than raising.
+        """
+        role = getattr(getattr(self, 'parent', None), 'instance', None)
+        metadata = getattr(role, 'full_metadata', {}) if role else {}
+        if not isinstance(metadata, dict):
+            return False
+        repository = metadata.get('repository', {})
+        if not isinstance(repository, dict):
+            repository = {}
+        if field_name in {'name', 'original_name'}:
+            # Same effective value as LegacyRoleSerializer.get_summary_fields.
+            stored = repository.get(field_name)
+            expected = stored if stored else metadata.get('github_repo')
+        else:
+            expected = repository.get(field_name)
+        return expected == value
 
     def is_valid(self, raise_exception=False):
         # Check for any unexpected fields
@@ -391,11 +422,40 @@ class LegacyRoleRepositoryUpdateSerializer(serializers.Serializer):
         return not bool(self._errors)
 
 
-class LegacyRoleUpdateSerializer(serializers.Serializer):
+class LegacyRoleUpdateSerializer(PlainSerializerCleanTextMixin, serializers.Serializer):
     github_user = serializers.CharField(required=False, allow_blank=False, max_length=50)
     github_repo = serializers.CharField(required=False, allow_blank=False, max_length=50)
     github_branch = serializers.CharField(required=False, allow_blank=False, max_length=50)
     repository = LegacyRoleRepositoryUpdateSerializer(required=False)
+
+    # The update view copies github_repo into repository.name (Tier 1). Keep the
+    # same allowlist here so {"github_repo": "..."} cannot bypass the stricter
+    # check that {"repository": {"name": "..."}} already enforces.
+    name_fields = DEFAULT_NAME_FIELDS | {'github_repo'}
+
+    class Meta:
+        model = FakeModel('LegacyRoleUpdate')
+
+    def _is_unchanged(self, field_name, value):
+        """Compare against LegacyRole.full_metadata, not model attributes.
+
+        github_user/repo/branch live in JSON metadata, not columns. The read
+        serializer's get_github_branch prefers a non-empty github_reference and
+        otherwise falls back to github_branch, so a PUT that echoes the displayed
+        branch must be treated as unchanged. A present but null or empty
+        github_reference is not that displayed value.
+        Malformed metadata returns False rather than raising.
+        """
+        metadata = getattr(self.instance, 'full_metadata', {}) if self.instance else {}
+        if not isinstance(metadata, dict):
+            return False
+        if field_name == 'github_branch':
+            # Same effective value as LegacyRoleSerializer.get_github_branch.
+            reference = metadata.get('github_reference')
+            expected = reference if reference else metadata.get('github_branch')
+        else:
+            expected = metadata.get(field_name)
+        return expected == value
 
     def is_valid(self, raise_exception=False):
         # Check for any unexpected fields
@@ -546,7 +606,7 @@ def _default_legacy_sync_baseurl():
     return settings.GALAXY_LEGACY_ROLE_SYNC_URL
 
 
-class LegacySyncSerializer(serializers.Serializer):
+class LegacySyncSerializer(PlainSerializerCleanTextMixin, serializers.Serializer):
 
     baseurl = serializers.CharField(
         required=False,
@@ -558,7 +618,7 @@ class LegacySyncSerializer(serializers.Serializer):
     limit = serializers.IntegerField(required=False)
 
     class Meta:
-        model = None
+        model = FakeModel('LegacySync')
         fields = [
             'baseurl',
             'github_user',
@@ -568,7 +628,7 @@ class LegacySyncSerializer(serializers.Serializer):
         ]
 
 
-class LegacyImportSerializer(serializers.Serializer):
+class LegacyImportSerializer(PlainSerializerCleanTextMixin, serializers.Serializer):
 
     github_user = serializers.CharField()
     github_repo = serializers.CharField()
@@ -578,7 +638,7 @@ class LegacyImportSerializer(serializers.Serializer):
     github_reference = serializers.CharField(required=False)
 
     class Meta:
-        model = None
+        model = FakeModel('LegacyImport')
         fields = [
             'github_user',
             'github_repo',

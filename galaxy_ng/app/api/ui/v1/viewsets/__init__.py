@@ -24,9 +24,11 @@ from .execution_environment import (
     ContainerRegistryRemoteViewSet,
     ContainerRemoteViewSet
 )
+from .repository import AnsibleRepositoryViewSet
 
 __all__ = (
     'APIRootView',
+    'AnsibleRepositoryViewSet',
     'CollectionImportViewSet',
     'CollectionRemoteViewSet',
     'CollectionVersionViewSet',

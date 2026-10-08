@@ -8,6 +8,7 @@ from rest_framework.test import APIClient, APITestCase
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.models import auth as auth_models
+from pulpcore.app.util import set_current_user
 from pulpcore.plugin.util import assign_role
 from galaxy_ng.app import constants
 
@@ -71,6 +72,12 @@ def get_current_ui_url(namespace, **kwargs):
 
 class BaseTestCase(APITestCase):
     def setUp(self):
+        # Pulp middleware leaves request-user ContextVar set after API calls.
+        # Clear it so fixture objects.create() does not assign creation_hooks
+        # ownership to a user rolled back by a previous test.
+        set_current_user(None)
+        self.addCleanup(set_current_user, None)
+
         self.client = APIClient()
 
         self.user = self._create_user('test')

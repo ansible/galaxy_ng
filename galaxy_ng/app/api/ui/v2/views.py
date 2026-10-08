@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from django.conf import settings
+from django.db import transaction
 from django.http import HttpResponseBadRequest
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils.translation import gettext_lazy as _
@@ -173,30 +174,66 @@ class TeamViewSet(BaseViewSet):
 
     bad_request_msg = _("Request should be made to '/api/gateway/v1/teams/'.")
 
+    def _validated_organization_name(self, org_name):
+        """Validate organization name via OrganizationSerializer / CleanTextMixin.
+
+        Team create uses get_or_create for the organization. Pass any existing
+        organization as instance so UniqueValidator excludes that row and
+        CleanTextMixin's unchanged-value grandfather rule applies. New org
+        names (instance=None) still reject prohibited text.
+
+        Remap serializer field errors from ``name`` to ``organization`` so the
+        client sees the error on the submitted team payload key.
+        """
+        organization = Organization.objects.filter(name=org_name).first()
+        org_serializer = OrganizationSerializer(
+            instance=organization,
+            data={'name': org_name},
+            context=self.get_serializer_context(),
+        )
+        try:
+            org_serializer.is_valid(raise_exception=True)
+        except ValidationError as exc:
+            detail = exc.detail
+            if isinstance(detail, dict) and 'name' in detail:
+                remapped = dict(detail)
+                remapped['organization'] = remapped.pop('name')
+                raise ValidationError(remapped) from exc
+            raise
+        return org_serializer.validated_data['name']
+
     def create(self, request, *args, **kwargs):
 
         if settings.get("IS_CONNECTED_TO_RESOURCE_SERVER"):
             return HttpResponseBadRequest(self.bad_request_msg)
-        # make the organization ...
-        org_name = request.data.get('organization', 'Default')
-        organization, _created = Organization.objects.get_or_create(
-            name=org_name
+
+        # organization is a read-only SerializerMethodField on TeamSerializer,
+        # so validate the submitted org name separately before any writes.
+        org_name = self._validated_organization_name(
+            request.data.get('organization', 'Default')
         )
 
-        # make the team ...
-        team, created = Team.objects.get_or_create(
-            name=request.data['name'],
-            defaults={'organization': organization}
-        )
-        if not created:
-            raise ValidationError(_("A team with this name already exists."))
+        team_serializer = self.get_serializer(data=request.data)
+        team_serializer.is_valid(raise_exception=True)
+        team_name = team_serializer.validated_data['name']
 
-        # set the group name ...
-        group_name = organization.name + '::' + team.name
-        team.group.name = group_name
-        team.group.save()
+        with transaction.atomic():
+            organization, _created = Organization.objects.get_or_create(
+                name=org_name
+            )
 
-        serializer = self.serializer_class(team)
+            team, created = Team.objects.get_or_create(
+                name=team_name,
+                defaults={'organization': organization}
+            )
+            if not created:
+                raise ValidationError(_("A team with this name already exists."))
+
+            group_name = organization.name + '::' + team.name
+            team.group.name = group_name
+            team.group.save()
+
+        serializer = self.get_serializer(team)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):

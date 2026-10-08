@@ -25,12 +25,13 @@ class SyncRemoteView(api_base.APIView):
     permission_classes = [access_policy.CollectionRemoteAccessPolicy]
     action = 'sync'
 
-    @extend_schema(
-        description="Trigger an asynchronous sync task",
-        responses={202: AsyncOperationResponseSerializer},
-    )
-    def post(self, request: Request, *args, **kwargs) -> Response:
-        distro_path = kwargs['path']
+    def get_object(self):
+        """Object is a CollectionRemote instance, required by has_model_or_obj_perms."""
+        distro = self.get_distribution()
+        return distro.repository.remote.ansible_collectionremote
+
+    def get_distribution(self):
+        distro_path = self.kwargs['path']
         distro = get_object_or_404(pulp_models.AnsibleDistribution, base_path=distro_path)
 
         if not distro.repository or not distro.repository.remote:
@@ -38,6 +39,14 @@ class SyncRemoteView(api_base.APIView):
                 detail={'remote': _('The %s distribution does not have'
                                     ' any remotes associated with it.') % distro_path})
 
+        return distro
+
+    @extend_schema(
+        description="Trigger an asynchronous sync task",
+        responses={202: AsyncOperationResponseSerializer},
+    )
+    def post(self, request: Request, *args, **kwargs) -> Response:
+        distro = self.get_distribution()
         remote = distro.repository.remote.ansible_collectionremote
 
         if not remote.requirements_file and any(

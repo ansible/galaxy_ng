@@ -10,6 +10,8 @@ from pulpcore.plugin.serializers import IdentityField
 from pulp_container.app import models as container_models
 from pulpcore.plugin import models as core_models
 
+from ansible_base.lib.serializers.mixins import CleanTextMixin
+
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control.fields import MyPermissionsField
 
@@ -299,7 +301,10 @@ class ContainerRepositoryHistorySerializer(serializers.ModelSerializer):
         return return_data
 
 
-class ContainerReadmeSerializer(serializers.ModelSerializer):
+class ContainerReadmeSerializer(CleanTextMixin, serializers.ModelSerializer):
+    # Markdown README content (platform-ui MarkdownEditor). Exclude so
+    # legitimate markdown is not rejected by Tier 2 free-text validation.
+    excluded_fields = frozenset({'text'})
     created_at = serializers.DateTimeField(source='created', required=False, read_only=True)
     updated_at = serializers.DateTimeField(source='updated', required=False)
 

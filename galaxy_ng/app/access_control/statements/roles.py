@@ -4,9 +4,7 @@ _LOCKED_ROLES = {
         "permissions": {},
         "inherit_from": ["galaxy.collection_admin", "galaxy.execution_environment_admin"],
     },
-
     # COLLECTIONS
-
     "galaxy.collection_admin": {
         "description": (
             "Create, delete and change collection namespaces. "
@@ -33,7 +31,13 @@ _LOCKED_ROLES = {
         "inherit_from": ["galaxy.ansible_repository_owner", "galaxy.collection_remote_owner"],
     },
     "galaxy.collection_remote_owner": {
-        "description": "Create and manage collection remotes.",
+        "description": (
+            "Create and manage collection remotes. "
+            "Configuring sync settings requires this role; launching a sync "
+            "also requires repository permission "
+            "(for example galaxy.ansible_repository_owner or "
+            "galaxy.collection_curator)."
+        ),
         "permissions": {
             "ansible.view_collectionremote",
             "ansible.add_collectionremote",
@@ -41,7 +45,7 @@ _LOCKED_ROLES = {
             "ansible.delete_collectionremote",
             "ansible.manage_roles_collectionremote",
         },
-        "inherit_from": []
+        "inherit_from": [],
     },
     "galaxy.ansible_repository_owner": {
         "description": "Manage ansible collection repositories.",
@@ -65,9 +69,7 @@ _LOCKED_ROLES = {
         },
         "inherit_from": [],
     },
-
     # EXECUTION ENVIRONMENTS
-
     "galaxy.execution_environment_admin": {
         "description": (
             "Push, delete and change execution environments. "
@@ -79,7 +81,7 @@ _LOCKED_ROLES = {
             "galaxy.add_containerregistryremote",
             "galaxy.change_containerregistryremote",
             "galaxy.delete_containerregistryremote",
-            "container.manage_roles_containernamespace"
+            "container.manage_roles_containernamespace",
         },
         "inherit_from": ["galaxy.execution_environment_publisher"],
     },
@@ -98,7 +100,7 @@ _LOCKED_ROLES = {
             "container.change_containernamespace",
             "container.namespace_add_containerdistribution",
             "container.manage_roles_containernamespace",
-            "container.view_containernamespace"
+            "container.view_containernamespace",
         },
         "inherit_from": ["galaxy.execution_environment_collaborator"],
     },
@@ -111,9 +113,7 @@ _LOCKED_ROLES = {
         },
         "inherit_from": [],
     },
-
     # ADMIN STUFF
-
     "galaxy.group_admin": {
         "description": "View, add, remove and change groups.",
         "permissions": {
@@ -146,11 +146,7 @@ _LOCKED_ROLES = {
     },
     "galaxy.task_admin": {
         "description": "View and cancel any task.",
-        "permissions": {
-            "core.change_task",
-            "core.delete_task",
-            "core.view_task"
-        },
+        "permissions": {"core.change_task", "core.delete_task", "core.view_task"},
         "inherit_from": [],
     },
     "galaxy.auditor": {

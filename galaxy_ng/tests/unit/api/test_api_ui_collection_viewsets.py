@@ -1,7 +1,11 @@
 import urllib
 import uuid
+from unittest import mock
 
+from django.contrib.auth.models import Permission
 from django.test import override_settings
+from django.urls import reverse
+from django.utils import timezone
 from pulp_ansible.app.models import (
     AnsibleDistribution,
     AnsibleRepository,
@@ -9,7 +13,13 @@ from pulp_ansible.app.models import (
     CollectionVersion,
     CollectionRemote
 )
+from pulpcore.app.util import get_prn
+from pulpcore.plugin.models import Task
+from pulpcore.plugin.util import assign_role
+from rest_framework import status
+
 from galaxy_ng.app import models
+from galaxy_ng.app.models import auth as auth_models
 from galaxy_ng.app.constants import DeploymentMode
 from .base import BaseTestCase, get_current_ui_url
 
@@ -18,12 +28,6 @@ def _create_repo(name, **kwargs):
     repo = AnsibleRepository.objects.create(name=name, **kwargs)
     AnsibleDistribution.objects.create(name=name, base_path=name, repository=repo)
     return repo
-
-
-def _create_remote(name, url, **kwargs):
-    return CollectionRemote.objects.create(
-        name=name, url=url, **kwargs
-    )
 
 
 def _get_create_version_in_repo(namespace, collection, repo, **kwargs):
@@ -350,3 +354,419 @@ class TestUiCollectionRemoteViewSet(BaseTestCase):
             "sync_highest_versions": -1,
         }, format='json')
         self.assertEqual(response.status_code, 400)
+
+
+@mock.patch('ansible_base.lib.serializers.mixins.get_setting', return_value=True)
+class TestUiCollectionRemoteWrite(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.admin_user = auth_models.User.objects.create(
+            username='remote_admin', is_superuser=True)
+        self.client.force_authenticate(user=self.admin_user)
+        self.list_url = get_current_ui_url('remotes-list')
+
+    def _detail_url(self, pk):
+        return get_current_ui_url('remotes-detail', kwargs={'pk': str(pk)})
+
+    def _task_from_href(self, task_href):
+        task_pk = str(task_href).rstrip('/').split('/')[-1]
+        return Task.objects.get(pk=task_pk)
+
+    def test_create_and_delete_remote(self, mock_get_setting):
+        response = self.client.post(self.list_url, {
+            "name": "test_collection_remote_1",
+            "url": "https://example.com/api/",
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(response.data['name'], 'test_collection_remote_1')
+        pk = response.data['pk']
+
+        detail_url = self._detail_url(pk)
+        response = self.client.get(detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], 'test_collection_remote_1')
+
+        # destroy dispatches pulpcore's async remote delete
+        response = self.client.delete(detail_url)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        self.assertIn('task', response.data)
+
+    def test_delete_task_reserves_remote_and_linked_repositories(self, mock_get_setting):
+        remote = CollectionRemote.objects.create(
+            name='reserve_remote', url='https://example.com/api/')
+        linked = AnsibleRepository.objects.create(
+            name='reserve_linked_repo',
+            remote=remote,
+            last_synced_metadata_time=timezone.now(),
+        )
+        # Never-synced repos are not reserved by pulp's CollectionRemoteViewSet.
+        AnsibleRepository.objects.create(
+            name='reserve_unsynced_repo', remote=remote)
+
+        response = self.client.delete(self._detail_url(remote.pk))
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED, response.data)
+        task = self._task_from_href(response.data['task'])
+
+        reserved = task.reserved_resources_record or []
+        self.assertIn(get_prn(remote), reserved)
+        self.assertIn(get_prn(linked), reserved)
+        unsynced = AnsibleRepository.objects.get(name='reserve_unsynced_repo')
+        self.assertNotIn(get_prn(unsynced), reserved)
+
+    def test_unprivileged_user_cannot_delete_remote(self, mock_get_setting):
+        remote = CollectionRemote.objects.create(
+            name='nope_delete_remote', url='https://example.com/api/')
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(self._detail_url(remote.pk))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(CollectionRemote.objects.filter(pk=remote.pk).exists())
+
+    def test_delete_and_sync_cannot_run_concurrently(self, mock_get_setting):
+        remote = CollectionRemote.objects.create(
+            name='overlap_remote', url='https://example.com/api/')
+        repo = AnsibleRepository.objects.create(
+            name='overlap_repo',
+            remote=remote,
+            last_synced_metadata_time=timezone.now(),
+        )
+        AnsibleDistribution.objects.create(
+            name='overlap_distro', base_path='overlap_distro', repository=repo)
+
+        sync_response = self.client.post(
+            reverse('galaxy:api:v3:sync', kwargs={'path': 'overlap_distro'}))
+        self.assertEqual(sync_response.status_code, status.HTTP_200_OK, sync_response.data)
+        sync_task = Task.objects.get(pk=sync_response.data['task'])
+
+        delete_response = self.client.delete(self._detail_url(remote.pk))
+        self.assertEqual(
+            delete_response.status_code, status.HTTP_202_ACCEPTED, delete_response.data)
+        delete_task = self._task_from_href(delete_response.data['task'])
+
+        remote_prn = get_prn(remote)
+        self.assertIn(remote_prn, sync_task.reserved_resources_record or [])
+        self.assertIn(remote_prn, delete_task.reserved_resources_record or [])
+
+    def test_dangerous_name_rejected_on_create(self, mock_get_setting):
+        response = self.client.post(self.list_url, {
+            "name": "<script>alert(1)</script>",
+            "url": "https://example.com/api/",
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertFalse(
+            CollectionRemote.objects.filter(name="<script>alert(1)</script>").exists())
+
+    def test_duplicate_name_rejected_on_create(self, mock_get_setting):
+        payload = {
+            "name": "duplicate_collection_remote",
+            "url": "https://example.com/api/",
+        }
+        response = self.client.post(self.list_url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+        response = self.client.post(self.list_url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(
+            CollectionRemote.objects.filter(name='duplicate_collection_remote').count(), 1)
+
+    def test_create_keep_password_hint_never_inherits_existing_proxy_password(
+        self, mock_get_setting,
+    ):
+        existing = self._create_proxy_remote(
+            'create_keep_hint_existing', 'existing-secret',
+        )
+        existing_url = existing.url
+
+        response = self.client.post(
+            self.list_url,
+            {
+                'name': existing.name,
+                'url': 'https://attacker.example.com/api/',
+                'proxy_url': 'http://proxy.example.com:4242',
+                'proxy_username': 'attacker-user',
+                'proxy_password': None,
+                'write_only_fields': [{'name': 'proxy_password', 'is_set': True}],
+            },
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+        existing.refresh_from_db()
+        self.assertEqual(existing.proxy_password, 'existing-secret')
+        self.assertEqual(existing.url, existing_url)
+        self.assertEqual(
+            CollectionRemote.objects.filter(name=existing.name).count(),
+            1,
+        )
+
+        response = self.client.post(
+            self.list_url,
+            {
+                'name': 'create_keep_hint_new_remote',
+                'url': 'https://create_keep_hint_new.example.com/api/',
+                'proxy_password': None,
+                'write_only_fields': [{'name': 'proxy_password', 'is_set': True}],
+            },
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+        new_remote = CollectionRemote.objects.get(name='create_keep_hint_new_remote')
+        self.assertNotEqual(new_remote.proxy_password, existing.proxy_password)
+        self.assertFalse(new_remote.proxy_password)
+
+    def test_unprivileged_user_cannot_create_remote(self, mock_get_setting):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(self.list_url, {
+            "name": "nope_remote",
+            "url": "https://example.com/api/",
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertFalse(CollectionRemote.objects.filter(name='nope_remote').exists())
+
+    def test_creator_with_only_add_perm_can_update_and_delete(self, mock_get_setting):
+        # add_collectionremote is enough to POST; the pulp creation hook must
+        # then grant galaxy.collection_remote_owner so PATCH/DELETE succeed.
+        creator = auth_models.User.objects.create(username='remote_creator')
+        creator.user_permissions.add(Permission.objects.get(
+            content_type__app_label='ansible',
+            codename='add_collectionremote',
+        ))
+        self.client.force_authenticate(user=creator)
+
+        response = self.client.post(self.list_url, {
+            "name": "owned_by_creator_remote",
+            "url": "https://example.com/api/",
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        detail_url = self._detail_url(response.data['pk'])
+
+        response = self.client.patch(
+            detail_url, {"url": "https://example.com/updated/"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        response = self.client.delete(detail_url)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED, response.data)
+        self.assertIn('task', response.data)
+
+    def test_name_cannot_be_renamed_on_update(self, mock_get_setting):
+        remote = CollectionRemote.objects.create(
+            name='rename_guard_remote', url='https://example.com/api/')
+        response = self.client.patch(self._detail_url(remote.pk), {
+            "name": "renamed_should_not_stick",
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        remote.refresh_from_db()
+        self.assertEqual(remote.name, 'rename_guard_remote')
+
+    def _create_proxy_remote(self, name, password):
+        return CollectionRemote.objects.create(
+            name=name,
+            url=f'https://{name}.example.com/api/',
+            proxy_url='http://proxy.example.com:4242',
+            proxy_username=f'{name}-user',
+            proxy_password=password,
+        )
+
+    def test_patch_omitting_proxy_password_preserves_it(self, mock_get_setting):
+        remote = self._create_proxy_remote('keep_proxy_pw_remote', 'keep-me')
+        response = self.client.patch(self._detail_url(remote.pk), {
+            "url": "https://example.com/updated/",
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        remote.refresh_from_db()
+        self.assertEqual(remote.proxy_password, 'keep-me')
+
+    def test_write_only_hint_does_not_copy_another_remote_proxy_password(self, mock_get_setting):
+        remote_a = self._create_proxy_remote('proxy_pw_remote_a', 'password-a')
+        remote_b = self._create_proxy_remote('proxy_pw_remote_b', 'password-b')
+
+        response = self.client.patch(self._detail_url(remote_a.pk), {
+            "name": remote_b.name,
+            "proxy_password": None,
+            "write_only_fields": [{"name": "proxy_password", "is_set": True}],
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        remote_a.refresh_from_db()
+        remote_b.refresh_from_db()
+        self.assertEqual(remote_a.proxy_password, 'password-a')
+        self.assertEqual(remote_b.proxy_password, 'password-b')
+
+    def test_owner_patch_with_forged_name_does_not_copy_other_proxy_password(
+        self, mock_get_setting,
+    ):
+        owner_a = auth_models.User.objects.create(username='remote_owner_a')
+        owner_b = auth_models.User.objects.create(username='remote_owner_b')
+
+        remote_a = self._create_proxy_remote('owner_proxy_remote_a', 'password-a')
+        remote_b = self._create_proxy_remote('owner_proxy_remote_b', 'password-b')
+        assign_role('galaxy.collection_remote_owner', owner_a, obj=remote_a)
+        assign_role('galaxy.collection_remote_owner', owner_b, obj=remote_b)
+
+        self.client.force_authenticate(user=owner_a)
+        response = self.client.patch(self._detail_url(remote_a.pk), {
+            "name": remote_b.name,
+            "proxy_password": None,
+            "write_only_fields": [{"name": "proxy_password", "is_set": True}],
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        remote_a.refresh_from_db()
+        remote_b.refresh_from_db()
+        self.assertEqual(remote_a.proxy_password, 'password-a')
+        self.assertEqual(remote_b.proxy_password, 'password-b')
+
+        response = self.client.patch(self._detail_url(remote_b.pk), {
+            "url": "https://evil.example.com/api/",
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        remote_b.refresh_from_db()
+        self.assertEqual(
+            remote_b.url,
+            'https://owner_proxy_remote_b.example.com/api/',
+        )
+
+    def test_patch_keep_hint_preserves_proxy_password(self, mock_get_setting):
+        remote = self._create_proxy_remote('patch_keep_hint_remote', 'patch-keep-me')
+        response = self.client.patch(self._detail_url(remote.pk), {
+            "url": "https://example.com/updated/",
+            "proxy_password": None,
+            "write_only_fields": [{"name": "proxy_password", "is_set": True}],
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        remote.refresh_from_db()
+        self.assertEqual(remote.proxy_password, 'patch-keep-me')
+
+    def test_patch_new_password_with_keep_hint_replaces_proxy_password(
+        self, mock_get_setting,
+    ):
+        remote = self._create_proxy_remote('patch_replace_hint_remote', 'old-secret')
+        response = self.client.patch(self._detail_url(remote.pk), {
+            "proxy_url": remote.proxy_url,
+            "proxy_username": remote.proxy_username,
+            "proxy_password": "brand-new-secret",
+            "write_only_fields": [{"name": "proxy_password", "is_set": True}],
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        remote.refresh_from_db()
+        self.assertEqual(remote.proxy_password, 'brand-new-secret')
+
+    def test_patch_explicit_null_clears_proxy_password(self, mock_get_setting):
+        remote = self._create_proxy_remote('patch_clear_pw_remote', 'clear-me')
+        response = self.client.patch(self._detail_url(remote.pk), {
+            "proxy_username": None,
+            "proxy_password": None,
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        remote.refresh_from_db()
+        self.assertFalse(remote.proxy_password)
+        self.assertIsNone(remote.proxy_username)
+
+    def test_patch_empty_proxy_password_returns_400_not_500(self, mock_get_setting):
+        remote = self._create_proxy_remote('patch_empty_pw_remote', 'keep-me')
+        response = self.client.patch(self._detail_url(remote.pk), {
+            "proxy_password": "",
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        remote.refresh_from_db()
+        self.assertEqual(remote.proxy_password, 'keep-me')
+
+    def test_patch_write_only_fields_hints_do_not_500(self, mock_get_setting):
+        remote = self._create_proxy_remote('hint_no_500_remote', 'hint-secret')
+        valid_cases = {
+            'absent': {},
+            'empty_list': {'write_only_fields': []},
+            'non_proxy_hint': {'write_only_fields': [{'name': 'token', 'is_set': True}]},
+        }
+        for label, hint_extra in valid_cases.items():
+            with self.subTest(hint=label):
+                payload = {
+                    'url': f'https://{label}.hint-no-500.example.com/api/',
+                    **hint_extra,
+                }
+                response = self.client.patch(
+                    self._detail_url(remote.pk), payload, format='json',
+                )
+                self.assertNotEqual(
+                    response.status_code,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    response.data,
+                )
+                self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        invalid_cases = {
+            'non_dict_entry': {'write_only_fields': ['token']},
+            'dict_without_name': {'write_only_fields': [{'is_set': True}]},
+            'non_list': {'write_only_fields': {'name': 'proxy_password', 'is_set': True}},
+        }
+        for label, hint_extra in invalid_cases.items():
+            with self.subTest(hint=label):
+                payload = {
+                    'url': f'https://{label}.hint-invalid.example.com/api/',
+                    **hint_extra,
+                }
+                response = self.client.patch(
+                    self._detail_url(remote.pk), payload, format='json',
+                )
+                self.assertNotEqual(
+                    response.status_code,
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    response.data,
+                )
+                self.assertEqual(
+                    response.status_code,
+                    status.HTTP_400_BAD_REQUEST,
+                    response.data,
+                )
+
+        remote.refresh_from_db()
+        self.assertEqual(remote.proxy_password, 'hint-secret')
+
+    def test_put_keep_hint_preserves_proxy_password(self, mock_get_setting):
+        remote = self._create_proxy_remote('put_keep_hint_remote', 'put-keep-me')
+        response = self.client.put(self._detail_url(remote.pk), {
+            "name": remote.name,
+            "url": remote.url,
+            "proxy_url": remote.proxy_url,
+            "proxy_username": remote.proxy_username,
+            "proxy_password": None,
+            "write_only_fields": [{"name": "proxy_password", "is_set": True}],
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        remote.refresh_from_db()
+        self.assertEqual(remote.proxy_password, 'put-keep-me')
+
+    def test_put_new_password_with_keep_hint_replaces_proxy_password(
+        self, mock_get_setting,
+    ):
+        remote = self._create_proxy_remote('put_replace_hint_remote', 'old-secret')
+        response = self.client.put(self._detail_url(remote.pk), {
+            "name": remote.name,
+            "url": remote.url,
+            "proxy_url": remote.proxy_url,
+            "proxy_username": remote.proxy_username,
+            "proxy_password": "brand-new-secret",
+            "write_only_fields": [{"name": "proxy_password", "is_set": True}],
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        remote.refresh_from_db()
+        self.assertEqual(remote.proxy_password, 'brand-new-secret')
+
+    def test_put_forged_name_keep_hint_does_not_copy_other_proxy_password(
+        self, mock_get_setting,
+    ):
+        remote_a = self._create_proxy_remote('put_forged_remote_a', 'password-a')
+        remote_b = self._create_proxy_remote('put_forged_remote_b', 'password-b')
+        response = self.client.put(self._detail_url(remote_a.pk), {
+            "name": remote_b.name,
+            "url": remote_a.url,
+            "proxy_url": remote_a.proxy_url,
+            "proxy_username": remote_a.proxy_username,
+            "proxy_password": None,
+            "write_only_fields": [{"name": "proxy_password", "is_set": True}],
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        remote_a.refresh_from_db()
+        remote_b.refresh_from_db()
+        self.assertEqual(remote_a.proxy_password, 'password-a')
+        self.assertEqual(remote_b.proxy_password, 'password-b')

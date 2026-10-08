@@ -226,12 +226,81 @@ STANDALONE_STATEMENTS = {
         },
     ],
     "CollectionRemoteViewSet": [
+        # list/retrieve stay open to any authenticated user: this viewset was
+        # originally a GET helper for the two seeded remotes. Pulp's
+        # remotes/ansible/collection requires view_collectionremote.
         {"action": ["list", "retrieve"], "principal": "authenticated", "effect": "allow"},
         {
-            "action": ["sync", "update", "partial_update"],
+            "action": "create",
             "principal": "authenticated",
             "effect": "allow",
-            "condition": "has_model_perms:ansible.change_collectionremote",
+            "condition": "has_model_perms:ansible.add_collectionremote",
+        },
+        {
+            "action": "sync",
+            "principal": "authenticated",
+            "effect": "allow",
+            # SyncRemoteView always syncs the distribution's linked remote and
+            # already validates requirements_file on that remote. Do not add
+            # require_requirements_yaml here: it reads request.data["remote"]
+            # and a stale/malformed body value can 500 before the view runs.
+            # Native Pulp repository-sync still uses that condition (pulp.py).
+            "condition": [
+                "can_sync_collection_remote:ansible.modify_ansible_repo_content",
+            ],
+        },
+        {
+            "action": ["update", "partial_update"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.change_collectionremote",
+        },
+        {
+            "action": "destroy",
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_or_obj_perms:ansible.delete_collectionremote",
+        },
+    ],
+    "AnsibleRepositoryViewSet": [
+        # list is allowed for any authenticated user. Private repos are filtered
+        # by AnsibleRepositoryAccessPolicy.scope_queryset on every action, so
+        # retrieve/update/destroy of a repo the caller cannot view return 404
+        # rather than 403 (which would disclose that the name exists).
+        {"action": ["list"], "principal": "authenticated", "effect": "allow"},
+        {
+            "action": ["retrieve"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_ansible_repo_perms:ansible.view_ansiblerepository",
+        },
+        {
+            "action": ["create"],
+            "principal": "authenticated",
+            "effect": "allow",
+            "condition": "has_model_perms:ansible.add_ansiblerepository",
+        },
+        {
+            "action": ["update", "partial_update"],
+            "principal": "authenticated",
+            "effect": "allow",
+            # Match pulpcore's default update policy: change plus view.
+            "condition": [
+                "has_ansible_repo_perms:ansible.change_ansiblerepository",
+                "has_ansible_repo_perms:ansible.view_ansiblerepository",
+            ],
+        },
+        {
+            "action": ["destroy"],
+            "principal": "authenticated",
+            "effect": "allow",
+            # Match pulp repositories/ansible/ansible: object/model delete
+            # plus is_not_protected_base_path so published/staging/etc. cannot
+            # be removed through this wrapper either.
+            "condition": [
+                "has_ansible_repo_perms:ansible.delete_ansiblerepository",
+                "is_not_protected_base_path",
+            ],
         },
     ],
     "UserViewSet": _user_statements,
