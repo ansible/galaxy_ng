@@ -328,7 +328,7 @@ psycopg-binary==3.3.4
     # via psycopg
 pulp-ansible==0.30.1
     # via galaxy-ng (setup.py)
-pulp-container==2.27.11
+pulp-container==2.27.13
     # via galaxy-ng (setup.py)
 pulp-glue==0.39.1
     # via pulpcore
@@ -358,7 +358,7 @@ pyflakes==3.1.0
     # via flake8
 pygtrie==2.5.0
     # via pulpcore
-pyjwt[crypto]==2.13.0
+pyjwt[crypto]==2.15.1
     # via
     #   django-ansible-base
     #   galaxy-ng (setup.py)

@@ -19,7 +19,7 @@ setup(
         "pulpcore>=3.105.21,<3.106",
         "pulp_ansible>=0.30.1,<0.31",
         "pulp-container>=2.27.11,<2.28",
-        "pyjwt[crypto]>=2.13.0",  # minimum version enforced to address AAP-78030
+        "pyjwt[crypto]>=2.14.0",  # minimum version enforced to address 94872
         "django>=5.2.17,<5.3",  # minimum version enforced to address AAP-85800
         "django-prometheus>=2.0.0",
         "social-auth-core>=4.4.2",
