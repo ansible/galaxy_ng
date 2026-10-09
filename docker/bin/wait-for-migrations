@@ -12,6 +12,31 @@ readonly TIMEOUT=60
 
 log_message() { echo "[${CMDNAME}]" "$@" >&2; }
 log_error() { echo "[${CMDNAME}] ERROR:" "$@" >&2; }
+log_error_lines() {
+    local line
+    while IFS= read -r line || [[ -n "${line}" ]]; do
+        log_error "${line}"
+    done
+}
+log_pending_migrations() {
+    local line
+    while IFS= read -r line || [[ -n "${line}" ]]; do
+        if [[ "${line}" == *"[ ]"* ]]; then
+            log_error "${line}"
+        fi
+    done
+}
+
+ERROR_FILE=""
+cleanup_error_file() {
+    if [[ -n "${ERROR_FILE}" ]]; then
+        rm -f -- "${ERROR_FILE}"
+        ERROR_FILE=""
+    fi
+}
+trap cleanup_error_file EXIT
+trap 'cleanup_error_file; exit 130' INT
+trap 'cleanup_error_file; exit 143' TERM
 
 # Args: last_sleep
 next_sleep() {
@@ -22,13 +47,35 @@ wait_for() {
     local rc=1
     local attempt=1
     local next_sleep="${MIN_SLEEP}"
+    local output
+
+    if ! ERROR_FILE=$(mktemp); then
+        log_error "Unable to create temporary file for migration diagnostics"
+        return 1
+    fi
 
     while true; do
         log_message "Attempt ${attempt} of ${ATTEMPTS}"
 
-        timeout "${TIMEOUT}" \
-                /bin/bash -c "! django-admin showmigrations | grep '\[ \]'" &>/dev/null \
-            && return || rc=$?
+        if output=$(timeout "${TIMEOUT}" django-admin showmigrations 2>"${ERROR_FILE}"); then
+            if ! grep -q '\[ \]' <<< "${output}"; then
+                cleanup_error_file
+                return 0
+            fi
+
+            rc=1
+            log_message "Pending migrations remain"
+            log_pending_migrations <<< "${output}"
+        else
+            rc=$?
+            log_error "django-admin showmigrations failed with exit code ${rc}"
+            if ! log_error_lines < "${ERROR_FILE}"; then
+                log_error "Unable to read migration diagnostics"
+            fi
+            if [[ -n "${output}" ]]; then
+                log_error_lines <<< "${output}"
+            fi
+        fi
 
         (( ++attempt > ATTEMPTS )) && break
 
@@ -37,6 +84,7 @@ wait_for() {
         next_sleep=$(next_sleep ${next_sleep})
     done
 
+    cleanup_error_file
     return $rc
 }
 
