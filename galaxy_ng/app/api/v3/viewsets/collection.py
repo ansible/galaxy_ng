@@ -27,6 +27,7 @@ from pulp_ansible.app.tasks.copy import copy_collection
 from galaxy_ng.app import models
 from galaxy_ng.app.access_control import access_policy
 from galaxy_ng.app.api import base as api_base
+from galaxy_ng.app.api.utils import parse_collection_filename
 from galaxy_ng.app.api.v3.serializers import CollectionUploadSerializer
 from galaxy_ng.app.common import metrics
 from galaxy_ng.app.common.parsers import AnsibleGalaxy29MultiPartParser
@@ -166,6 +167,33 @@ class CollectionArtifactDownloadView(api_base.APIView):
     def _get_ansible_distribution(self, base_path):
         return AnsibleDistribution.objects.get(base_path=base_path)
 
+    @staticmethod
+    def _track_collection_download(request, filename, distro_base_path):
+        """Apply enabled logging and counting for a collection artifact download."""
+        log_download = settings.ANSIBLE_COLLECT_DOWNLOAD_LOG
+        count_download = settings.get("ANSIBLE_COLLECT_DOWNLOAD_COUNT", False)
+        if not (log_download or count_download):
+            return
+
+        try:
+            collection_filename = parse_collection_filename(filename)
+        except ValueError:
+            raise NotFound()
+
+        if log_download:
+            pulp_ansible_views.CollectionArtifactDownloadView.log_download(
+                request,
+                collection_filename.namespace,
+                collection_filename.name,
+                collection_filename.version,
+                distro_base_path,
+            )
+
+        if count_download:
+            pulp_ansible_views.CollectionArtifactDownloadView.count_download(
+                collection_filename.namespace, collection_filename.name
+            )
+
     def get(self, request, *args, **kwargs):
         metrics.collection_artifact_download_attempts.inc()
 
@@ -174,23 +202,7 @@ class CollectionArtifactDownloadView(api_base.APIView):
         prefix = settings.CONTENT_PATH_PREFIX.strip('/')
         distribution = self._get_ansible_distribution(distro_base_path)
 
-        if settings.ANSIBLE_COLLECT_DOWNLOAD_LOG:
-            pulp_ansible_views.CollectionArtifactDownloadView.log_download(
-                request, filename, distro_base_path
-            )
-
-        if settings.get("ANSIBLE_COLLECT_DOWNLOAD_COUNT", False):
-            # Extract namespace and name from filename (format: namespace-name-version.tar.gz)
-            filename_base = filename.replace('.tar.gz', '')
-            parts = filename_base.split('-')
-            if len(parts) >= 3:
-                # namespace-name-version format
-                namespace = parts[0]
-                name = '-'.join(parts[1:-1])
-                pulp_ansible_views.CollectionArtifactDownloadView.count_download(namespace, name)
-            else:
-                # Fallback if parsing fails - log a warning
-                log.warning(f"Unable to parse namespace and name from filename: {filename}")
+        self._track_collection_download(request, filename, distro_base_path)
 
         if settings.GALAXY_DEPLOYMENT_MODE == DeploymentMode.INSIGHTS.value:  # noqa: SIM300
             url = 'http://{host}:{port}/{prefix}/{distro_base_path}/{filename}'.format(

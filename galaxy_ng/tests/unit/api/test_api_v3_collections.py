@@ -17,10 +17,17 @@ from pulp_ansible.app.models import (
 
 from pulp_ansible.app.galaxy.v3.views import get_collection_dependents, get_unique_dependents
 
+import pytest
+
 from rest_framework import status
+from rest_framework.exceptions import NotFound
+from rest_framework.test import APIRequestFactory
 
 from galaxy_ng.app import models
-from galaxy_ng.app.api.v3.viewsets.collection import CollectionRepositoryMixing
+from galaxy_ng.app.api.v3.viewsets.collection import (
+    CollectionArtifactDownloadView,
+    CollectionRepositoryMixing,
+)
 from galaxy_ng.app.constants import DeploymentMode
 from galaxy_ng.tests.constants import TEST_COLLECTION_CONFIGS
 
@@ -149,6 +156,115 @@ class TestCollectionViewsets(BaseTestCase):
 
         # used for href tests
         self.pulp_href_fragment = "pulp_ansible/galaxy"
+
+    @override_settings(
+        ANSIBLE_COLLECT_DOWNLOAD_LOG=True,
+        CONTENT_ORIGIN="https://origin",
+    )
+    def test_artifact_download_logs_parsed_collection_filename(self):
+        filename = "autohubtest2-siqfphue-1.0.0.tar.gz"
+        request = APIRequestFactory().get("/")
+        distribution = mock.Mock()
+        distribution.content_guard.cast.return_value.preauthenticate_url.return_value = (
+            "https://content/"
+        )
+
+        view = CollectionArtifactDownloadView()
+        view.kwargs = {
+            "distro_base_path": self.repo.name,
+            "filename": filename,
+        }
+
+        with (
+            mock.patch.object(view, "_get_ansible_distribution", return_value=distribution),
+            mock.patch(
+                "galaxy_ng.app.api.v3.viewsets.collection.pulp_ansible_views."
+                "CollectionArtifactDownloadView.log_download"
+            ) as log_download,
+        ):
+            view.get(request)
+
+        log_download.assert_called_once_with(
+            request,
+            "autohubtest2",
+            "siqfphue",
+            "1.0.0",
+            self.repo.name,
+        )
+
+    @override_settings(
+        ANSIBLE_COLLECT_DOWNLOAD_LOG=False,
+        ANSIBLE_COLLECT_DOWNLOAD_COUNT=True,
+        CONTENT_ORIGIN="https://origin",
+    )
+    def test_artifact_download_counts_parsed_collection_filename(self):
+        filename = "autohubtest2-siqfphue-1.0.0.tar.gz"
+        request = APIRequestFactory().get("/")
+        distribution = mock.Mock()
+        distribution.content_guard.cast.return_value.preauthenticate_url.return_value = (
+            "https://content/"
+        )
+
+        view = CollectionArtifactDownloadView()
+        view.kwargs = {
+            "distro_base_path": self.repo.name,
+            "filename": filename,
+        }
+
+        with (
+            mock.patch.object(view, "_get_ansible_distribution", return_value=distribution),
+            mock.patch(
+                "galaxy_ng.app.api.v3.viewsets.collection.pulp_ansible_views."
+                "CollectionArtifactDownloadView.count_download"
+            ) as count_download,
+        ):
+            view.get(request)
+
+        count_download.assert_called_once_with("autohubtest2", "siqfphue")
+
+    @override_settings(
+        ANSIBLE_COLLECT_DOWNLOAD_LOG=True,
+        CONTENT_ORIGIN="https://origin",
+    )
+    def test_artifact_download_returns_not_found_for_invalid_tracked_filename(self):
+        request = APIRequestFactory().get("/")
+        distribution = mock.Mock()
+
+        view = CollectionArtifactDownloadView()
+        view.kwargs = {
+            "distro_base_path": self.repo.name,
+            "filename": "invalid.tar.gz",
+        }
+
+        with (
+            mock.patch.object(view, "_get_ansible_distribution", return_value=distribution),
+            pytest.raises(NotFound),
+        ):
+            view.get(request)
+
+    @override_settings(
+        ANSIBLE_COLLECT_DOWNLOAD_LOG=False,
+        ANSIBLE_COLLECT_DOWNLOAD_COUNT=False,
+        CONTENT_ORIGIN="https://origin",
+    )
+    def test_artifact_download_skips_parsing_when_tracking_is_disabled(self):
+        request = APIRequestFactory().get("/")
+        distribution = mock.Mock()
+        distribution.content_guard.cast.return_value.preauthenticate_url.return_value = (
+            "https://content/"
+        )
+
+        view = CollectionArtifactDownloadView()
+        view.kwargs = {
+            "distro_base_path": self.repo.name,
+            "filename": "invalid.tar.gz",
+        }
+
+        with mock.patch.object(view, "_get_ansible_distribution", return_value=distribution):
+            response = view.get(request)
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.url, "https://content/")
 
     def upload_collections(self, namespace=None, collection_configs=None):
         """using the config from TEST_COLLECTION_CONFIGS,
