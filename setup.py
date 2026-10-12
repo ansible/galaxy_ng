@@ -31,7 +31,7 @@ setup(
         "boto3",
         "distro",
         "django-flags>=5.0.13",
-        "django-ansible-base[jwt-consumer,feature-flags] @ git+https://github.com/ansible/django-ansible-base@e5a492d23705be7a6a22a9047ac3e4a0b3a25493",
+        "django-ansible-base[jwt-consumer,feature-flags] @ git+https://github.com/ansible/django-ansible-base@ef2ceb250322272451ce220d10c20947898d36d3",
         "django-crum==0.7.9",
         "django-automated-logging~=6.2",
         "django-storages[azure,boto3,s3]",
