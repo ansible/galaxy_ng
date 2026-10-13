@@ -718,6 +718,10 @@ class AccessPolicyBase(AccessPolicyFromSettings):
         if request.method == 'OPTIONS':
             return request.user.is_authenticated
 
+        # This is a POST (and now OPTIONS) only endpoint, return early for any other method
+        if request.method != 'POST':
+            return request.user.is_authenticated
+
         if request.method == 'POST' and not request.data:
             if not request.user.is_authenticated:
                 return False
