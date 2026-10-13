@@ -1,6 +1,6 @@
 from django.db import transaction
 from django.db.models import Q
-from pulp_ansible.app.models import Collection
+from pulp_ansible.app.models import CollectionVersion
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -121,7 +121,7 @@ def delete_namespace(name: str) -> Response:
 
     Performs checks to ensure:
     1. Namespace exists
-    2. No collections are associated with the namespace
+    2. No non-rejected collections are associated with the namespace
 
     Args:
         name: The name of the namespace to delete
@@ -139,8 +139,12 @@ def delete_namespace(name: str) -> Response:
             detail={'name': f'Namespace {name} does not exist.'}
         )
 
-    # Check if there are any collections in the namespace
-    if Collection.objects.filter(namespace=namespace.name).exists():
+    # Check if there are any collection versions in the namespace.
+    # Collections with no versions don't block deletion.
+    # For now, we allow deletion if no collection versions exist.
+    if CollectionVersion.objects.filter(
+        collection__namespace=namespace.name
+    ).exists():
         raise ValidationError(
             detail=(
                 f"Namespace {namespace.name} cannot be deleted because "
