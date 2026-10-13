@@ -9,9 +9,8 @@ class TestUserRolePipeline(TestCase):
     @patch('galaxy_ng.app.pipelines.settings')
     def test_user_role_no_user(self, mock_settings):
         response = {'roles': ['admin']}
-        details = {}
 
-        result = pipelines.user_role(response, details, user=None)
+        result = pipelines.user_role(response, user=None)
 
         assert result is None
 
@@ -20,9 +19,8 @@ class TestUserRolePipeline(TestCase):
         mock_settings.KEYCLOAK_ROLE_TOKEN_CLAIM = 'roles'
         mock_user = Mock()
         response = {}
-        details = {}
 
-        result = pipelines.user_role(response, details, user=mock_user)
+        result = pipelines.user_role(response, user=mock_user)
 
         assert result is None
         mock_user.save.assert_not_called()
@@ -32,9 +30,8 @@ class TestUserRolePipeline(TestCase):
         mock_settings.KEYCLOAK_ROLE_TOKEN_CLAIM = 'roles'
         mock_user = Mock()
         response = {'roles': []}
-        details = {}
 
-        result = pipelines.user_role(response, details, user=mock_user)
+        result = pipelines.user_role(response, user=mock_user)
 
         assert result is None
         mock_user.save.assert_not_called()
@@ -44,9 +41,8 @@ class TestUserRolePipeline(TestCase):
         mock_settings.KEYCLOAK_ROLE_TOKEN_CLAIM = 'roles'
         mock_user = Mock()
         response = {'roles': 'admin'}
-        details = {}
 
-        result = pipelines.user_role(response, details, user=mock_user)
+        result = pipelines.user_role(response, user=mock_user)
 
         assert result is None
         mock_user.save.assert_not_called()
@@ -57,9 +53,8 @@ class TestUserRolePipeline(TestCase):
         mock_settings.KEYCLOAK_ADMIN_ROLE = 'hubadmin'
         mock_user = Mock()
         response = {'roles': ['user', 'hubadmin', 'viewer']}
-        details = {}
 
-        pipelines.user_role(response, details, user=mock_user)
+        pipelines.user_role(response, user=mock_user)
 
         assert mock_user.is_staff is True
         assert mock_user.is_admin is True
@@ -72,9 +67,8 @@ class TestUserRolePipeline(TestCase):
         mock_settings.KEYCLOAK_ADMIN_ROLE = 'hubadmin'
         mock_user = Mock()
         response = {'roles': ['user', 'viewer']}
-        details = {}
 
-        pipelines.user_role(response, details, user=mock_user)
+        pipelines.user_role(response, user=mock_user)
 
         assert mock_user.is_staff is False
         assert mock_user.is_admin is False
@@ -87,9 +81,8 @@ class TestUserRolePipeline(TestCase):
         mock_settings.KEYCLOAK_ADMIN_ROLE = 'admin'
         mock_user = Mock()
         response = {'roles': ['admin']}
-        details = {}
 
-        pipelines.user_role(response, details, user=mock_user)
+        pipelines.user_role(response, user=mock_user)
 
         assert mock_user.is_staff is True
         assert mock_user.is_admin is True
@@ -102,9 +95,8 @@ class TestUserRolePipeline(TestCase):
         mock_settings.KEYCLOAK_ADMIN_ROLE = 'admin'
         mock_user = Mock()
         response = {'roles': ['admin']}
-        details = {}
 
-        pipelines.user_role(response, details, user=mock_user, extra_arg='test', kwarg1='value1')
+        pipelines.user_role(response, user=mock_user, extra_arg='test', kwarg1='value1')
 
         assert mock_user.is_staff is True
         assert mock_user.is_admin is True

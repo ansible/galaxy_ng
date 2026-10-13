@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 
 
-def user_role(response, details, user=None, *args, **kwargs):
+def user_role(response, user=None, *args, **kwargs):
     """Pipeline used by SOCIAL AUTH to associate superuser priviledges."""
     if not user:
         return
