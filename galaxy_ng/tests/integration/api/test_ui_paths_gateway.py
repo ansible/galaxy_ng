@@ -136,9 +136,7 @@ def test_gw_api_ui_v1_distributions(galaxy_client):
         # this next assert might fail if the test suite has been run before against
         # the same hub instance
         # https://issues.redhat.com/browse/AAH-2601
-        try:
-            assert key in distro_tuples
-        except AssertionError:
+        if key not in distro_tuples:
             pytest.xfail("rh-certified distribution has not been found because "
                          "the distribution endpoint returns the first 100 distributions"
                          " and rh-certified is further down in the list. "
