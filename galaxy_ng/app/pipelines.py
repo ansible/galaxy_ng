@@ -24,7 +24,7 @@ def user_role(response, user=None, *args, **kwargs):
     user.save()
 
 
-def user_group(response, details, user=None, *args, **kwargs):
+def user_group(response, user=None, *args, **kwargs):
     """Pipeline used by social auth to update a users group associations."""
     if not user:
         return

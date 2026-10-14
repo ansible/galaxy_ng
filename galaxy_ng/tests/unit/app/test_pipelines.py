@@ -110,9 +110,8 @@ class TestUserGroupPipeline(TestCase):
     @patch('galaxy_ng.app.pipelines.settings')
     def test_user_group_no_user(self, mock_settings, mock_group):
         response = {'groups': ['admin']}
-        details = {}
 
-        result = pipelines.user_group(response, details, user=None)
+        result = pipelines.user_group(response, user=None)
 
         assert result is None
         mock_group.objects.get_or_create.assert_not_called()
@@ -123,9 +122,8 @@ class TestUserGroupPipeline(TestCase):
         mock_settings.KEYCLOAK_GROUP_TOKEN_CLAIM = 'groups'
         mock_user = Mock()
         response = {'groups': 'admin'}
-        details = {}
 
-        result = pipelines.user_group(response, details, user=mock_user)
+        result = pipelines.user_group(response, user=mock_user)
 
         assert result is None
         mock_group.objects.get_or_create.assert_not_called()
@@ -145,9 +143,8 @@ class TestUserGroupPipeline(TestCase):
         ]
 
         response = {'groups': ['admin', 'users']}
-        details = {}
 
-        pipelines.user_group(response, details, user=mock_user)
+        pipelines.user_group(response, user=mock_user)
 
         assert mock_group.objects.get_or_create.call_count == 2
         mock_group.objects.get_or_create.assert_any_call(name='admin')
@@ -173,9 +170,8 @@ class TestUserGroupPipeline(TestCase):
         ]
 
         response = {'groups': ['/org/department/admin', '/org/users', 'viewer']}
-        details = {}
 
-        pipelines.user_group(response, details, user=mock_user)
+        pipelines.user_group(response, user=mock_user)
 
         assert mock_group.objects.get_or_create.call_count == 3
         mock_group.objects.get_or_create.assert_any_call(name='admin')
@@ -193,9 +189,8 @@ class TestUserGroupPipeline(TestCase):
         mock_settings.KEYCLOAK_GROUP_TOKEN_CLAIM = 'groups'
         mock_user = Mock()
         response = {'groups': []}
-        details = {}
 
-        pipelines.user_group(response, details, user=mock_user)
+        pipelines.user_group(response, user=mock_user)
 
         mock_group.objects.get_or_create.assert_not_called()
         mock_user.groups.clear.assert_called_once()
@@ -210,9 +205,8 @@ class TestUserGroupPipeline(TestCase):
         mock_group.objects.get_or_create.return_value = (mock_group_obj, True)
 
         response = {'groups': ['single_group']}
-        details = {}
 
-        pipelines.user_group(response, details, user=mock_user)
+        pipelines.user_group(response, user=mock_user)
 
         mock_group.objects.get_or_create.assert_called_once_with(name='single_group')
         mock_user.groups.clear.assert_called_once()
@@ -228,9 +222,8 @@ class TestUserGroupPipeline(TestCase):
         mock_group.objects.get_or_create.return_value = (mock_group_obj, True)
 
         response = {'groups': ['/level1/level2/level3/level4/final_group']}
-        details = {}
 
-        pipelines.user_group(response, details, user=mock_user)
+        pipelines.user_group(response, user=mock_user)
 
         mock_group.objects.get_or_create.assert_called_once_with(name='final_group')
         mock_user.groups.clear.assert_called_once()
@@ -246,9 +239,8 @@ class TestUserGroupPipeline(TestCase):
         mock_group.objects.get_or_create.return_value = (mock_group_obj, True)
 
         response = {'groups': ['test_group']}
-        details = {}
 
-        pipelines.user_group(response, details, user=mock_user, extra_arg='test', kwarg1='value1')
+        pipelines.user_group(response, user=mock_user, extra_arg='test', kwarg1='value1')
 
         mock_group.objects.get_or_create.assert_called_once_with(name='test_group')
         mock_user.groups.clear.assert_called_once()
