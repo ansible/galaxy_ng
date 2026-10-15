@@ -16,7 +16,7 @@ setup(
     setup_requires=["wheel"],
     install_requires=[
         "galaxy-importer>=0.4.31,<0.5.0",
-        "pulpcore>=3.105.21,<3.106",
+        "pulpcore>=3.105.23,<3.106",
         "pulp_ansible>=0.30.1,<0.31",
         "pulp-container>=2.27.11,<2.28",
         "pyjwt[crypto]>=2.14.0",  # minimum version enforced to address 94872
