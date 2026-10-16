@@ -478,7 +478,7 @@ uritemplate==4.2.0
     # via drf-spectacular
 url-normalize==2.2.1
     # via pulpcore
-urllib3==2.7.0
+urllib3==2.8.0
     # via
     #   botocore
     #   requests
