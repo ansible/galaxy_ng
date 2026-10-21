@@ -19,6 +19,14 @@
     "addLabels": ["dependencies", "python"]
   },
 
+  "pip_setup": {
+    "enabled": false
+  },
+
+  "pip_requirements": {
+    "enabled": false
+  },
+
   "lockFileMaintenance": {
     "enabled": false,
     "schedule": ["at any time"],
