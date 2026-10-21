@@ -1,7 +1,6 @@
 """Utility functions for AH tests."""
 
 import logging
-from typing import Optional
 
 import requests
 import re
@@ -148,8 +147,8 @@ class UIClient:
 
     def get(
         self,
-        relative_url: Optional[str] = None,
-        absolute_url: Optional[str] = None
+        relative_url: str | None = None,
+        absolute_url: str | None = None
     ) -> requests.models.Response:
 
         pheaders = {
@@ -179,8 +178,8 @@ class UIClient:
 
     def get_paginated(
         self,
-        relative_url: Optional[str] = None,
-        absolute_url: Optional[str] = None
+        relative_url: str | None = None,
+        absolute_url: str | None = None
     ) -> list:
         """Iterate through all results in a paginated queryset"""
         if absolute_url:

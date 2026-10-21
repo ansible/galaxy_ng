@@ -827,7 +827,7 @@ class LegacyRoleImportDetailSerializer(serializers.Serializer):
             #  However to preserve current behavior we will return a naive object for now
             #  and revisit this code in future.
             ts = datetime.datetime.fromtimestamp(
-                message['time'], tz=datetime.timezone.utc
+                message['time'], tz=datetime.UTC
             ).replace(tzinfo=None).isoformat()
             msg_state = self.STATE_MAP.get(message['state'].upper(), message['state'].upper())
             msg = {

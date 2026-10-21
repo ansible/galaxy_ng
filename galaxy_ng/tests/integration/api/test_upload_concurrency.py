@@ -47,7 +47,7 @@ def test_upload_concurrency(ansible_config, settings, galaxy_client):
 
         future_to_args_kwargs = {
             executor.submit(ansible_galaxy, args, **kwargs): (args, kwargs)
-            for args, kwargs in zip(args_list, kwargs_list)
+            for args, kwargs in zip(args_list, kwargs_list, strict=False)
         }
 
         for future in concurrent.futures.as_completed(future_to_args_kwargs):

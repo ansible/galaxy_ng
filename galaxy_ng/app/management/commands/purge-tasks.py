@@ -1,5 +1,5 @@
 from gettext import gettext as _
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 import uuid
 
 import django_guid
@@ -68,12 +68,12 @@ class Command(BaseCommand):
             raise CommandError("You must provide either --finished-before or --days-before.")
 
         if days_before:
-            finished_before_dt = datetime.now(timezone.utc) - timedelta(days=days_before)
+            finished_before_dt = datetime.now(UTC) - timedelta(days=days_before)
 
         if finished_before:
             finished_before_dt = django_timezone.make_aware(
                 finished_before,
-                timezone=timezone.utc
+                timezone=UTC
             )
 
         states = ("completed", "failed", "skipped", "canceled")

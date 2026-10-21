@@ -152,7 +152,7 @@ def test_legacy_role_download_counter_concurrency(ansible_config):
 
         future_to_args_kwargs = {
             executor.submit(fake_install_role, *args, **kwargs): (args, kwargs)
-            for args, kwargs in zip(args_list, kwargs_list)
+            for args, kwargs in zip(args_list, kwargs_list, strict=False)
         }
 
         for future in concurrent.futures.as_completed(future_to_args_kwargs):

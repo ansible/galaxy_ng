@@ -5,7 +5,8 @@ import logging
 import redis
 
 from functools import wraps
-from typing import Any, Callable, Optional
+from typing import Any
+from collections.abc import Callable
 from uuid import uuid4
 
 from django.conf import settings
@@ -45,11 +46,11 @@ def get_redis_connection():
     return _conn
 
 
-conn: Optional[redis.Redis] = get_redis_connection()
+conn: redis.Redis | None = get_redis_connection()
 
 
 def connection_error_wrapper(
-    func: Optional[Callable] = None, default: Callable = lambda: 0
+    func: Callable | None = None, default: Callable = lambda: 0
 ) -> Callable:
     """A decorator that enables sync functions which use Redis to swallow connection errors."""
 

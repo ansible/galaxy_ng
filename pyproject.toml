@@ -75,6 +75,7 @@ omit = [
 # Ruff
 # ---------------------------------------------------------
 [tool.ruff]
+target-version = "py312"
 line-length = 100
 extend-exclude = [
     "galaxy_ng/_vendor/",
@@ -154,6 +155,8 @@ extend-ignore = [
     # TD003 Missing issue link on the line following this TODO
     # We don't create issues for TODOs
     "TD003",
+    # Ignored because it was removed at Ruff 0.13
+    "UP038",
 ]
 
 [tool.ruff.lint.per-file-ignores]

@@ -147,7 +147,7 @@ class TestRoleMetadata(TestCase):
     ):
         mock_get_galaxy_key.return_value = None
         mock_date = datetime.datetime(
-            2021, 10, 31, 12, 30, 45, tzinfo=datetime.timezone.utc
+            2021, 10, 31, 12, 30, 45, tzinfo=datetime.UTC
         )
         mock_get_head_date.return_value = mock_date
 

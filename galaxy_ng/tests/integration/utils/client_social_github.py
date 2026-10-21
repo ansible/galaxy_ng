@@ -1,4 +1,3 @@
-from typing import Optional
 from urllib.parse import urlparse
 
 import requests
@@ -140,8 +139,8 @@ class SocialGithubClient:
 
     def get(
         self,
-        relative_url: Optional[str] = None,
-        absolute_url: Optional[str] = None
+        relative_url: str | None = None,
+        absolute_url: str | None = None
     ) -> requests.models.Response:
 
         pheaders = {
@@ -163,8 +162,8 @@ class SocialGithubClient:
 
     def delete(
         self,
-        relative_url: Optional[str] = None,
-        absolute_url: Optional[str] = None,
+        relative_url: str | None = None,
+        absolute_url: str | None = None,
     ) -> requests.models.Response:
 
         pheaders = {
@@ -186,8 +185,8 @@ class SocialGithubClient:
 
     def put(
         self,
-        relative_url: Optional[str] = None,
-        absolute_url: Optional[str] = None,
+        relative_url: str | None = None,
+        absolute_url: str | None = None,
         data=None,
     ) -> requests.models.Response:
 
@@ -210,8 +209,8 @@ class SocialGithubClient:
 
     def patch(
         self,
-        relative_url: Optional[str] = None,
-        absolute_url: Optional[str] = None,
+        relative_url: str | None = None,
+        absolute_url: str | None = None,
         data=None
     ) -> requests.models.Response:
 
@@ -234,8 +233,8 @@ class SocialGithubClient:
 
     def post(
         self,
-        relative_url: Optional[str] = None,
-        absolute_url: Optional[str] = None,
+        relative_url: str | None = None,
+        absolute_url: str | None = None,
         data=None
     ) -> requests.models.Response:
 

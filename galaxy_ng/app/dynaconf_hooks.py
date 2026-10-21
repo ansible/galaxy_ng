@@ -11,11 +11,11 @@ settings before making conditionals.
 
 Read more: https://www.dynaconf.com/advanced/#hooks
 """
+
 import json
 import logging
 import os
 import re
-import sys
 from typing import Any
 
 import ldap
@@ -32,12 +32,7 @@ from dynaconf import Dynaconf, Validator
 
 from galaxy_ng.app.dynamic_settings import DYNAMIC_SETTINGS_SCHEMA
 
-if sys.version_info < (3, 10):
-    # Python 3.9 has a rather different interface for `entry_points`.
-    # Let's use a compatibility version.
-    from importlib_metadata import EntryPoint
-else:
-    from importlib.metadata import EntryPoint
+from importlib.metadata import EntryPoint
 
 logger = logging.getLogger(__name__)
 
@@ -61,19 +56,19 @@ def _parse_forwarded_header(forwarded_header: str) -> tuple[str | None, str | No
     host = None
 
     # Handle multiple forwarded entries separated by commas
-    for entry in forwarded_header.split(','):
+    for entry in forwarded_header.split(","):
         entry = entry.strip()
         # Split by semicolons to get individual parameters
-        for param in entry.split(';'):
+        for param in entry.split(";"):
             param = param.strip()
-            if '=' in param:
-                key, value = param.split('=', 1)
+            if "=" in param:
+                key, value = param.split("=", 1)
                 key = key.strip().lower()
                 value = value.strip().strip('"')  # Remove quotes if present
 
-                if key == 'proto' and not proto:
+                if key == "proto" and not proto:
                     proto = value
-                elif key == 'host' and not host:
+                elif key == "host" and not host:
                     host = value
 
     return proto, host
@@ -102,7 +97,7 @@ def _extract_proto_and_host(headers):
 def _apply_proto_host_fallbacks(proto, host, req):
     """Apply fallback values for proto and host when not provided in headers."""
     if not proto:
-        proto = 'https' if req.is_secure() else 'http'
+        proto = "https" if req.is_secure() else "http"
     if not host:
         host = "localhost:5001"  # host read/set in _extract_proto_and_host()
     return proto, host
@@ -114,6 +109,7 @@ def _validate_resource_server_headers(proto, host):
     """
     if not proto or not host:
         from django.core.exceptions import SuspiciousOperation
+
         raise SuspiciousOperation(
             "alter_hostname_settings: When connected to resource server, proto and host "
             f"must be provided in headers. Found proto='{proto}', host='{host}'. "
@@ -122,13 +118,7 @@ def _validate_resource_server_headers(proto, host):
         )
 
 
-def alter_hostname_settings(
-    temp_settings,
-    value,
-    key: str,
-    *args,
-    **kwargs
-):
+def alter_hostname_settings(temp_settings, value, key: str, *args, **kwargs):
     """Use the request headers to dynamically alter the content origin and api hostname.
 
     This is useful in scenarios where the hub is accessible directly and through a
@@ -147,7 +137,7 @@ def alter_hostname_settings(
     Returns:
         The modified URL based on request headers, or the original value if no modification needed
     """
-    ALLOWED_KEYS = ['CONTENT_ORIGIN', 'ANSIBLE_API_HOSTNAME', 'TOKEN_SERVER']
+    ALLOWED_KEYS = ["CONTENT_ORIGIN", "ANSIBLE_API_HOSTNAME", "TOKEN_SERVER"]
 
     if not apps.ready or key.upper() not in ALLOWED_KEYS:
         return value.value
@@ -168,18 +158,12 @@ def alter_hostname_settings(
         proto, host = _apply_proto_host_fallbacks(proto, host, req)
 
     baseurl = proto + "://" + host
-    if key.upper() == 'TOKEN_SERVER':
-        baseurl += '/token/'
+    if key.upper() == "TOKEN_SERVER":
+        baseurl += "/token/"
     return baseurl
 
 
-def read_settings_from_cache_or_db(
-    temp_settings,
-    value,
-    key: str,
-    *args,
-    **kwargs
-):
+def read_settings_from_cache_or_db(temp_settings, value, key: str, *args, **kwargs):
     """A function to be attached on Dynaconf Afterget hook.
 
     Load everything from settings cache or db, process parsing and mergings,
@@ -239,7 +223,9 @@ def read_settings_from_cache_or_db(
     else:
         logger.debug(
             "Key %s not on db/cache, %s other keys loaded from %s",
-            key, len(data), metadata.identifier
+            key,
+            len(data),
+            metadata.identifier,
         )
 
     return temp_settings.get(key, value.value)
@@ -318,9 +304,9 @@ def post(settings: Dynaconf, run_dynamic: bool = True, run_validate: bool = True
         storages.setdefault("default", {})["BACKEND"] = resolved_storages
         # Dynaconf/pulpcore may not include Django's implicit "staticfiles" default.
         # Ensure it's present so Django's staticfiles.E005 check passes.
-        storages.setdefault("staticfiles", {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
-        })
+        storages.setdefault(
+            "staticfiles", {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}
+        )
         data["STORAGES"] = storages
         data["DEFAULT_FILE_STORAGE"] = resolved_dfs
 
@@ -365,7 +351,6 @@ def configure_keycloak(settings: Dynaconf) -> dict[str, Any]:
             KEYCLOAK_REALM,
         ]
     ):
-
         data["GALAXY_AUTH_KEYCLOAK_ENABLED"] = True
 
         data["KEYCLOAK_ADMIN_ROLE"] = settings.get("KEYCLOAK_ADMIN_ROLE", default="hubadmin")
@@ -389,9 +374,9 @@ def configure_keycloak(settings: Dynaconf) -> dict[str, Any]:
                 keycloak=loopback_url, realm=KEYCLOAK_REALM
             )
 
-        data[
-            "SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"
-        ] = f"{data['KEYCLOAK_URL']}/auth/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/"
+        data["SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL"] = (
+            f"{data['KEYCLOAK_URL']}/auth/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token/"
+        )
 
         data["SOCIAL_AUTH_LOGIN_REDIRECT_URL"] = settings.get(
             "SOCIAL_AUTH_LOGIN_REDIRECT_URL", default="/ui/"
@@ -476,7 +461,6 @@ def configure_socialauth(settings: Dynaconf) -> dict[str, Any]:
     SOCIAL_AUTH_GITHUB_SECRET = settings.get("SOCIAL_AUTH_GITHUB_SECRET", default=None)
 
     if all([SOCIAL_AUTH_GITHUB_KEY, SOCIAL_AUTH_GITHUB_SECRET]):
-
         # Add to installed apps
         data["INSTALLED_APPS"] = ["social_django", "dynaconf_merge_unique"]
 
@@ -490,19 +474,19 @@ def configure_socialauth(settings: Dynaconf) -> dict[str, Any]:
         data["DEFAULT_AUTHENTICATION_BACKENDS"] = backends
         data["GALAXY_AUTHENTICATION_BACKENDS"] = backends
 
-        data['DEFAULT_AUTHENTICATION_CLASSES'] = [
+        data["DEFAULT_AUTHENTICATION_CLASSES"] = [
             "galaxy_ng.app.auth.session.SessionAuthentication",
             "rest_framework.authentication.TokenAuthentication",
             "rest_framework.authentication.BasicAuthentication",
         ]
 
-        data['GALAXY_AUTHENTICATION_CLASSES'] = [
+        data["GALAXY_AUTHENTICATION_CLASSES"] = [
             "galaxy_ng.app.auth.session.SessionAuthentication",
             "rest_framework.authentication.TokenAuthentication",
             "rest_framework.authentication.BasicAuthentication",
         ]
 
-        data['REST_FRAMEWORK_AUTHENTICATION_CLASSES'] = [
+        data["REST_FRAMEWORK_AUTHENTICATION_CLASSES"] = [
             "galaxy_ng.app.auth.session.SessionAuthentication",
             "rest_framework.authentication.TokenAuthentication",
             "rest_framework.authentication.BasicAuthentication",
@@ -511,17 +495,17 @@ def configure_socialauth(settings: Dynaconf) -> dict[str, Any]:
         # Override the get_username and create_user steps
         # to conform to our super special user validation
         # requirements
-        data['SOCIAL_AUTH_PIPELINE'] = [
-            'social_core.pipeline.social_auth.social_details',
-            'social_core.pipeline.social_auth.social_uid',
-            'social_core.pipeline.social_auth.auth_allowed',
-            'social_core.pipeline.social_auth.social_user',
-            'galaxy_ng.social.pipeline.user.get_username',
-            'galaxy_ng.social.pipeline.user.create_user',
-            'social_core.pipeline.social_auth.associate_user',
-            'social_core.pipeline.social_auth.load_extra_data',
-            'social_core.pipeline.user.user_details',
-            DAB_SERVICE_BACKED_REDIRECT
+        data["SOCIAL_AUTH_PIPELINE"] = [
+            "social_core.pipeline.social_auth.social_details",
+            "social_core.pipeline.social_auth.social_uid",
+            "social_core.pipeline.social_auth.auth_allowed",
+            "social_core.pipeline.social_auth.social_user",
+            "galaxy_ng.social.pipeline.user.get_username",
+            "galaxy_ng.social.pipeline.user.create_user",
+            "social_core.pipeline.social_auth.associate_user",
+            "social_core.pipeline.social_auth.load_extra_data",
+            "social_core.pipeline.user.user_details",
+            DAB_SERVICE_BACKED_REDIRECT,
         ]
 
     return data
@@ -648,7 +632,7 @@ def configure_pulp_ansible(settings: Dynaconf) -> dict[str, Any]:
         # point to the galaxy_ng api namespace. We're forcing it to get set to our api
         # namespace here because setting it to anything else will break our api.
         "ANSIBLE_URL_NAMESPACE": "galaxy:api:v3:",
-        "ANSIBLE_DEFAULT_DISTRIBUTION_PATH": distro_path
+        "ANSIBLE_DEFAULT_DISTRIBUTION_PATH": distro_path,
     }
 
 
@@ -663,18 +647,17 @@ def configure_authentication_classes(settings: Dynaconf, data: dict[str, Any]) -
     # environments would have to be reconfigured, this is a lot easier.
 
     galaxy_auth_classes = data.get(
-        "GALAXY_AUTHENTICATION_CLASSES",
-        settings.get("GALAXY_AUTHENTICATION_CLASSES", None)
+        "GALAXY_AUTHENTICATION_CLASSES", settings.get("GALAXY_AUTHENTICATION_CLASSES", None)
     )
     if galaxy_auth_classes is None:
         galaxy_auth_classes = []
 
     # add in keycloak classes if necessary ...
-    if data.get('GALAXY_AUTH_KEYCLOAK_ENABLED') is True:
+    if data.get("GALAXY_AUTH_KEYCLOAK_ENABLED") is True:
         for class_name in [
             # "galaxy_ng.app.auth.session.SessionAuthentication",
             "galaxy_ng.app.auth.token_auth.ExpiringTokenAuthentication",
-            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth"
+            "galaxy_ng.app.auth.keycloak.KeycloakBasicAuth",
         ]:
             if class_name not in galaxy_auth_classes:
                 galaxy_auth_classes.insert(0, class_name)
@@ -768,17 +751,13 @@ def configure_ldap(settings: Dynaconf) -> dict[str, Any]:
         if not settings.get("AUTH_LDAP_USER_SEARCH"):
             user_scope = AUTH_LDAP_SCOPE_MAP.get(AUTH_LDAP_USER_SEARCH_SCOPE, ldap.SCOPE_SUBTREE)
             data["AUTH_LDAP_USER_SEARCH"] = LDAPSearch(
-                AUTH_LDAP_USER_SEARCH_BASE_DN,
-                user_scope,
-                AUTH_LDAP_USER_SEARCH_FILTER
+                AUTH_LDAP_USER_SEARCH_BASE_DN, user_scope, AUTH_LDAP_USER_SEARCH_FILTER
             )
 
         if not settings.get("AUTH_LDAP_GROUP_SEARCH"):
             group_scope = AUTH_LDAP_SCOPE_MAP.get(AUTH_LDAP_GROUP_SEARCH_SCOPE, ldap.SCOPE_SUBTREE)
             data["AUTH_LDAP_GROUP_SEARCH"] = LDAPSearch(
-                AUTH_LDAP_GROUP_SEARCH_BASE_DN,
-                group_scope,
-                AUTH_LDAP_GROUP_SEARCH_FILTER
+                AUTH_LDAP_GROUP_SEARCH_BASE_DN, group_scope, AUTH_LDAP_GROUP_SEARCH_FILTER
             )
 
         # Depending on the LDAP server the following might need to be changed
@@ -787,16 +766,12 @@ def configure_ldap(settings: Dynaconf) -> dict[str, Any]:
         # data["AUTH_LDAP_GROUP_TYPE"] = GroupOfNamesType(name_attr="cn")
         # export PULP_AUTH_LDAP_GROUP_TYPE_CLASS="django_auth_ldap.config:GroupOfNamesType"
         if classpath := settings.get(
-            "AUTH_LDAP_GROUP_TYPE_CLASS",
-            default="django_auth_ldap.config:GroupOfNamesType"
+            "AUTH_LDAP_GROUP_TYPE_CLASS", default="django_auth_ldap.config:GroupOfNamesType"
         ):
-            entry_point = EntryPoint(
-                name=None, group=None, value=classpath
-            )
+            entry_point = EntryPoint(name=None, group=None, value=classpath)
             group_type_class = entry_point.load()
             group_type_params = settings.get(
-                "AUTH_LDAP_GROUP_TYPE_PARAMS",
-                default={"name_attr": "cn"}
+                "AUTH_LDAP_GROUP_TYPE_PARAMS", default={"name_attr": "cn"}
             )
             data["AUTH_LDAP_GROUP_TYPE"] = group_type_class(**group_type_params)
 
@@ -857,8 +832,8 @@ def configure_authentication_backends(settings: Dynaconf, data: dict[str, Any]) 
 
     # deduplicate dynaconf_merge ...
     if backends.count("dynaconf_merge") > 1:
-        backends = [x for x in backends if x != 'dynaconf_merge']
-        backends.append('dynaconf_merge')
+        backends = [x for x in backends if x != "dynaconf_merge"]
+        backends.append("dynaconf_merge")
 
     # if there are backends, add them to the final result
     if len(backends) > 0:
@@ -869,13 +844,11 @@ def configure_authentication_backends(settings: Dynaconf, data: dict[str, Any]) 
 
 def configure_renderers(settings) -> dict[str, Any]:
     """
-        Add CustomBrowsableAPI only for community (galaxy.ansible.com, galaxy-stage, galaxy-dev)"
+    Add CustomBrowsableAPI only for community (galaxy.ansible.com, galaxy-stage, galaxy-dev)"
     """
-    if re.search(
-        r'galaxy(-dev|-stage)*.ansible.com', settings.get('CONTENT_ORIGIN') or ""
-    ):
+    if re.search(r"galaxy(-dev|-stage)*.ansible.com", settings.get("CONTENT_ORIGIN") or ""):
         value = settings.get("REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES", [])
-        value.append('galaxy_ng.app.renderers.CustomBrowsableAPIRenderer')
+        value.append("galaxy_ng.app.renderers.CustomBrowsableAPIRenderer")
         return {"REST_FRAMEWORK__DEFAULT_RENDERER_CLASSES": value}
 
     return {}
@@ -948,9 +921,9 @@ def validate(settings: Dynaconf) -> None:
         # keys like "staticfiles" that Django requires for migrations.
         # Instead, mutate the full dict and write it back in one call.
         storages.setdefault("default", {})["BACKEND"] = resolved_storages
-        storages.setdefault("staticfiles", {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
-        })
+        storages.setdefault(
+            "staticfiles", {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}
+        )
         settings.set("STORAGES", storages)
         settings.set("DEFAULT_FILE_STORAGE", resolved_dfs)
 
@@ -959,7 +932,8 @@ def validate(settings: Dynaconf) -> None:
             "GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL",
             eq=False,
             when=Validator(
-                "GALAXY_REQUIRE_CONTENT_APPROVAL", eq=False,
+                "GALAXY_REQUIRE_CONTENT_APPROVAL",
+                eq=False,
             ),
             messages={
                 "operations": "{name} cannot be True if GALAXY_REQUIRE_CONTENT_APPROVAL is False"
@@ -1004,7 +978,7 @@ def configure_dynamic_settings(settings: Dynaconf) -> dict[str, Any]:
         logger.warning(
             "Galaxy Dynamic Settings requires Dynaconf >=3.2.3, "
             "system will work normally but dynamic settings from database will be ignored: %s",
-            str(exc)
+            str(exc),
         )
         return {}
 
@@ -1021,11 +995,7 @@ def configure_dynamic_settings(settings: Dynaconf) -> dict[str, Any]:
         else:
             logger.error("Hook function '%s' not found in module scope", func_name)
 
-    return {
-        "_registered_hooks": {
-            Action.AFTER_GET: hook_functions
-        }
-    }
+    return {"_registered_hooks": {Action.AFTER_GET: hook_functions}}
 
 
 def configure_dab_required_settings(settings: Dynaconf, data: dict) -> dict[str, Any]:
@@ -1042,7 +1012,7 @@ def configure_dab_required_settings(settings: Dynaconf, data: dict) -> dict[str,
     # Remove jwt_consumer from the installed apps because galaxy uses Pulp implementation
     dab_dynaconf.set(
         "INSTALLED_APPS",
-        [app for app in dab_dynaconf.INSTALLED_APPS if app != 'ansible_base.jwt_consumer']
+        [app for app in dab_dynaconf.INSTALLED_APPS if app != "ansible_base.jwt_consumer"],
     )
     # Load the standard AAP settings files
     load_standard_settings_files(dab_dynaconf)  # /etc/ansible-automation-platform/*.yaml

@@ -2,8 +2,7 @@ import pytest
 import random
 import string
 from io import StringIO
-from typing import Optional
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
@@ -20,15 +19,15 @@ class TestPurgeTasksCommand(TestCase):
     def _create_tasks(
         self,
         tasks: int,
-        finished_at: Optional[str] = None,
-        days: Optional[int] = None,
+        finished_at: str | None = None,
+        days: int | None = None,
         state="completed"
     ):
         if finished_at:
             _datetime = datetime.fromisoformat(finished_at)
 
         if days:
-            _datetime = datetime.now(timezone.utc) - timedelta(days=days)
+            _datetime = datetime.now(UTC) - timedelta(days=days)
 
         rand_str = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
         created_pks = []
