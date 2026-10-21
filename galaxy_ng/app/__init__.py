@@ -15,10 +15,12 @@ class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
 
     def ready(self):
         super().ready()
-        from .signals import handlers  # noqa
         from pulp_container.app.models import ContainerNamespace, ContainerRepository
         from pulpcore.plugin.models import Task
         from ansible_base.rbac import permission_registry
+
+        from .auth.registry import enable_registry_token_password_auth
+        from .signals import handlers  # noqa
 
         permission_registry.register(
             ContainerNamespace,
@@ -29,6 +31,8 @@ class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
 
         add_required_dab_attributes_to_models()
         fix_charfield_max_length_for_dab_check()
+        require_auth_for_container_pull()
+        enable_registry_token_password_auth()
 
 
 def add_required_dab_attributes_to_models():
@@ -208,3 +212,35 @@ def fix_charfield_max_length_for_dab_check():
                     f"Patched {model_name}.{field.name} CharField max_length "
                     f"to {field.max_length} for DAB compatibility"
                 )
+
+
+def require_auth_for_container_pull():
+    """Require authentication for execution environment pulls.
+
+    The registry token service uses ``RegistryAccessPolicy``, which reads the
+    ``distributions/container/container`` row from ``core.AccessPolicy`` instead
+    of Galaxy's ``PULP_VIEWSETS`` override.  pulpcore seeds that row from
+    ``ContainerDistributionViewSet.DEFAULT_ACCESS_POLICY`` during ``post_migrate``,
+    so patching the viewset is what makes the change durable across migrations.
+
+    Only the anonymous pull statement is changed.  Create, push, label, role,
+    and destroy statements -- plus the object-creator creation hook -- are left
+    exactly as upstream defines them.
+    """
+    from django.conf import settings
+    from pulp_container.app.viewsets import ContainerDistributionViewSet
+
+    if getattr(settings, "GALAXY_ENABLE_UNAUTHENTICATED_EE_PULL", False):
+        logger.info(
+            "GALAXY_ENABLE_UNAUTHENTICATED_EE_PULL is enabled; "
+            "anonymous execution environment pulls will remain allowed."
+        )
+        return
+
+    statements = ContainerDistributionViewSet.DEFAULT_ACCESS_POLICY.get("statements", [])
+    for statement in statements:
+        actions = statement.get("action", [])
+        if isinstance(actions, str):
+            actions = [actions]
+        if "pull" in actions and statement.get("principal") == "*":
+            statement["principal"] = "authenticated"
