@@ -17,25 +17,25 @@ help:             ## Show the help.
 requirements/no-pip-upgrade:     ## Update based on setup.py and *.in files without asking pip for latest version
 	pip-compile -o requirements/requirements.common.txt setup.py
 	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py
-	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py
+	pip-compile -o requirements/requirements.standalone.txt setup.py
 
 .PHONY: requirements/pip-upgrade-single-package
 requirements/pip-upgrade-single-package:     ## Upgrade a single package based on setup.py and *.in files. Example: `make requirements/pip-upgrade-single-package package=django`
 	pip-compile -o requirements/requirements.common.txt setup.py --upgrade-package $(package)
 	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py --upgrade-package $(package)
-	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py --upgrade-package $(package)
+	pip-compile -o requirements/requirements.standalone.txt setup.py --upgrade-package $(package)
 
 .PHONY: requirements/pip-upgrade-multiple-packages
 requirements/pip-upgrade-multiple-packages:     ## Upgrade multiple packages based on setup.py and *.in files. Example: `make requirements/pip-upgrade-multiple-packages packages="django djangorestframework pulpcore"`
 	pip-compile -o requirements/requirements.common.txt setup.py $(foreach p,$(packages),--upgrade-package $(p))
 	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py $(foreach p,$(packages),--upgrade-package $(p))
-	pip-compile -o requirements/requirements.standalone.txt requirements/requirements.standalone.in setup.py $(foreach p,$(packages),--upgrade-package $(p))
+	pip-compile -o requirements/requirements.standalone.txt setup.py $(foreach p,$(packages),--upgrade-package $(p))
 
 .PHONY: requirements/pip-upgrade-all
 requirements/pip-upgrade-all:     ## Update based on setup.py and *.in files, and all packages via pip
 	pip-compile -o requirements/requirements.common.txt setup.py --upgrade
 	pip-compile -o requirements/requirements.insights.txt setup.py requirements/requirements.insights.in --upgrade
-	pip-compile -o requirements/requirements.standalone.txt setup.py requirements/requirements.standalone.in --upgrade
+	pip-compile -o requirements/requirements.standalone.txt setup.py --upgrade
 
 # Repository management
 

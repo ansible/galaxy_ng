@@ -83,7 +83,7 @@ REQUIREMENTS_FILES = [
     ['requirements/requirements.txt'],
     ['requirements/requirements.common.txt'],
     ['requirements/requirements.insights.txt', 'requirements/requirements.insights.in'],
-    ['requirements/requirements.standalone.txt', 'requirements/requirements.standalone.in']
+    ['requirements/requirements.standalone.txt']
 ]
 
 
