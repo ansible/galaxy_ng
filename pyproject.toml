@@ -1,3 +1,91 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "galaxy-ng"
+version = "4.13.0dev"
+description = "galaxy-ng plugin for the Pulp Project"
+readme = {text = "galaxy-ng plugin for the Pulp Project", content-type = "text/plain"}
+license = {text = "GPLv2+"}
+authors = [{name = "Red Hat, Inc.", email = "info@ansible.com"}]
+urls = {Homepage = "https://github.com/ansible/galaxy_ng/"}
+requires-python = ">=3.12"
+classifiers = [
+  "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+  "Operating System :: POSIX :: Linux",
+  "Framework :: Django",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+  "galaxy-importer>=0.4.31,<0.5.0",
+  "pulpcore>=3.105.23,<3.106",
+  "pulp_ansible>=0.30.3,<0.31",
+  "pulp-container>=2.27.11,<2.28",
+  "pyjwt[crypto]>=2.14.0",
+  "django>=5.2.17,<5.3",
+  "django-prometheus>=2.0.0",
+  "social-auth-core>=4.4.2",
+  "social-auth-app-django>=5.2.0",
+  "django-auth-ldap==4.0.0",
+  "drf-spectacular",
+  "dynaconf>=3.2.13",
+  "insights_analytics_collector>=0.3.0",
+  "boto3",
+  "distro",
+  "django-flags>=5.0.13",
+  "django-ansible-base[jwt-consumer,feature-flags] @ git+https://github.com/ansible/django-ansible-base@ef2ceb250322272451ce220d10c20947898d36d3",
+  "django-crum==0.7.9",
+  "django-automated-logging~=6.2",
+  "django-storages[azure,boto3,s3]",
+  "aiohttp>=3.14.3",
+  "aiodns>=3.3.0,<3.7",
+  "pillow>=13.0.0",
+  "cryptography>=46.0.7",
+  "pyopenssl>=25.3.0",
+  "black>=26.3.1",
+  "ansible-lint>=26.1.1",
+  "pyasn1>=0.6.4",
+  "djangorestframework<3.16",
+  "gitpython>=3.2.0",
+]
+
+[project.optional-dependencies]
+insights = [
+  "boto3",
+  "logstash-formatter",
+  "watchtower",
+  "app-common-python",
+]
+standalone = []
+
+[dependency-groups]
+dev = [
+  "coverage",
+  "flake8",
+  "flake8-black",
+  "flake8-docstrings",
+  "flake8-tuple",
+  "flake8-quotes",
+  "check-manifest",
+  "darker",
+  "isort",
+  "pip-tools",
+]
+
+[project.entry-points."pulpcore.plugin"]
+galaxy_ng = "galaxy_ng:default_app_config"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["galaxy_ng*"]
+exclude = ["galaxy_ng.tests", "galaxy_ng.tests.*"]
+
 [tool.black]
 line-length = 100
 target-version = ["py36", "py37"]
@@ -32,7 +120,6 @@ ignore = [
     "CHANGES/**",
     "CONTRIBUTING.rst",
     "HISTORY.rst",
-    "dev_requirements.txt",
     "doc_requirements.txt",
     "functest_requirements.txt",
     "unittest_requirements.txt",
@@ -171,7 +258,7 @@ builtins-ignorelist = ["id"]
 
 [tool.bumpversion]
 
-current_version = "4.12.0dev"
+current_version = "4.13.0dev"
 commit = false
 tag = false
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)((?P<release>[a-z]+))?((?P<build>\\d+))?"
@@ -210,6 +297,6 @@ replace = "__version__ = \"{new_version}\""
 
 [[tool.bumpversion.files]]
 
-filename = "./setup.py"
+filename = "./pyproject.toml"
 search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""

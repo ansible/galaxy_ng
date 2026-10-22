@@ -1,5 +1,5 @@
 # This file contains dev requirements to be installed inside container image.
-# to add requirements to developer host machine see dev_requirements.txt
+# Developer host requirements are defined in the `dev` dependency group in pyproject.toml.
 
 ipython
 ipdb

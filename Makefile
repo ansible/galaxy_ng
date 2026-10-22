@@ -15,27 +15,30 @@ help:             ## Show the help.
 
 .PHONY: requirements/no-pip-upgrade
 requirements/no-pip-upgrade:     ## Update based on setup.py and *.in files without asking pip for latest version
-	pip-compile -o requirements/requirements.common.txt setup.py
-	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py
-	pip-compile -o requirements/requirements.standalone.txt setup.py
+	uv export --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.common.txt
+	uv export --extra insights --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.insights.txt
+	uv export --extra standalone --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.standalone.txt
 
 .PHONY: requirements/pip-upgrade-single-package
-requirements/pip-upgrade-single-package:     ## Upgrade a single package based on setup.py and *.in files. Example: `make requirements/pip-upgrade-single-package package=django`
-	pip-compile -o requirements/requirements.common.txt setup.py --upgrade-package $(package)
-	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py --upgrade-package $(package)
-	pip-compile -o requirements/requirements.standalone.txt setup.py --upgrade-package $(package)
+requirements/pip-upgrade-single-package:     ## Upgrade a single package based on pyproject.toml. Example: `make requirements/pip-upgrade-single-package package=django`
+	uv lock --upgrade-package $(package)
+	uv export --extra insights --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.insights.txt
+	uv export --extra standalone --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.standalone.txt
+	uv export --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.common.txt
 
 .PHONY: requirements/pip-upgrade-multiple-packages
-requirements/pip-upgrade-multiple-packages:     ## Upgrade multiple packages based on setup.py and *.in files. Example: `make requirements/pip-upgrade-multiple-packages packages="django djangorestframework pulpcore"`
-	pip-compile -o requirements/requirements.common.txt setup.py $(foreach p,$(packages),--upgrade-package $(p))
-	pip-compile -o requirements/requirements.insights.txt requirements/requirements.insights.in setup.py $(foreach p,$(packages),--upgrade-package $(p))
-	pip-compile -o requirements/requirements.standalone.txt setup.py $(foreach p,$(packages),--upgrade-package $(p))
+requirements/pip-upgrade-multiple-packages:     ## Upgrade multiple packages based on pyproject.toml. Example: `make requirements/pip-upgrade-multiple-packages packages="django djangorestframework pulpcore"`
+	uv lock $(foreach p,$(packages),--upgrade-package $(p))
+	uv export --extra insights --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.insights.txt
+	uv export --extra standalone --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.standalone.txt
+	uv export --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.common.txt
 
 .PHONY: requirements/pip-upgrade-all
-requirements/pip-upgrade-all:     ## Update based on setup.py and *.in files, and all packages via pip
-	pip-compile -o requirements/requirements.common.txt setup.py --upgrade
-	pip-compile -o requirements/requirements.insights.txt setup.py requirements/requirements.insights.in --upgrade
-	pip-compile -o requirements/requirements.standalone.txt setup.py --upgrade
+requirements/pip-upgrade-all:     ## Update pyproject.toml dependencies and all packages via uv
+	uv lock --upgrade
+	uv export --extra insights --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.insights.txt
+	uv export --extra standalone --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.standalone.txt
+	uv export --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.common.txt
 
 # Repository management
 
@@ -57,24 +60,24 @@ fmt:              ## Format the code using Darker
 
 .PHONY: dev/bumpversion-patch
 dev/bumpversion-patch:  ## 'bumpversion path' to go from 4.1.0 -> 4.1.1
-	bump-my-version bump --verbose patch
+	uv run bump-my-version bump --verbose patch
 
-.PHONY: bumpversion-minor
+.PHONY: dev/bumpversion-minor
 dev/bumpversion-minor:  ## 'bumpversion minor' to go from 4.1.1 -> 4.2.0
-	bump-my-version bump --verbose minor
+	uv run bump-my-version bump --verbose minor
 
 .PHONY: bumpversion-major
 dev/bumpversion-major:  ## 'bumpversion major' to go from 4.2.9 -> 5.0.0
-	bump-my-version bump --verbose major
+	uv run bump-my-version bump --verbose major
 
 .PHONY: dev/bumpversion-build
 dev/bumpversion-build:  ## 'bumpversion build' to go from 5.3.7.a1 -> 5.3.7.a2
-	bump-my-version bump --verbose build
+	uv run bump-my-version bump --verbose build
 
 # another 'bumpversion release' to from from 5.3.7.b1 -> 5.3.7
 .PHONY: dev/bumpversion-release
 dev/bumpversion-release:  ## 'bumpversion release' to from 5.3.7.a1 -> 5.3.7.b1
-	bump-my-version bump --verbose release
+	uv run bump-my-version bump --verbose release
 
 # Documentation Management
 
@@ -84,8 +87,8 @@ docs/clean:  ## Clean the documentation
 
 .PHONY: docs/install
 docs/install:   ## Install the documentation dependencies
-	@pip install -r doc_requirements.txt
-	@pip install -U 'Jinja2==3.1.6'
+	@uv pip install -r doc_requirements.txt
+	@uv pip install -U 'Jinja2==3.1.6'
 
 .PHONY: docs/build
 docs/build:  ## Build the documentation
