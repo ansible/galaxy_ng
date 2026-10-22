@@ -17,7 +17,7 @@ setup(
     install_requires=[
         "galaxy-importer>=0.4.31,<0.5.0",
         "pulpcore>=3.105.23,<3.106",
-        "pulp_ansible>=0.30.1,<0.31",
+        "pulp_ansible>=0.30.3,<0.31",
         "pulp-container>=2.27.11,<2.28",
         "pyjwt[crypto]>=2.14.0",  # minimum version enforced to address 94872
         "django>=5.2.17,<5.3",  # minimum version enforced to address AAP-85800
@@ -37,7 +37,7 @@ setup(
         "django-storages[azure,boto3,s3]",
         "aiohttp>=3.14.3",
         "aiodns>=3.3.0,<3.7",  # aligned with pulpcore; >=3.3 required to fix hanging issue
-        "pillow>=12.3.0",  # minimum version enforced to address AAP-82156
+        "pillow>=13.0.0",  # minimum version enforced to address AAP-98426
         "cryptography>=46.0.7",  # minimum version enforced to address AAP-75045
         "pyopenssl>=25.3.0",  # bumped to allow cryptography>=46.0.5
         "black>=26.3.1",  # minimum version enforced for AAP-68431, AAP-68430, AAP-68421
@@ -46,7 +46,7 @@ setup(
         # Needed for compatibility with DAB:
         # https://github.com/ansible-automation-platform/django-ansible-base/blob/devel/requirements/requirements.in#L7
         "djangorestframework<3.16",
-        "gitpython>=3.1.60",  # minimum version enforced to address AAP-92294, AAP-92292,AAP-92284
+        "gitpython>=3.2.0",  # minimum version enforced to address AAP-98678
     ],
     include_package_data=True,
     packages=find_packages(exclude=["tests", "tests.*"]),

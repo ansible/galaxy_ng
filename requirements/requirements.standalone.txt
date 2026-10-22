@@ -192,7 +192,7 @@ galaxy-importer==0.4.39
     #   pulp-ansible
 gitdb==4.0.12
     # via gitpython
-gitpython==3.1.62
+gitpython==3.2.1
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -305,7 +305,7 @@ pathspec==1.0.4
     #   yamllint
 pbr==7.0.3
     # via bindep
-pillow==12.3.0
+pillow==13.0.0
     # via
     #   galaxy-ng (setup.py)
     #   pulp-ansible
@@ -326,7 +326,7 @@ psycopg[binary]==3.3.4
     # via pulpcore
 psycopg-binary==3.3.4
     # via psycopg
-pulp-ansible==0.30.1
+pulp-ansible==0.30.3
     # via galaxy-ng (setup.py)
 pulp-container==2.27.13
     # via galaxy-ng (setup.py)
