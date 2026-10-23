@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "enabledManagers": ["tekton", "pip-compile"],
+  "enabledManagers": ["tekton", "pep621"],
 
   "tekton": {
     "enabled": true,
@@ -8,27 +8,16 @@
     "schedule": ["* 0-5 * * 5"]
   },
 
-  "pip-compile": {
-    "managerFilePatterns": [
-      "/requirements/requirements\\.(?:common|insights|standalone)\\.txt$/"
-    ],
+  "pep621": {
     "lockFileMaintenance": {
-      "enabled": false
+      "enabled": true
     },
     "schedule": ["at any time"],
     "addLabels": ["dependencies", "python"]
   },
 
-  "pip_setup": {
-    "enabled": false
-  },
-
-  "pip_requirements": {
-    "enabled": false
-  },
-
   "lockFileMaintenance": {
-    "enabled": false,
+    "enabled": true,
     "schedule": ["at any time"],
     "addLabels": ["dependencies", "python"]
   },
@@ -52,17 +41,33 @@
     },
 
     {
-      "description": "All pip-compile patch updates — no auto-merge in Phase 1a",
-      "matchManagers": ["pip-compile"],
-      "matchUpdateTypes": ["patch"],
+      "description": "All pep621 updates — no auto-merge",
+      "matchManagers": ["pep621"],
       "automerge": false,
       "addLabels": ["dependencies", "python"]
     },
     {
-      "description": "Disable pip-compile minor and major updates",
-      "matchManagers": ["pip-compile"],
+      "description": "Disable pep621 minor and major updates by default",
+      "matchManagers": ["pep621"],
       "matchUpdateTypes": ["minor", "major"],
       "enabled": false
+    },
+    {
+      "description": "Export requirements files after uv updates",
+      "matchManagers": ["pep621"],
+      "postUpgradeTasks": {
+        "commands": [
+          "uv export --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.common.txt",
+          "uv export --extra insights --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.insights.txt",
+          "uv export --extra standalone --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.standalone.txt"
+        ],
+        "fileFilters": [
+          "requirements/requirements.common.txt",
+          "requirements/requirements.insights.txt",
+          "requirements/requirements.standalone.txt"
+        ],
+        "executionMode": "branch"
+      }
     },
 
     {
