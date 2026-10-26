@@ -489,7 +489,6 @@ PULP_ANSIBLE_VIEWSETS = {
                 "action": "list",
                 "principal": "authenticated",
                 "effect": "allow",
-                "condition": "has_model_perms:ansible.view_collectionremote"
             },
             {
                 "action": "create",

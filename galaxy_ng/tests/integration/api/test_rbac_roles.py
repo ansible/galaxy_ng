@@ -615,6 +615,7 @@ ACTIONS_FOR_ALL_USERS = {
     view_tasks,
     view_role,
     view_pulp_groups,
+    view_ansible_remote,
 }
 
 DENIED_FOR_ALL_USERS = {
