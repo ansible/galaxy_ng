@@ -53,7 +53,7 @@ backoff==2.2.1
     # via pulpcore
 bindep==2.14.0
     # via ansible-builder
-black==26.10.0
+black==26.10.1
     # via
     #   ansible-lint
     #   galaxy-ng
