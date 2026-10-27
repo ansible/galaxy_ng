@@ -16,7 +16,7 @@ Onboarding guide for AI agents working in the galaxy\_ng repository. This docume
 
 ## Project Identity
 
-Galaxy NG is a **Pulp plugin**, not a standalone Django application. This distinction affects nearly everything: how settings are loaded, how models inherit, how tasks run, and how URLs are registered. The Django app label is `"galaxy"`, the app lives at `galaxy_ng.app`, and it is registered as a Pulp plugin via the `pulpcore.plugin` entry point in `setup.py`.
+Galaxy NG is a **Pulp plugin**, not a standalone Django application. This distinction affects nearly everything: how settings are loaded, how models inherit, how tasks run, and how URLs are registered. The Django app label is `"galaxy"`, the app lives at `galaxy_ng.app`, and it is registered as a Pulp plugin via the `pulpcore.plugin` entry point in `pyproject.toml`.
 
 ## Repository Structure
 
@@ -150,7 +150,7 @@ from pulp_container.app import models as container_models
 
 ### Pulp Plugin System
 
-Galaxy NG registers itself as a Pulp plugin via the `pulpcore.plugin` entry point in `setup.py`. The `PulpGalaxyPluginAppConfig` in `galaxy_ng/app/__init__.py` is the entry point. Its `ready()` method:
+Galaxy NG registers itself as a Pulp plugin via the `[project.entry-points."pulpcore.plugin"]` table in `pyproject.toml`. The `PulpGalaxyPluginAppConfig` in `galaxy_ng/app/__init__.py` is the entry point. Its `ready()` method:
 1. Imports signal handlers (must happen here, not at module level elsewhere).
 2. Registers additional models with DAB's permission registry.
 3. Patches upstream models to satisfy DAB system checks.
@@ -226,7 +226,7 @@ Pulp timestamp fields (`pulp_created`, `pulp_last_updated`) must be remapped to 
 LifecycleModel hooks that perform cache invalidation or dispatch external calls must use `on_commit=True` to ensure they only fire after the transaction commits. See `docs/database-guidelines.md` for LifecycleModel hook patterns.
 
 ### 10. Version tracked in three places
-The version string is maintained in `galaxy_ng/__init__.py`, `galaxy_ng/app/__init__.py`, and `setup.py`. All three must stay in sync. Use `make dev/bumpversion-*` (which uses bump-my-version) to update them atomically.
+The version string is maintained in `galaxy_ng/__init__.py`, `galaxy_ng/app/__init__.py`, and `pyproject.toml`. All three must stay in sync. Use `make dev/bumpversion-*` (which runs bump-my-version via `uv run`) to update them atomically.
 
 ## CI/CD
 
@@ -245,22 +245,22 @@ The CI also checks for a DAB branch override in PR descriptions (`.ci/scripts/ge
 
 ## Dependency Management
 
-Dependencies are declared in `setup.py` (`install_requires`) with pinned versions. Lock files live in `requirements/` and are generated with `pip-compile`.
+Project metadata and runtime dependency constraints are declared in `pyproject.toml` under `[project]`. Deployment-specific optional dependencies are in `[project.optional-dependencies]`, and development tools are in `[dependency-groups].dev`. `uv.lock` is the resolved lock file; `requirements/requirements.common.txt`, `requirements/requirements.insights.txt`, and `requirements/requirements.standalone.txt` are exported lock snapshots used by builds and deployment tooling. Do not edit these exported requirements files directly.
 
 ### Make Targets
 
 | Target | Usage |
 |--------|-------|
-| `make requirements/no-pip-upgrade` | Regenerate lock files from `setup.py` and `*.in` files without upgrading packages |
-| `make requirements/pip-upgrade-single-package package=<name>` | Upgrade a single package (e.g., `package=django`) |
-| `make requirements/pip-upgrade-multiple-packages packages="<pkg1> <pkg2>"` | Upgrade multiple packages at once |
-| `make requirements/pip-upgrade-all` | Upgrade all packages to latest compatible versions |
+| `make requirements/no-pip-upgrade` | Export the existing `uv.lock` resolution to requirements files without upgrading packages |
+| `make requirements/pip-upgrade-single-package package=<name>` | Upgrade one package with `uv lock --upgrade-package`, then export requirements files |
+| `make requirements/pip-upgrade-multiple-packages packages="<pkg1> <pkg2>"` | Upgrade selected packages with uv, then export requirements files |
+| `make requirements/pip-upgrade-all` | Upgrade all compatible packages with uv, then export requirements files |
 
 ### Workflow
 
-1. Edit the version pin in `setup.py` under `install_requires`.
-2. Run the appropriate `make requirements/*` target to regenerate the lock files (`requirements.common.txt`, `requirements.insights.txt`, `requirements.standalone.txt`).
-3. Deployment-specific extras go in `requirements/requirements.insights.in` or `requirements/requirements.standalone.in`.
+1. Edit dependency constraints in `pyproject.toml` (`[project].dependencies` for common dependencies, or `[project.optional-dependencies]` for deployment extras).
+2. Run an upgrade target (`make requirements/pip-upgrade-single-package`, `make requirements/pip-upgrade-multiple-packages`, or `make requirements/pip-upgrade-all`) to update `uv.lock` and regenerate the exported requirements files (`requirements/requirements.common.txt`, `requirements/requirements.insights.txt`, and `requirements/requirements.standalone.txt`). Use `make requirements/no-pip-upgrade` only to export an already-current `uv.lock`.
+3. Commit `pyproject.toml`, `uv.lock`, and the regenerated requirements files together.
 
 ## Internationalization
 

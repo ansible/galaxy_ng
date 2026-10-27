@@ -14,7 +14,7 @@ help:             ## Show the help.
 # Update python dependencies lock files (i.e. requirements.*.txt)
 
 .PHONY: requirements/no-pip-upgrade
-requirements/no-pip-upgrade:     ## Update based on setup.py and *.in files without asking pip for latest version
+requirements/no-pip-upgrade:     ## Export the locked pyproject.toml dependencies without upgrading packages
 	uv export --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.common.txt
 	uv export --extra insights --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.insights.txt
 	uv export --extra standalone --format requirements.txt --frozen --no-hashes --no-emit-project --no-dev --output-file requirements/requirements.standalone.txt
