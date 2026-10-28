@@ -225,8 +225,10 @@ Pulp timestamp fields (`pulp_created`, `pulp_last_updated`) must be remapped to 
 ### 9. Forgetting `on_commit=True` on lifecycle hooks with side effects
 LifecycleModel hooks that perform cache invalidation or dispatch external calls must use `on_commit=True` to ensure they only fire after the transaction commits. See `docs/database-guidelines.md` for LifecycleModel hook patterns.
 
-### 10. Version tracked in three places
-The version string is maintained in `galaxy_ng/__init__.py`, `galaxy_ng/app/__init__.py`, and `pyproject.toml`. All three must stay in sync. Use `make dev/bumpversion-*` (which runs bump-my-version via `uv run`) to update them atomically.
+### 10. Version source of truth
+The package version is declared in `[project].version` in `pyproject.toml` and updated with
+`make dev/bumpversion-*`. At runtime, `galaxy_ng.__version__` reads the installed distribution
+metadata, and the Pulp app config uses that value rather than maintaining a duplicate version.
 
 ## CI/CD
 

@@ -1,6 +1,9 @@
 import logging
-from pulpcore.plugin import PulpPluginAppConfig
+
 from django.urls.exceptions import NoReverseMatch
+from pulpcore.plugin import PulpPluginAppConfig
+
+from galaxy_ng import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +13,7 @@ class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
 
     name = "galaxy_ng.app"
     label = "galaxy"
-    version = "4.13.0dev"
+    version = __version__
     python_package_name = "galaxy-ng"
 
     def ready(self):
