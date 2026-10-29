@@ -15,6 +15,27 @@ from galaxy_ng.app.api.v3.serializers.execution_environment import (
 
 
 class TestContainerRepositorySerializer(SimpleTestCase):
+    def test_private_field_is_writable(self):
+        serializer = ContainerRepositorySerializer(data={"private": True}, partial=True)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertEqual(serializer.validated_data, {"private": True})
+
+    def test_private_field_is_exposed(self):
+        self.assertIn("private", ContainerRepositorySerializer().fields)
+
+    def test_update_passes_private_to_model(self):
+        instance = Mock()
+        instance.repository = Mock()
+        serializer = ContainerRepositorySerializer()
+
+        with patch.object(
+            serializers.ModelSerializer, "update", return_value=instance
+        ) as update:
+            result = serializer.update(instance, {"private": True})
+
+        self.assertIs(result, instance)
+        update.assert_called_once_with(instance, {"private": True})
+
     def test_retention_field_accepts_value_and_null(self):
         serializer = ContainerRepositorySerializer(
             data={"retain_repo_versions": 5}, partial=True

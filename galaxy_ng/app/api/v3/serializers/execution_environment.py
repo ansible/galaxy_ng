@@ -1,5 +1,6 @@
 import json
 
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
@@ -80,6 +81,10 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
         allow_null=True,
         min_value=0,
     )
+    private = serializers.BooleanField(
+        required=False,
+        help_text=_("Restrict pull access to explicitly authorized users."),
+    )
     pulp_href = IdentityField(view_name='distributions-container/container-detail')
 
     # This serializer is purposfully refraining from using pulp fields directly
@@ -102,7 +107,7 @@ class ContainerRepositorySerializer(serializers.ModelSerializer):
             "updated_at",
         )
 
-        fields = (*read_only_fields, "retain_repo_versions")
+        fields = (*read_only_fields, "retain_repo_versions", "private")
 
     def update(self, instance, validated_data):
         repository_data = validated_data.pop("repository", {})
