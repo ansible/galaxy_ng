@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-01 05:38+0000\n"
+"POT-Creation-Date: 2026-11-01 05:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,29 +15,25 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: _vendor/automated_logging/templates/dal/admin/view.html:6
-msgid "Back to list"
-msgstr ""
-
-#: app/access_control/access_policy.py:410
+#: app/access_control/access_policy.py:668
 msgid "Namespace in filename not found."
 msgstr "파일 이름의 네임스페이스를 찾을 수 없습니다."
 
-#: app/access_control/access_policy.py:443
+#: app/access_control/access_policy.py:696
 msgid "Distribution does not exist."
 msgstr ""
 
-#: app/access_control/access_policy.py:457
+#: app/access_control/access_policy.py:764
 msgid "Namespace not found."
 msgstr "네임스페이스를 찾을 수 없습니다."
 
-#: app/access_control/access_policy.py:526
+#: app/access_control/access_policy.py:841
 msgid ""
-"Signatures are required in order to add collections into any "
-"'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
+"Signatures are required in order to add collections into any 'approved' "
+"repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
 msgstr ""
 
-#: app/access_control/access_policy.py:574 app/api/v3/views/sync.py:49
+#: app/access_control/access_policy.py:898 app/api/v3/views/sync.py:58
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
@@ -70,8 +66,8 @@ msgstr "그룹은 그룹 오브젝트 목록이어야 합니다."
 msgid "Group name=%s, id=%s does not exist"
 msgstr "그룹 이름=%s, id=%s이/가 존재하지 않습니다."
 
-#: app/access_control/fields.py:76 app/api/ui/v1/serializers/user.py:159
-#: app/api/ui/v2/serializers.py:132
+#: app/access_control/fields.py:76 app/api/ui/v1/serializers/user.py:165
+#: app/api/ui/v2/serializers.py:136
 msgid "Invalid group name or ID"
 msgstr "잘못된 그룹 이름 또는 ID"
 
@@ -90,11 +86,11 @@ msgid ""
 "object."
 msgstr "역할 {role} 이 존재하지 않거나 이 오브젝트와 관련된 권한이 없습니다."
 
-#: app/api/ui/v1/serializers/execution_environment.py:64
+#: app/api/ui/v1/serializers/execution_environment.py:76
 msgid "Selected registry does not exist."
 msgstr "선택한 레지스트리가 존재하지 않습니다."
 
-#: app/api/ui/v1/serializers/execution_environment.py:73
+#: app/api/ui/v1/serializers/execution_environment.py:85
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
@@ -102,22 +98,30 @@ msgstr ""
 "컨테이너 이름에는 영숫자 \".\", \"_\", \"-\" 및 최대 하나의 \"/\"만 포함할 "
 "수 있습니다."
 
-#: app/api/ui/v1/serializers/execution_environment.py:91
+#: app/api/ui/v1/serializers/execution_environment.py:103
 msgid "Name cannot be changed."
 msgstr "이름은 변경할 수 없습니다."
 
-#: app/api/ui/v1/serializers/synclist.py:38
+#: app/api/ui/v1/serializers/signing.py:23
+msgid "Required if not provided via URL."
+msgstr ""
+
+#: app/api/ui/v1/serializers/signing.py:27
+msgid "Required if not provided via URL or content_units."
+msgstr ""
+
+#: app/api/ui/v1/serializers/synclist.py:40
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr ""
 "동기화 목록을 생성하는 동안 리포지토리 \"{pulp_id}\"을/를 찾을 수 없습니다"
 
-#: app/api/ui/v1/serializers/synclist.py:65
+#: app/api/ui/v1/serializers/synclist.py:67
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "동기화 목록이 이미 존재합니다. %s"
 
-#: app/api/ui/v1/serializers/synclist.py:73
+#: app/api/ui/v1/serializers/synclist.py:75
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
@@ -126,7 +130,7 @@ msgstr ""
 "{synclist}동기화 목록을 생성하는 동안 \"{namespace}.{name}\" 컬렉션을 찾을 "
 "수 없습니다."
 
-#: app/api/ui/v1/serializers/synclist.py:112
+#: app/api/ui/v1/serializers/synclist.py:114
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -135,7 +139,7 @@ msgstr ""
 "{synclist} 동기화 목록을 업데이트하는 동안 컬렉션 \"{namespace}.{name}\"을 찾"
 "을 수 없습니다."
 
-#: app/api/ui/v1/serializers/user.py:77
+#: app/api/ui/v1/serializers/user.py:83
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
@@ -143,19 +147,19 @@ msgstr ""
 "변경 요청 사용자는 'galaxy.change_group' 권한이 필요한 사용자 그룹에 속하지 "
 "않습니다."
 
-#: app/api/ui/v1/serializers/user.py:92 app/api/ui/v1/serializers/user.py:98
+#: app/api/ui/v1/serializers/user.py:98 app/api/ui/v1/serializers/user.py:104
 msgid "Must be a super user to grant super user permissions."
 msgstr "슈퍼유저 권한을 부여하려면 슈퍼유저여야 합니다."
 
-#: app/api/ui/v1/serializers/user.py:112
+#: app/api/ui/v1/serializers/user.py:118
 msgid "Must be a super user to change another user's password."
 msgstr "다른 사용자의 암호를 변경하려면 슈퍼유저여야 합니다."
 
-#: app/api/ui/v1/serializers/user.py:128
+#: app/api/ui/v1/serializers/user.py:134
 msgid "You do not have permissions to modify super users."
 msgstr "슈퍼 유저를 수정할 수 있는 권한이 없습니다."
 
-#: app/api/ui/v1/serializers/user.py:155 app/api/ui/v2/serializers.py:128
+#: app/api/ui/v1/serializers/user.py:161 app/api/ui/v2/serializers.py:132
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "그룹 이름=%(name)s, id=%(id)s이/가 존재하지 않습니다."
@@ -204,50 +208,50 @@ msgstr ""
 msgid "Indexing execution environments is not supported on this registry."
 msgstr "이 레지스트리에서는 인덱싱 실행 환경이 지원되지 않습니다."
 
-#: app/api/ui/v1/views/signing.py:71
+#: app/api/ui/v1/views/signing.py:89
 msgid "Missing required field: namespace"
 msgstr "필수 필드가 누락됨: namespace"
 
-#: app/api/ui/v1/views/signing.py:88
+#: app/api/ui/v1/views/signing.py:106
 #, python-format
 msgid "No content units found for: %s"
 msgstr "콘텐츠 단위를 찾을 수 없습니다: %s"
 
-#: app/api/ui/v1/views/signing.py:103
+#: app/api/ui/v1/views/signing.py:121
 msgid "distro_base_path field is required."
 msgstr "distro_base_path 필드가 필요합니다."
 
-#: app/api/ui/v1/views/signing.py:108
+#: app/api/ui/v1/views/signing.py:126
 #, python-format
 msgid "Distribution %s does not exist."
 msgstr "배포 %s이/가 존재하지 않습니다."
 
-#: app/api/ui/v1/views/signing.py:114
+#: app/api/ui/v1/views/signing.py:132
 msgid "signing_service field is required."
 msgstr "signing_service 필드가 필요합니다."
 
-#: app/api/ui/v1/views/signing.py:117
+#: app/api/ui/v1/views/signing.py:135
 #, python-format
 msgid "Signing service \"%s\" does not exist."
 msgstr "서명 서비스 \"%s\"이/가 존재하지 않습니다."
 
-#: app/api/ui/v1/viewsets/collection.py:77
+#: app/api/ui/v1/viewsets/collection.py:82
 msgid "Distribution base path is required"
 msgstr "배포 기본 경로가 필요합니다."
 
-#: app/api/ui/v1/viewsets/collection.py:197
+#: app/api/ui/v1/viewsets/collection.py:202
 msgid "{} must be a valid semantic version range."
 msgstr ""
 
-#: app/api/ui/v1/viewsets/collection.py:233
+#: app/api/ui/v1/viewsets/collection.py:238
 msgid "Retrieve collection version"
 msgstr "컬렉션 버전 검색"
 
-#: app/api/ui/v1/viewsets/collection.py:244
+#: app/api/ui/v1/viewsets/collection.py:249
 msgid "Collection version not found for: {}"
 msgstr "컬렉션 버전을 찾을 수 없음: {}"
 
-#: app/api/ui/v1/viewsets/collection.py:300
+#: app/api/ui/v1/viewsets/collection.py:305
 msgid "Retrieve collection import"
 msgstr "컬렉션 가져오기 검색"
 
@@ -256,35 +260,44 @@ msgstr "컬렉션 가져오기 검색"
 msgid "A group named %s already exists."
 msgstr "%s 이라는 그룹이 이미 존재합니다."
 
-#: app/api/ui/v2/serializers.py:146
+#: app/api/ui/v2/serializers.py:150
 #, python-format
-#| msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgid "Team name=%(name)s, id=%(id)s does not exist"
 msgstr ""
 
-#: app/api/ui/v2/serializers.py:150
-#| msgid "Invalid group name or ID"
+#: app/api/ui/v2/serializers.py:154
 msgid "Invalid team name or ID"
 msgstr ""
 
-#: app/api/ui/v2/serializers.py:164
+#: app/api/ui/v2/serializers.py:168
 #, python-format
-#| msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgid "Org name=%(name)s, id=%(id)s does not exist"
 msgstr ""
 
-#: app/api/ui/v2/serializers.py:168
-#| msgid "Invalid group name or ID"
+#: app/api/ui/v2/serializers.py:172
 msgid "Invalid org name or ID"
 msgstr ""
 
-#: app/api/utils.py:58
+#: app/api/ui/v2/views.py:81
+msgid "Request should be made to '/api/gateway/v1/users/'."
+msgstr ""
+
+#: app/api/ui/v2/views.py:131 app/api/ui/v2/views.py:175
+msgid "Request should be made to '/api/gateway/v1/teams/'."
+msgstr ""
+
+#: app/api/ui/v2/views.py:230
+#| msgid "A local container with this name already exists."
+msgid "A team with this name already exists."
+msgstr ""
+
+#: app/api/utils.py:60
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
 msgstr "잘못된 파일 이름 {filename} 예상 형식: namespace-name-version.tar.gz"
 
-#: app/api/utils.py:65
+#: app/api/utils.py:67
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
@@ -293,59 +306,68 @@ msgstr ""
 "파일 이름 {filename}의 잘못된 버전 문자열 {version}. 시맨틱 버전 형식이 예상"
 "됩니다."
 
-#: app/api/utils.py:69
+#: app/api/utils.py:71
 #, python-format
 msgid "Expected namespace to be max length of %s"
 msgstr "예상되는 최대 네임스페이스 길이 %s"
 
-#: app/api/utils.py:71
+#: app/api/utils.py:73
 #, python-format
 msgid "Expected name to be max length of %s"
 msgstr "예상되는 최대 이름 길이는 %s입니다"
 
-#: app/api/utils.py:73
+#: app/api/utils.py:75
 #, python-format
 msgid "Expected version to be max length of %s"
 msgstr "예상 버전의 최대 길이는 %s입니다"
 
-#: app/api/v3/serializers/namespace.py:73
+#: app/api/utils.py:115 app/api/utils.py:140
+#| msgid "A local container with this name already exists."
+msgid "A resource with this name already exists."
+msgstr ""
+
+#: app/api/v3/serializers/namespace.py:131
 #, python-format
 msgid "'%s' is not a valid url."
 msgstr "\"%s\"은/는 유효한 URL이 아닙니다."
 
-#: app/api/v3/serializers/namespace.py:112
+#: app/api/v3/serializers/namespace.py:178
 msgid "Attribute 'name' is required"
 msgstr "'name' 속성이 필요합니다."
 
-#: app/api/v3/serializers/namespace.py:115
+#: app/api/v3/serializers/namespace.py:181
 msgid "Name can only contain lower case letters, underscores and numbers"
 msgstr "이름에는 소문자, 밑줄 및 숫자만 포함할 수 있습니다."
 
-#: app/api/v3/serializers/namespace.py:118
+#: app/api/v3/serializers/namespace.py:184
 msgid "Name must be longer than 2 characters"
 msgstr "이름은 2자 이상이어야 합니다."
 
-#: app/api/v3/serializers/namespace.py:121
+#: app/api/v3/serializers/namespace.py:187
 msgid "Name cannot begin with '_'"
 msgstr "이름은 '_'로 시작할 수 없습니다."
 
-#: app/api/v3/serializers/sync.py:67
+#: app/api/v3/serializers/sync.py:133
 msgid "Password for proxy authentication."
 msgstr "프록시 인증을 위한 암호입니다."
 
-#: app/api/v3/serializers/sync.py:74
+#: app/api/v3/serializers/sync.py:140
 msgid "User for proxy authentication."
 msgstr "프록시 인증에 사용할 사용자입니다."
 
-#: app/api/v3/serializers/sync.py:87
+#: app/api/v3/serializers/sync.py:153
 msgid "Remote password."
 msgstr "원격 암호."
 
-#: app/api/v3/serializers/sync.py:94
+#: app/api/v3/serializers/sync.py:160
 msgid "Remote user."
 msgstr "원격 사용자."
 
-#: app/api/v3/serializers/sync.py:148
+#: app/api/v3/serializers/sync.py:227 app/api/v3/serializers/sync.py:236
+msgid "Expected a list of objects with a string \"name\" field."
+msgstr ""
+
+#: app/api/v3/serializers/sync.py:262
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
@@ -353,52 +375,52 @@ msgstr ""
 "요구 사항 파일을 지정하지 않고 커뮤니티 도메인에서 콘텐츠를 동기화하는 것은 "
 "허용되지 않습니다."
 
-#: app/api/v3/views/sync.py:38 app/api/v3/views/sync.py:83
+#: app/api/v3/views/sync.py:39 app/api/v3/views/sync.py:92
 #, python-format
 msgid "The %s distribution does not have any remotes associated with it."
 msgstr "%s 배포에 연결된 원격 장치가 없습니다."
 
-#: app/api/v3/views/sync.py:97
+#: app/api/v3/views/sync.py:106
 #, python-format
 msgid "The %s remote does not have any registries associated with it."
 msgstr "%s 원격 장치에 연결된 레지스트리가 없습니다."
 
-#: app/api/v3/viewsets/collection.py:117
+#: app/api/v3/viewsets/collection.py:118
 #, python-brace-format
 msgid "Namespace \"{0}\" does not exist."
 msgstr "\"{0}\" 네임스페이스가 존재하지 않습니다."
 
-#: app/api/v3/viewsets/collection.py:212
+#: app/api/v3/viewsets/collection.py:234
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
 msgstr "콘텐츠 앱에서 예기치 않은 응답이 발생했습니다. 코드: %s."
 
-#: app/api/v3/viewsets/collection.py:240
+#: app/api/v3/viewsets/collection.py:262
 #, python-format
 msgid "Collection %s not found"
 msgstr "컬렉션%s을/를 찾을 수 없습니다."
 
-#: app/api/v3/viewsets/collection.py:250
+#: app/api/v3/viewsets/collection.py:276
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
 msgstr "이동 컬렉션%s의 리포지터리를 찾을 수 없습니다"
 
-#: app/api/v3/viewsets/collection.py:290
+#: app/api/v3/viewsets/collection.py:316
 #, python-format
 msgid "Collection %s not found in source repo"
 msgstr "소스 저장소에서 컬렉션 %s을/를 찾을 수 없습니다"
 
-#: app/api/v3/viewsets/collection.py:293
+#: app/api/v3/viewsets/collection.py:319
 #, python-format
 msgid "Collection %s already found in destination repo"
 msgstr "대상 저장소에서 %s 컬렉션을 찾았습니다"
 
-#: app/api/v3/viewsets/collection.py:319
+#: app/api/v3/viewsets/collection.py:345
 #, python-format
 msgid "Signing %s service not found"
 msgstr "서명 %s 서비스를 찾을 수 없음"
 
-#: app/api/v3/viewsets/collection.py:332
+#: app/api/v3/viewsets/collection.py:358
 #, python-brace-format
 msgid ""
 "Collection {namespace}.{name} could not be approved because system requires "
@@ -928,10 +950,27 @@ msgstr ""
 msgid "Data conflicts with existing entity."
 msgstr "데이터가 기존 엔티티와 충돌합니다."
 
-#: app/management/commands/populate-role-tags.py:19
+#: app/management/commands/populate-role-tags.py:16
 msgid ""
 "Populate the 'LegacyRoleTag' model with tags from LegacyRole "
 "'full_metadata__tags'."
+msgstr ""
+
+#: app/management/commands/purge-tasks.py:38
+msgid "Purge finished tasks."
+msgstr ""
+
+#: app/management/commands/purge-tasks.py:43
+msgid "Tasks with this date and older will be purged from the system"
+msgstr ""
+
+#: app/management/commands/purge-tasks.py:49
+msgid ""
+"Tasks with this date and older than this days will be purged from the system"
+msgstr ""
+
+#: app/management/commands/purge-tasks.py:55
+msgid "Do not delete anything."
 msgstr ""
 
 #: app/tasks/index_registry.py:27
