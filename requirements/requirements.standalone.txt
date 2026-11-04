@@ -123,7 +123,7 @@ django==5.2.18
     #   insights-analytics-collector
     #   pulpcore
     #   social-auth-app-django
-django-ansible-base @ git+https://github.com/ansible/django-ansible-base@ef2ceb250322272451ce220d10c20947898d36d3
+django-ansible-base @ git+https://github.com/ansible/django-ansible-base@62a1a424db58ea859321d4ae49de2dc9d681ec63
     # via galaxy-ng
 django-auth-ldap==4.0.0
     # via galaxy-ng
@@ -153,7 +153,7 @@ django-prometheus==2.5.0
     # via galaxy-ng
 django-storages==1.14.6
     # via galaxy-ng
-djangorestframework==3.15.2
+djangorestframework==3.18.3
     # via
     #   django-ansible-base
     #   drf-access-policy
@@ -330,7 +330,7 @@ pulp-container==2.27.13
     # via galaxy-ng
 pulp-glue==0.39.5
     # via pulpcore
-pulpcore==3.105.23
+pulpcore==3.105.25
     # via
     #   galaxy-ng
     #   pulp-ansible

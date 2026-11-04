@@ -101,9 +101,9 @@
       "allowedVersions": "<2.28"
     },
     {
-      "description": "Enforce djangorestframework<3.16 ceiling",
+      "description": "Enforce djangorestframework<3.19 ceiling",
       "matchPackageNames": ["djangorestframework"],
-      "allowedVersions": "<3.16"
+      "allowedVersions": "<3.19"
     },
     {
       "description": "Enforce aiodns<3.7 ceiling",

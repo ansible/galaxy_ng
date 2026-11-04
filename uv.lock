@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -894,8 +894,8 @@ wheels = [
 
 [[package]]
 name = "django-ansible-base"
-version = "2026.10.9.0.dev104+gef2ceb250"
-source = { git = "https://github.com/ansible/django-ansible-base?rev=ef2ceb250322272451ce220d10c20947898d36d3#ef2ceb250322272451ce220d10c20947898d36d3" }
+version = "2026.10.23.0.dev3+g62a1a424d"
+source = { git = "https://github.com/ansible/django-ansible-base?rev=62a1a424db58ea859321d4ae49de2dc9d681ec63#62a1a424db58ea859321d4ae49de2dc9d681ec63" }
 dependencies = [
     { name = "cryptography" },
     { name = "django" },
@@ -1083,14 +1083,14 @@ s3 = [
 
 [[package]]
 name = "djangorestframework"
-version = "3.15.2"
+version = "3.18.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2c/ce/31482eb688bdb4e271027076199e1aa8d02507e530b6d272ab8b4481557c/djangorestframework-3.15.2.tar.gz", hash = "sha256:36fe88cd2d6c6bec23dca9804bab2ba5517a8bb9d8f47ebc68981b56840107ad", size = 1067420, upload-time = "2024-06-19T07:59:32.891Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8d/b2/1cee76b188301f7d03169ca77fab2b3d3ec5d01b3469189f944af2d7f11a/djangorestframework-3.18.3.tar.gz", hash = "sha256:446a9b352e7eff630421ab3f2328bd2401b109a9470afa4a31189994911ed030", size = 923563, upload-time = "2026-10-06T21:33:51.521Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7c/b6/fa99d8f05eff3a9310286ae84c4059b08c301ae4ab33ae32e46e8ef76491/djangorestframework-3.15.2-py3-none-any.whl", hash = "sha256:2b8871b062ba1aefc2de01f773875441a961fefbf79f5eed1e32b2f096944b20", size = 1071235, upload-time = "2024-06-19T07:59:26.106Z" },
+    { url = "https://files.pythonhosted.org/packages/c4/dd/de5f4543765bec94e036a5e9593a42f8fa7efec8de78eb56b9ca834385f3/djangorestframework-3.18.3-py3-none-any.whl", hash = "sha256:8544bb674846731b1e3c9b309236ee1dc412905a0aa725be2ec193ca950a7d12", size = 903986, upload-time = "2026-10-06T21:33:49.917Z" },
 ]
 
 [[package]]
@@ -1405,14 +1405,14 @@ requires-dist = [
     { name = "cryptography", specifier = ">=46.0.7" },
     { name = "distro" },
     { name = "django", specifier = ">=5.2.17,<5.3" },
-    { name = "django-ansible-base", extras = ["jwt-consumer", "feature-flags"], git = "https://github.com/ansible/django-ansible-base?rev=ef2ceb250322272451ce220d10c20947898d36d3" },
+    { name = "django-ansible-base", extras = ["jwt-consumer", "feature-flags"], git = "https://github.com/ansible/django-ansible-base?rev=62a1a424db58ea859321d4ae49de2dc9d681ec63" },
     { name = "django-auth-ldap", specifier = "==4.0.0" },
     { name = "django-automated-logging", specifier = "~=6.2" },
     { name = "django-crum", specifier = "==0.7.9" },
     { name = "django-flags", specifier = ">=5.0.13" },
     { name = "django-prometheus", specifier = ">=2.0.0" },
     { name = "django-storages", extras = ["azure", "boto3", "s3"] },
-    { name = "djangorestframework", specifier = "<3.16" },
+    { name = "djangorestframework", specifier = ">=3.18.2,<3.19" },
     { name = "drf-spectacular" },
     { name = "dynaconf", specifier = ">=3.2.13" },
     { name = "galaxy-importer", specifier = ">=0.4.31,<0.5.0" },
@@ -1422,7 +1422,7 @@ requires-dist = [
     { name = "pillow", specifier = ">=13.0.0" },
     { name = "pulp-ansible", specifier = ">=0.30.3,<0.31" },
     { name = "pulp-container", specifier = ">=2.27.11,<2.28" },
-    { name = "pulpcore", specifier = ">=3.105.23,<3.106" },
+    { name = "pulpcore", specifier = ">=3.105.24,<3.106" },
     { name = "pyasn1", specifier = ">=0.6.4" },
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.14.0" },
     { name = "pyopenssl", specifier = ">=25.3.0" },
@@ -2490,7 +2490,7 @@ wheels = [
 
 [[package]]
 name = "pulpcore"
-version = "3.105.23"
+version = "3.105.25"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiodns" },
@@ -2534,9 +2534,9 @@ dependencies = [
     { name = "whitenoise" },
     { name = "yarl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/93/f4/6a252fd14335d06498c0d8cb5643259b60568bb12cc833d228143a93ff95/pulpcore-3.105.23.tar.gz", hash = "sha256:85bb81ccb88db4b0ef09b4a97f06a7e0c1f087d597b011c905c0911476243622", size = 663691, upload-time = "2026-10-15T19:15:39.007Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7b/6b/4727f8d7b36d68caa80f68f11bff09c261be727c82b1afb94f9e40e6b2f3/pulpcore-3.105.25.tar.gz", hash = "sha256:92db77037bc87bd4cb8e7f80a13fc6e8929f23b8b6c5bfcc41a59a1df61756a2", size = 666972, upload-time = "2026-10-23T13:18:03.534Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f0/4e/a548a88a0e35c30662e47d373e3f90abb43b310a636fb0833179c274bbd7/pulpcore-3.105.23-py3-none-any.whl", hash = "sha256:dbb2d83c0f80ec83570a120644476e18b191f2753853f2743b1f486ff39245be", size = 754368, upload-time = "2026-10-15T19:15:37.281Z" },
+    { url = "https://files.pythonhosted.org/packages/a7/89/2c64a6f5fc5f2964b88fe401fca24eff24f7695b80eae906f135875ab781/pulpcore-3.105.25-py3-none-any.whl", hash = "sha256:358799cb414e9d29c78aaa7e19624d057f78701f6db29da4d2f2c2d76fa02507", size = 757919, upload-time = "2026-10-23T13:18:01.717Z" },
 ]
 
 [[package]]

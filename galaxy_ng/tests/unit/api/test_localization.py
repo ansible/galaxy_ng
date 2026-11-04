@@ -61,7 +61,7 @@ class TestLocalization(BaseTestCase):
             response = self._switch_lang_get('fr')
             self.assertEqual(
                 response,
-                'Pas trouvé.'
+                'Non trouvé.'
             )
 
             response = self._switch_lang_get('nl')

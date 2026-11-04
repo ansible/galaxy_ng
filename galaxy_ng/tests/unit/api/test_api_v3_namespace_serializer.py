@@ -2,6 +2,7 @@ from unittest import mock
 
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
 from galaxy_ng.app.api.v3.serializers import NamespaceSerializer
 from galaxy_ng.app.constants import DeploymentMode
@@ -71,6 +72,29 @@ class TestNamespaceLinkGrandfathering(BaseTestCase):
 
         self.assertFalse(serializer.is_valid())
         self.assertIn('links__url', _link_error_keys(serializer.errors))
+
+    def test_create_rejects_non_list_links(self, mock_get_setting):
+        serializer = NamespaceSerializer(data={
+            'name': 'ns_link_non_list',
+            'links': {'name': 'Docs', 'url': SAFE_LINK_URL},
+        })
+
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('links__non_field_errors', _link_error_keys(serializer.errors))
+
+    def test_list_error_details_are_normalized(self, mock_get_setting):
+        serializer = NamespaceSerializer(data={
+            'name': 'ns_link_list_errors',
+            'links': [{'name': 'Docs', 'url': SAFE_LINK_URL}],
+        })
+
+        with mock.patch(
+            'rest_framework.serializers.ListSerializer.run_validation',
+            side_effect=ValidationError([{'name': ['invalid']}]),
+        ):
+            self.assertFalse(serializer.is_valid())
+
+        self.assertIn('links__name', _link_error_keys(serializer.errors))
 
     def test_create_accepts_display_caption_punctuation(self, mock_get_setting):
         """Captions are Tier 2 labels; parentheses, &, and / must be allowed."""

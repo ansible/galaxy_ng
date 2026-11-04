@@ -69,6 +69,7 @@ class TestV3NamespaceViewSet(BaseTestCase):
             response = self.client.put(ns_detail_url, put_data, format='json')
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIsInstance(response.data['errors'], list)
             self.assertEqual(len(response.data['errors']), 5)
 
             received_error_fields = set()

@@ -1,5 +1,6 @@
 import logging
 import re
+from collections.abc import Mapping
 
 from django.db import transaction
 from django.core import validators
@@ -43,8 +44,17 @@ class ScopedErrorListSerializer(serializers.ListSerializer):
             return super().run_validation(*args, **kwargs)
         except (ValidationError) as exc:
             new_detail = []
-            # loop through list of errors
-            for err in exc.detail:
+            # DRF 3.18 returns list serializer errors as a mapping keyed by item
+            # index, while older versions returned a list of field mappings.
+            if isinstance(exc.detail, Mapping):
+                errors = (
+                    [exc.detail.get(index, {}) for index in range(len(args[0]))]
+                    if all(isinstance(key, int) for key in exc.detail)
+                    else [exc.detail]
+                )
+            else:
+                errors = exc.detail
+            for err in errors:
                 new_err = {}
                 # loop for fields in error
                 for field in err:
