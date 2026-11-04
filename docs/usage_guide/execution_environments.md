@@ -18,6 +18,27 @@ Galaxy NG provides a container registry for pushing container images. It functio
 1. Authenticate with the galaxy registry: `podman login localhost:5001`
 2. Pull the image: `podman image pull localhost:5001/my_ee:latest`
 
+Pulling an image always requires authentication. Both your account password and a
+Galaxy API token can be used as the password for `podman login`. Anonymous pulls
+are disabled by default; deployments that intentionally serve images to anonymous
+clients can opt in with `GALAXY_ENABLE_UNAUTHENTICATED_EE_PULL = True`.
+
+### Private images
+
+Execution environments are public by default, which means any authenticated user
+can pull them. To restrict pulls to users with the `container.pull_containerdistribution`
+permission, mark the distribution as private:
+
+```bash
+curl -u admin:password -X PATCH \
+  -H "Content-Type: application/json" \
+  -d '{"private": true}' \
+  https://localhost:5001/api/galaxy/pulp/api/v3/distributions/container/container/<id>/
+```
+
+The same `private` field is available on the Galaxy execution environment API and
+can be updated there.
+
 ## Syncing Images
 
 To sync an image from a remote container registry, you need to configure a remote under "Execution Environments > Remote Registries"

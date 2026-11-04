@@ -364,6 +364,13 @@ CONNECTED_ANSIBLE_CONTROLLERS = []
 GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS = False
 GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD = False
 
+# Execution environment pulls are authenticated by default. Set this to True
+# only for deployments that intentionally serve images to anonymous clients
+# (for example, a public community mirror). Changing this value takes effect
+# on the next `pulpcore-manager migrate` run, which re-syncs the container
+# distribution access policy from the viewset default.
+GALAXY_ENABLE_UNAUTHENTICATED_EE_PULL = False
+
 GALAXY_ENABLE_API_ACCESS_LOG = False
 # Extra AUTOMATED_LOGGING settings are defined on dynaconf_hooks.py
 # to be overridden by the /etc/pulp/settings.py
