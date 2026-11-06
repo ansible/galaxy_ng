@@ -1,6 +1,7 @@
 import logging
 
 from django.urls.exceptions import NoReverseMatch
+from rest_framework.permissions import AllowAny
 from pulpcore.plugin import PulpPluginAppConfig
 
 from galaxy_ng import __version__
@@ -18,6 +19,7 @@ class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
 
     def ready(self):
         super().ready()
+        protect_pulpcore_status_view()
         from .signals import handlers  # noqa
         from pulp_container.app.models import ContainerNamespace, ContainerRepository
         from pulpcore.plugin.models import Task
@@ -32,6 +34,40 @@ class PulpGalaxyPluginAppConfig(PulpPluginAppConfig):
 
         add_required_dab_attributes_to_models()
         fix_charfield_max_length_for_dab_check()
+
+
+def protect_pulpcore_status_view():
+    """Expose minimal anonymous health data and full authenticated status."""
+    from django.utils.cache import patch_vary_headers
+    from pulpcore.app.views.status import StatusView
+
+    from galaxy_ng.app.api.base import GALAXY_AUTHENTICATION_CLASSES
+
+    if getattr(StatusView, "_galaxy_status_response_filtered", False):
+        return
+
+    original_finalize_response = StatusView.finalize_response
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        response = original_finalize_response(self, request, response, *args, **kwargs)
+        response["Cache-Control"] = "private"
+        patch_vary_headers(response, ("Authorization", "Cookie"))
+        if (
+            request.method in ("GET", "HEAD")
+            and response.status_code == 200
+            and not request.user.is_authenticated
+        ):
+            response.data = {
+                name: response.data[name]
+                for name in ("database_connection", "redis_connection")
+                if name in response.data
+            }
+        return response
+
+    StatusView.authentication_classes = GALAXY_AUTHENTICATION_CLASSES
+    StatusView.permission_classes = [AllowAny]
+    StatusView.finalize_response = finalize_response
+    StatusView._galaxy_status_response_filtered = True
 
 
 def add_required_dab_attributes_to_models():

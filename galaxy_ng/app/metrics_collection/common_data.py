@@ -1,11 +1,10 @@
-import os
-import requests
 import logging
-from urllib.parse import urljoin
 import platform
 import distro
 from django.conf import settings
+from django.http import HttpRequest
 from pulpcore.plugin.models import system_id
+from pulpcore.app.views.status import StatusView
 
 logger = logging.getLogger("metrics_collection.export_data")
 
@@ -13,11 +12,12 @@ logger = logging.getLogger("metrics_collection.export_data")
 def api_status():
     status_path = 'pulp/api/v3/status/'
     try:
-        path = os.path.join(settings.GALAXY_API_PATH_PREFIX or '', status_path)
-        url = urljoin(settings.ANSIBLE_API_HOSTNAME, path)
-        response = requests.request("GET", url)
+        # Direct get() intentionally preserves the full internal status payload.
+        request = HttpRequest()
+        request.method = "GET"
+        response = StatusView().get(request)
         if response.status_code == 200:
-            return response.json()
+            return response.data
         else:
             logger.error(f"export metrics_collection: failed API call {status_path}: "
                          f"HTTP status {response.status_code}")

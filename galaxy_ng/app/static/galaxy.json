@@ -1178,7 +1178,7 @@
           }
         },
         "x-ai-description": "Get feature flags",
-        "description": "Get feature flags"
+        "description": "Get feature flags. Anonymous callers receive only dab_resource_registry and external_authentication; authenticated callers receive the full response."
       }
     },
     "/api/galaxy/_ui/v1/imports/collections/": {
@@ -3216,7 +3216,7 @@
           }
         },
         "x-ai-description": "Get UI settings",
-        "description": "Get UI settings"
+        "description": "Get UI settings. Anonymous callers receive only GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS and GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD; authenticated callers receive the full response."
       }
     },
     "/api/galaxy/_ui/v1/synclists/": {
@@ -6754,7 +6754,7 @@
     "/api/galaxy/pulp/api/v3/status/": {
       "get": {
         "operationId": "pulp_v3_status_get",
-        "description": "Returns status and app information about Pulp.\n\nInformation includes:\n * version of pulpcore and loaded pulp plugins\n * known workers\n * known content apps\n * database connection status\n * redis connection status\n * disk usage information",
+        "description": "Returns status and app information about Pulp. Authenticated callers receive the full response. Anonymous callers receive only database_connection and redis_connection health fields for readiness checks.\n\nInformation includes:\n * version of pulpcore and loaded pulp plugins\n * known workers\n * known content apps\n * database connection status\n * redis connection status\n * disk usage information",
         "summary": "Inspect status of Pulp",
         "tags": [
           "Info"
@@ -6762,9 +6762,16 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+                "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StatusResponse"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/AnonymousStatusResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/StatusResponse"
+                    }
+                  ]
                 }
               }
             },
@@ -35199,6 +35206,24 @@
         ],
         "type": "string",
         "description": "* `skipped` - skipped\n* `completed` - completed\n* `failed` - failed\n* `canceled` - canceled"
+      },
+      "AnonymousStatusResponse": {
+        "type": "object",
+        "description": "Minimal status information available to anonymous callers",
+        "properties": {
+          "database_connection": {
+            "$ref": "#/components/schemas/DatabaseConnectionResponse",
+            "description": "Database connection information"
+          },
+          "redis_connection": {
+            "$ref": "#/components/schemas/RedisConnectionResponse",
+            "description": "Redis connection information"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "database_connection"
+        ]
       },
       "StatusResponse": {
         "type": "object",

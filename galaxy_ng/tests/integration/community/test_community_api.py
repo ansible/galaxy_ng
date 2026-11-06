@@ -3,7 +3,6 @@
 
 import json
 import pytest
-import subprocess
 import time
 
 from ansible.errors import AnsibleError
@@ -39,11 +38,11 @@ pytestmark = pytest.mark.qa  # noqa: F821
 def test_community_settings(ansible_config):
     """Tests settings are correct"""
 
-    config = ansible_config("anonymous_user")
+    config = ansible_config("admin")
     api_client = get_client(
         config=config,
         request_token=False,
-        require_auth=False
+        require_auth=True
     )
 
     resp = api_client('/api/_ui/v1/settings/', method='GET')
@@ -66,11 +65,11 @@ def test_community_settings(ansible_config):
 def test_community_feature_flags(ansible_config):
     """Tests feature flags are correct"""
 
-    config = ansible_config("anonymous_user")
+    config = ansible_config("admin")
     api_client = get_client(
         config=config,
         request_token=False,
-        require_auth=False
+        require_auth=True
     )
 
     resp = api_client('/api/_ui/v1/feature-flags/', method='GET')
@@ -577,30 +576,19 @@ def test_v1_username_autocomplete_search(ansible_config):
     for role in resp['results']:
         assert role["username"] == github_user
 
-    server = config.get("url")
-
     # test correct results with ansible-galaxy role search
-    cmd = [
-        "ansible-galaxy"
-        + " role search"
-        + " --author "
-        + github_user
-        + " --server "
-        + server
-    ]
-    proc = subprocess.run(cmd, shell=True, capture_output=True)
+    proc = ansible_galaxy(
+        f"role search --author {github_user}",
+        ansible_config=config,
+        check_retcode=False,
+    )
     assert b"Found 5 roles matching your search" in proc.stdout
 
-    cmd = [
-        "ansible-galaxy"
-        + " role search"
-        + " --author "
-        + github_user
-        + " adminer "
-        + " --server "
-        + server
-    ]
-    proc = subprocess.run(cmd, shell=True, capture_output=True)
+    proc = ansible_galaxy(
+        f"role search --author {github_user} adminer",
+        ansible_config=config,
+        check_retcode=False,
+    )
     assert b"Found 1 roles matching your search" in proc.stdout
     assert b"geerlingguy.adminer" in proc.stdout
 

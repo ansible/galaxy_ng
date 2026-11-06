@@ -1,19 +1,33 @@
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django.utils.cache import patch_vary_headers
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from pulpcore.plugin.models import SigningService
 from galaxy_ng.app.api import base as api_base
 
 
+PUBLIC_FEATURE_FLAGS = (
+    "dab_resource_registry",
+    "external_authentication",
+)
+
+
 class FeatureFlagsView(api_base.APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    # The UI needs these flags before login to select the authentication flow.
+    permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
-        flags = settings.get("GALAXY_FEATURE_FLAGS", {})
-        _load_conditional_signing_flags(flags)
-        return Response(flags)
+        flags = dict(settings.get("GALAXY_FEATURE_FLAGS", {}))
+        if request.user.is_authenticated:
+            _load_conditional_signing_flags(flags)
+        else:
+            flags = {name: flags.get(name, False) for name in PUBLIC_FEATURE_FLAGS}
+        response = Response(flags)
+        response["Cache-Control"] = "private"
+        patch_vary_headers(response, ("Authorization", "Cookie"))
+        return response
 
 
 def _load_conditional_signing_flags(flags):

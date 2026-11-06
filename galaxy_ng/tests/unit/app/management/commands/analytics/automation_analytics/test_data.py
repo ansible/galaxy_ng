@@ -1,10 +1,12 @@
-import galaxy_ng.app.metrics_collection.common_data
-from django.test import TestCase, override_settings
 from unittest.mock import MagicMock, patch
-import unittest
+
+from django.test import SimpleTestCase, TestCase, override_settings
+from pulpcore.app.views.status import StatusView
+
+import galaxy_ng.app.metrics_collection.common_data
 
 
-class TestHubVersion(TestCase):
+class TestHubVersion(SimpleTestCase):
 
     @patch('django.apps.apps.get_app_config')
     def test_hub_version_returns_galaxy_app_version(self, mock_get_app_config):
@@ -20,24 +22,29 @@ class TestHubVersion(TestCase):
 
 class TestAutomationAnalyticsData(TestCase):
 
-    @unittest.skip("FIXME - broken by dab 2024.12.13")
-    @override_settings(ANSIBLE_API_HOSTNAME='https://example.com')
-    @override_settings(GALAXY_API_PATH_PREFIX='/api-test/xxx')
-    @patch('galaxy_ng.app.metrics_collection.common_data.requests.request')
-    def test_api_status_request(self, mock_request):
-        mock_response = MagicMock(name="mock_response")
-        mock_response.status_code = 200
-        mock_request.return_value = mock_response
-
-        json_response = MagicMock(name="json")
+    @patch('galaxy_ng.app.metrics_collection.common_data.StatusView.get')
+    def test_api_status_request(self, mock_get):
         mocked_api_status = MagicMock(name="api_status")
-        json_response.return_value = mocked_api_status
-        mock_response.json = json_response
+        mock_get.return_value = MagicMock(status_code=200, data=mocked_api_status)
 
         response = galaxy_ng.app.metrics_collection.common_data.api_status()
 
         self.assertEqual(response, mocked_api_status)
 
-        mock_request.assert_called_with("GET",
-                                        'https://example.com/api-test/xxx/pulp/api/v3/status/')
-        json_response.assert_called_once()
+        request = mock_get.call_args.args[0]
+        self.assertEqual(request.method, 'GET')
+
+    @override_settings(CACHE_ENABLED=False)
+    @patch('pulpcore.app.views.status._disk_usage', return_value={
+        'total': 1,
+        'used': 1,
+        'free': 0,
+    })
+    @patch.object(StatusView, '_get_db_conn_status', return_value=True)
+    def test_api_status_direct_call(self, mock_db_status, mock_disk_usage):
+        response = galaxy_ng.app.metrics_collection.common_data.api_status()
+
+        self.assertEqual(response['database_connection'], {'connected': True})
+        self.assertIn('versions', response)
+        mock_db_status.assert_called_once_with()
+        mock_disk_usage.assert_called_once_with()

@@ -7,7 +7,7 @@ LEGACY_STATEMENTS = {
                 "list",
                 "retrieve",
             ],
-            "principal": "*",
+            "principal": "authenticated",
             "effect": "allow",
         },
         {

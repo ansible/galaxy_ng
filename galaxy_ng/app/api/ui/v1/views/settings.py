@@ -1,18 +1,33 @@
 from django.conf import settings
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django.utils.cache import patch_vary_headers
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from galaxy_ng.app.api import base as api_base
 
+PUBLIC_SETTINGS = (
+    "GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS",
+    "GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD",
+)
+
+
+def _private_response(data):
+    response = Response(data)
+    response["Cache-Control"] = "private"
+    patch_vary_headers(response, ("Authorization", "Cookie"))
+    return response
+
 
 class SettingsView(api_base.APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    # Public browsing needs these values before login.
+    permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
-        data = {}
+        if not request.user.is_authenticated:
+            return _private_response({name: settings.get(name, False) for name in PUBLIC_SETTINGS})
+
         keyset = [
-            "GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_ACCESS",
-            "GALAXY_ENABLE_UNAUTHENTICATED_COLLECTION_DOWNLOAD",
+            *PUBLIC_SETTINGS,
             "GALAXY_API_SPEC_REQUIRE_AUTHENTICATION",
             "GALAXY_FEATURE_FLAGS",
             "GALAXY_TOKEN_EXPIRATION",
@@ -46,4 +61,4 @@ class SettingsView(api_base.APIView):
             data["DYNACONF_AFTER_GET_HOOKS"] = \
                 [str(func) for func in settings_dict["DYNACONF_AFTER_GET_HOOKS"]]
 
-        return Response(data)
+        return _private_response(data)
