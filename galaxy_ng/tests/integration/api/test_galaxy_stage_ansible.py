@@ -4,6 +4,7 @@ import logging
 import subprocess
 import tempfile
 import pytest
+import requests
 
 from galaxykit.collections import get_all_collections, upload_artifact
 from galaxykit.namespaces import get_namespace
@@ -327,8 +328,17 @@ def test_custom_browsable_format(galaxy_client, gh_user_1):
     assert isinstance(resp, dict)
     assert "results" in resp
 
-    resp = gc_admin.get("v1/namespaces/", headers={"Accept": "text/html"}, parse_json=False)
+    headers = {**gc_admin.headers, "Accept": "text/html"}
+    resp = gc_admin.get("v1/namespaces/", headers=headers, parse_json=False)
     assert "results" in str(resp.content)
+
+    # An anonymous HTML request requires authentication.
+    resp = requests.get(
+        f"{gc_admin.galaxy_root.rstrip('/')}/v1/namespaces/",
+        headers={"Accept": "text/html"},
+        timeout=30,
+    )
+    assert resp.status_code == 401
 
     # test as a basic user
     resp = gh_user_1.get("v1/namespaces/")
@@ -339,5 +349,6 @@ def test_custom_browsable_format(galaxy_client, gh_user_1):
     assert isinstance(resp, dict)
     assert "results" in resp
 
-    resp = gh_user_1.get("v1/namespaces/", headers={"Accept": "text/html"}, parse_json=False)
+    headers = {**gh_user_1.headers, "Accept": "text/html"}
+    resp = gh_user_1.get("v1/namespaces/", headers=headers, parse_json=False)
     assert "results" in str(resp.content)
