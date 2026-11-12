@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-01 05:38+0000\n"
+"POT-Creation-Date: 2026-11-01 05:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,29 +15,25 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: _vendor/automated_logging/templates/dal/admin/view.html:6
-msgid "Back to list"
-msgstr ""
-
-#: app/access_control/access_policy.py:410
+#: app/access_control/access_policy.py:668
 msgid "Namespace in filename not found."
 msgstr "L'espace de nommage n'a pas été trouvé dans le nom de fichier."
 
-#: app/access_control/access_policy.py:443
+#: app/access_control/access_policy.py:696
 msgid "Distribution does not exist."
 msgstr ""
 
-#: app/access_control/access_policy.py:457
+#: app/access_control/access_policy.py:764
 msgid "Namespace not found."
 msgstr "Espace de nommage non trouvé."
 
-#: app/access_control/access_policy.py:526
+#: app/access_control/access_policy.py:841
 msgid ""
-"Signatures are required in order to add collections into any "
-"'approved'repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
+"Signatures are required in order to add collections into any 'approved' "
+"repository when GALAXY_REQUIRE_SIGNATURE_FOR_APPROVAL is enabled."
 msgstr ""
 
-#: app/access_control/access_policy.py:574 app/api/v3/views/sync.py:49
+#: app/access_control/access_policy.py:898 app/api/v3/views/sync.py:58
 msgid ""
 "Syncing content from galaxy.ansible.com without specifying a requirements "
 "file is not allowed."
@@ -70,8 +66,8 @@ msgstr "Les groupes doivent correspondre à une liste d'objets de groupe"
 msgid "Group name=%s, id=%s does not exist"
 msgstr "Le groupe nom=%s, id=%s n'existe pas"
 
-#: app/access_control/fields.py:76 app/api/ui/v1/serializers/user.py:159
-#: app/api/ui/v2/serializers.py:132
+#: app/access_control/fields.py:76 app/api/ui/v1/serializers/user.py:165
+#: app/api/ui/v2/serializers.py:136
 msgid "Invalid group name or ID"
 msgstr "Nom de groupe ou ID invalide"
 
@@ -91,11 +87,11 @@ msgid ""
 msgstr ""
 "Le rôle {role} n'existe pas ou n'a pas de permissions liées à cet objet."
 
-#: app/api/ui/v1/serializers/execution_environment.py:64
+#: app/api/ui/v1/serializers/execution_environment.py:76
 msgid "Selected registry does not exist."
 msgstr "Le registre sélectionné n'existe pas."
 
-#: app/api/ui/v1/serializers/execution_environment.py:73
+#: app/api/ui/v1/serializers/execution_environment.py:85
 msgid ""
 "Container names can only contain alphanumeric numbers, \".\", \"_\", \"-\" "
 "and a up to one \"/\"."
@@ -103,23 +99,31 @@ msgstr ""
 "Les noms de conteneurs ne peuvent contenir que des chiffres alphanumériques, "
 "\".\", \"_\", \"-\" et un maximum d'un \"/\"."
 
-#: app/api/ui/v1/serializers/execution_environment.py:91
+#: app/api/ui/v1/serializers/execution_environment.py:103
 msgid "Name cannot be changed."
 msgstr "Le nom ne peut pas être modifié."
 
-#: app/api/ui/v1/serializers/synclist.py:38
+#: app/api/ui/v1/serializers/signing.py:23
+msgid "Required if not provided via URL."
+msgstr ""
+
+#: app/api/ui/v1/serializers/signing.py:27
+msgid "Required if not provided via URL or content_units."
+msgstr ""
+
+#: app/api/ui/v1/serializers/synclist.py:40
 #, python-brace-format
 msgid "Repository \"{pulp_id}\" not found while creating synclist"
 msgstr ""
 "Le référentiel \"{pulp_id}\" n'a pas été trouvé lors de la création de la "
 "synclist"
 
-#: app/api/ui/v1/serializers/synclist.py:65
+#: app/api/ui/v1/serializers/synclist.py:67
 #, python-format
 msgid "Synclist already exists: %s"
 msgstr "Synclist existe déjà : %s"
 
-#: app/api/ui/v1/serializers/synclist.py:73
+#: app/api/ui/v1/serializers/synclist.py:75
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while creating synclist "
@@ -128,7 +132,7 @@ msgstr ""
 "La collection \"{namespace}.{name}\" n'a pas été trouvée lors de la création "
 "de la synclist {synclist}"
 
-#: app/api/ui/v1/serializers/synclist.py:112
+#: app/api/ui/v1/serializers/synclist.py:114
 #, python-brace-format
 msgid ""
 "Collection \"{namespace}.{name}\" not found while updating synclist "
@@ -137,7 +141,7 @@ msgstr ""
 "La collection \"{namespace}.{name}\" n'a pas été trouvé lors de la mise à "
 "jour de la synclist {synclist}"
 
-#: app/api/ui/v1/serializers/user.py:77
+#: app/api/ui/v1/serializers/user.py:83
 msgid ""
 "'galaxy.change_group' permission is required to change a users group that "
 "the requesting user is not in."
@@ -145,23 +149,23 @@ msgstr ""
 "L'autorisation 'galaxy.change_group' est nécessaire pour modifier un groupe "
 "d'utilisateurs dont l'utilisateur demandeur ne fait pas partie."
 
-#: app/api/ui/v1/serializers/user.py:92 app/api/ui/v1/serializers/user.py:98
+#: app/api/ui/v1/serializers/user.py:98 app/api/ui/v1/serializers/user.py:104
 msgid "Must be a super user to grant super user permissions."
 msgstr ""
 "Il faut être un super utilisateur pour accorder des autorisations de super "
 "utilisateur."
 
-#: app/api/ui/v1/serializers/user.py:112
+#: app/api/ui/v1/serializers/user.py:118
 msgid "Must be a super user to change another user's password."
 msgstr ""
 "Il faut être un super utilisateur pour changer le mot de passe d'un autre "
 "utilisateur."
 
-#: app/api/ui/v1/serializers/user.py:128
+#: app/api/ui/v1/serializers/user.py:134
 msgid "You do not have permissions to modify super users."
 msgstr "Vous n'avez pas le droit de modifier les super utilisateurs."
 
-#: app/api/ui/v1/serializers/user.py:155 app/api/ui/v2/serializers.py:128
+#: app/api/ui/v1/serializers/user.py:161 app/api/ui/v2/serializers.py:132
 #, python-format
 msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgstr "Le groupe nom=%(name)s, id=%(id)s n'existe pas"
@@ -213,50 +217,50 @@ msgstr ""
 "L'indexation des environnements d'exécution n'est pas prise en charge par ce "
 "registre."
 
-#: app/api/ui/v1/views/signing.py:71
+#: app/api/ui/v1/views/signing.py:89
 msgid "Missing required field: namespace"
 msgstr "Champ obligatoire manquant"
 
-#: app/api/ui/v1/views/signing.py:88
+#: app/api/ui/v1/views/signing.py:106
 #, python-format
 msgid "No content units found for: %s"
 msgstr "Aucun unité de contenu n’a été trouvée pour : %s"
 
-#: app/api/ui/v1/views/signing.py:103
+#: app/api/ui/v1/views/signing.py:121
 msgid "distro_base_path field is required."
 msgstr "Le champ distro_base_path est obligatoire."
 
-#: app/api/ui/v1/views/signing.py:108
+#: app/api/ui/v1/views/signing.py:126
 #, python-format
 msgid "Distribution %s does not exist."
 msgstr "Distribution %s non existante"
 
-#: app/api/ui/v1/views/signing.py:114
+#: app/api/ui/v1/views/signing.py:132
 msgid "signing_service field is required."
 msgstr "Le champ signing_service est obligatoire"
 
-#: app/api/ui/v1/views/signing.py:117
+#: app/api/ui/v1/views/signing.py:135
 #, python-format
 msgid "Signing service \"%s\" does not exist."
 msgstr "Le service de signature \"%s\" n’existe pas"
 
-#: app/api/ui/v1/viewsets/collection.py:77
+#: app/api/ui/v1/viewsets/collection.py:82
 msgid "Distribution base path is required"
 msgstr "Le chemin de la base de distribution est requis"
 
-#: app/api/ui/v1/viewsets/collection.py:197
+#: app/api/ui/v1/viewsets/collection.py:202
 msgid "{} must be a valid semantic version range."
 msgstr ""
 
-#: app/api/ui/v1/viewsets/collection.py:233
+#: app/api/ui/v1/viewsets/collection.py:238
 msgid "Retrieve collection version"
 msgstr "Récupérer la version de la collection"
 
-#: app/api/ui/v1/viewsets/collection.py:244
+#: app/api/ui/v1/viewsets/collection.py:249
 msgid "Collection version not found for: {}"
 msgstr "Version de la collection non trouvée pour : {}"
 
-#: app/api/ui/v1/viewsets/collection.py:300
+#: app/api/ui/v1/viewsets/collection.py:305
 msgid "Retrieve collection import"
 msgstr "Récupérer l'importation de la collection"
 
@@ -265,29 +269,38 @@ msgstr "Récupérer l'importation de la collection"
 msgid "A group named %s already exists."
 msgstr "Un groupe nommé %s existe déjà."
 
-#: app/api/ui/v2/serializers.py:146
+#: app/api/ui/v2/serializers.py:150
 #, python-format
-#| msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgid "Team name=%(name)s, id=%(id)s does not exist"
 msgstr ""
 
-#: app/api/ui/v2/serializers.py:150
-#| msgid "Invalid group name or ID"
+#: app/api/ui/v2/serializers.py:154
 msgid "Invalid team name or ID"
 msgstr ""
 
-#: app/api/ui/v2/serializers.py:164
+#: app/api/ui/v2/serializers.py:168
 #, python-format
-#| msgid "Group name=%(name)s, id=%(id)s does not exist"
 msgid "Org name=%(name)s, id=%(id)s does not exist"
 msgstr ""
 
-#: app/api/ui/v2/serializers.py:168
-#| msgid "Invalid group name or ID"
+#: app/api/ui/v2/serializers.py:172
 msgid "Invalid org name or ID"
 msgstr ""
 
-#: app/api/utils.py:58
+#: app/api/ui/v2/views.py:81
+msgid "Request should be made to '/api/gateway/v1/users/'."
+msgstr ""
+
+#: app/api/ui/v2/views.py:131 app/api/ui/v2/views.py:175
+msgid "Request should be made to '/api/gateway/v1/teams/'."
+msgstr ""
+
+#: app/api/ui/v2/views.py:230
+#| msgid "A local container with this name already exists."
+msgid "A team with this name already exists."
+msgstr ""
+
+#: app/api/utils.py:60
 #, python-brace-format
 msgid ""
 "Invalid filename {filename}. Expected format: namespace-name-version.tar.gz"
@@ -295,7 +308,7 @@ msgstr ""
 "Nom de fichier {filename} non valide. Format attendu : namespace-name-"
 "version.tar.gz"
 
-#: app/api/utils.py:65
+#: app/api/utils.py:67
 #, python-brace-format
 msgid ""
 "Invalid version string {version} from filename {filename}. Expected semantic "
@@ -304,61 +317,70 @@ msgstr ""
 "Chaîne de version {version} non valide  à partir du nom de fichier "
 "{filename}. Format de version sémantique attendu."
 
-#: app/api/utils.py:69
+#: app/api/utils.py:71
 #, python-format
 msgid "Expected namespace to be max length of %s"
 msgstr "L'espace de nom attendu est d'une longueur maximale de %s"
 
-#: app/api/utils.py:71
+#: app/api/utils.py:73
 #, python-format
 msgid "Expected name to be max length of %s"
 msgstr "Le nom doit avoir une longueur maximale de %s"
 
-#: app/api/utils.py:73
+#: app/api/utils.py:75
 #, python-format
 msgid "Expected version to be max length of %s"
 msgstr "La version attendue est d'une longueur maximale de %s"
 
-#: app/api/v3/serializers/namespace.py:73
+#: app/api/utils.py:115 app/api/utils.py:140
+#| msgid "A local container with this name already exists."
+msgid "A resource with this name already exists."
+msgstr ""
+
+#: app/api/v3/serializers/namespace.py:131
 #, python-format
 msgid "'%s' is not a valid url."
 msgstr "\"%s\" n'est pas un choix valide."
 
-#: app/api/v3/serializers/namespace.py:112
+#: app/api/v3/serializers/namespace.py:178
 msgid "Attribute 'name' is required"
 msgstr "L'attribut \"nom\" est obligatoire"
 
-#: app/api/v3/serializers/namespace.py:115
+#: app/api/v3/serializers/namespace.py:181
 msgid "Name can only contain lower case letters, underscores and numbers"
 msgstr ""
 "Le nom ne peut contenir que des lettres minuscules, des caractères de "
 "soulignement et des chiffres"
 
-#: app/api/v3/serializers/namespace.py:118
+#: app/api/v3/serializers/namespace.py:184
 msgid "Name must be longer than 2 characters"
 msgstr "Le nom doit comporter plus de 2 caractères"
 
-#: app/api/v3/serializers/namespace.py:121
+#: app/api/v3/serializers/namespace.py:187
 msgid "Name cannot begin with '_'"
 msgstr "Le nom ne peut pas commencer par '_'"
 
-#: app/api/v3/serializers/sync.py:67
+#: app/api/v3/serializers/sync.py:133
 msgid "Password for proxy authentication."
 msgstr "Mot de passe pour l'authentification du proxy."
 
-#: app/api/v3/serializers/sync.py:74
+#: app/api/v3/serializers/sync.py:140
 msgid "User for proxy authentication."
 msgstr "Utilisateur pour l'authentification du proxy."
 
-#: app/api/v3/serializers/sync.py:87
+#: app/api/v3/serializers/sync.py:153
 msgid "Remote password."
 msgstr "Mot de passe utilisateur à distance."
 
-#: app/api/v3/serializers/sync.py:94
+#: app/api/v3/serializers/sync.py:160
 msgid "Remote user."
 msgstr "Utilisateur distant."
 
-#: app/api/v3/serializers/sync.py:148
+#: app/api/v3/serializers/sync.py:227 app/api/v3/serializers/sync.py:236
+msgid "Expected a list of objects with a string \"name\" field."
+msgstr ""
+
+#: app/api/v3/serializers/sync.py:262
 msgid ""
 "Syncing content from community domains without specifying a requirements "
 "file is not allowed."
@@ -366,52 +388,52 @@ msgstr ""
 "La synchronisation du contenu des domaines communautaires sans spécifier un "
 "fichier d'exigences n'est pas autorisée."
 
-#: app/api/v3/views/sync.py:38 app/api/v3/views/sync.py:83
+#: app/api/v3/views/sync.py:39 app/api/v3/views/sync.py:92
 #, python-format
 msgid "The %s distribution does not have any remotes associated with it."
 msgstr "La distribution %s n'a pas d’utilisateurs distants associés."
 
-#: app/api/v3/views/sync.py:97
+#: app/api/v3/views/sync.py:106
 #, python-format
 msgid "The %s remote does not have any registries associated with it."
 msgstr "La distribution %s n'a pas de registres associés."
 
-#: app/api/v3/viewsets/collection.py:117
+#: app/api/v3/viewsets/collection.py:118
 #, python-brace-format
 msgid "Namespace \"{0}\" does not exist."
 msgstr "L'espace de nommage \"{0}\" n'existe pas."
 
-#: app/api/v3/viewsets/collection.py:212
+#: app/api/v3/viewsets/collection.py:234
 #, python-format
 msgid "Unexpected response from content app. Code: %s."
 msgstr "Réponse inattendue de l'application de contenu. Code :%s."
 
-#: app/api/v3/viewsets/collection.py:240
+#: app/api/v3/viewsets/collection.py:262
 #, python-format
 msgid "Collection %s not found"
 msgstr "Collection %s non trouvée"
 
-#: app/api/v3/viewsets/collection.py:250
+#: app/api/v3/viewsets/collection.py:276
 #, python-format
 msgid "Repo(s) for moving collection %s not found"
 msgstr "Repo(s) pour déplacer la collection %s non trouvé(s)"
 
-#: app/api/v3/viewsets/collection.py:290
+#: app/api/v3/viewsets/collection.py:316
 #, python-format
 msgid "Collection %s not found in source repo"
 msgstr "Collection %s non trouvée dans le repo source"
 
-#: app/api/v3/viewsets/collection.py:293
+#: app/api/v3/viewsets/collection.py:319
 #, python-format
 msgid "Collection %s already found in destination repo"
 msgstr "Collection %s déjà trouvée dans le repo de destination"
 
-#: app/api/v3/viewsets/collection.py:319
+#: app/api/v3/viewsets/collection.py:345
 #, python-format
 msgid "Signing %s service not found"
 msgstr "Le service de signature %s n’a pas été trouvé"
 
-#: app/api/v3/viewsets/collection.py:332
+#: app/api/v3/viewsets/collection.py:358
 #, python-brace-format
 msgid ""
 "Collection {namespace}.{name} could not be approved because system requires "
@@ -943,10 +965,27 @@ msgstr ""
 msgid "Data conflicts with existing entity."
 msgstr "Les données entrent en conflit avec une entité existante."
 
-#: app/management/commands/populate-role-tags.py:19
+#: app/management/commands/populate-role-tags.py:16
 msgid ""
 "Populate the 'LegacyRoleTag' model with tags from LegacyRole "
 "'full_metadata__tags'."
+msgstr ""
+
+#: app/management/commands/purge-tasks.py:38
+msgid "Purge finished tasks."
+msgstr ""
+
+#: app/management/commands/purge-tasks.py:43
+msgid "Tasks with this date and older will be purged from the system"
+msgstr ""
+
+#: app/management/commands/purge-tasks.py:49
+msgid ""
+"Tasks with this date and older than this days will be purged from the system"
+msgstr ""
+
+#: app/management/commands/purge-tasks.py:55
+msgid "Do not delete anything."
 msgstr ""
 
 #: app/tasks/index_registry.py:27
