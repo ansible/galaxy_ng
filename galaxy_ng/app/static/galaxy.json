@@ -1178,7 +1178,7 @@
           }
         },
         "x-ai-description": "Get feature flags",
-        "description": "Get feature flags. Anonymous callers receive only dab_resource_registry and external_authentication; authenticated callers receive the full response."
+        "description": "Get feature flags. Anonymous callers receive only dab_resource_registry, external_authentication, and legacy_roles; authenticated callers receive the full response."
       }
     },
     "/api/galaxy/_ui/v1/imports/collections/": {

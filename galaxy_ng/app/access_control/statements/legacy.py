@@ -7,7 +7,10 @@ LEGACY_STATEMENTS = {
                 "list",
                 "retrieve",
             ],
-            "principal": "authenticated",
+            # Legacy role reads stay anonymous so tokenless
+            # `ansible-galaxy role install/search` keeps working
+            # (community Galaxy compatibility).
+            "principal": "*",
             "effect": "allow",
         },
         {

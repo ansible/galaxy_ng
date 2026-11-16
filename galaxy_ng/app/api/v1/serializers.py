@@ -817,26 +817,30 @@ class LegacyRoleImportDetailSerializer(serializers.Serializer):
 
         task_messages = []
 
-        for message in obj.messages:
-            msg_type = self.MSG_TYPE_MAP.get(message['level'], message['level'])
-            # FIXME(cutwater): The `datetime.utcfromtimestamp` method used here is a cause of
-            #  multiple problems (deprecated method, naive-datetime object result,
-            #  SonarCloud reliability issue). It returned a naive datetime object, which
-            #  should be avoided in general. The recommended fix is to build
-            #  a timezone-aware datetime object: `datetime.fromtimestamp(ts, timezone.utc)`.
-            #  However to preserve current behavior we will return a naive object for now
-            #  and revisit this code in future.
-            ts = datetime.datetime.fromtimestamp(
-                message['time'], tz=datetime.UTC
-            ).replace(tzinfo=None).isoformat()
-            msg_state = self.STATE_MAP.get(message['state'].upper(), message['state'].upper())
-            msg = {
-                'id': ts,
-                'state': msg_state,
-                'message_type': msg_type,
-                'message_text': message['message']
-            }
-            task_messages.append(msg)
+        # Import messages can contain clone URLs with embedded credentials,
+        # so they are only returned to authenticated callers.
+        request = self.context.get('request')
+        if request is None or request.user.is_authenticated:
+            for message in obj.messages:
+                msg_type = self.MSG_TYPE_MAP.get(message['level'], message['level'])
+                # FIXME(cutwater): The `datetime.utcfromtimestamp` method used here is a cause of
+                #  multiple problems (deprecated method, naive-datetime object result,
+                #  SonarCloud reliability issue). It returned a naive datetime object, which
+                #  should be avoided in general. The recommended fix is to build
+                #  a timezone-aware datetime object: `datetime.fromtimestamp(ts, timezone.utc)`.
+                #  However to preserve current behavior we will return a naive object for now
+                #  and revisit this code in future.
+                ts = datetime.datetime.fromtimestamp(
+                    message['time'], tz=datetime.UTC
+                ).replace(tzinfo=None).isoformat()
+                msg_state = self.STATE_MAP.get(message['state'].upper(), message['state'].upper())
+                msg = {
+                    'id': ts,
+                    'state': msg_state,
+                    'message_type': msg_type,
+                    'message_text': message['message']
+                }
+                task_messages.append(msg)
 
         kwargs = task.enc_kwargs or {}
         return {

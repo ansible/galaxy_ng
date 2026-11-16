@@ -22,7 +22,8 @@ def ansible_galaxy(
     galaxy_client=None,
     token=None,
     force_token=False,
-    cleanup=True
+    cleanup=True,
+    isolate_env=False
 ):
 
     # Allow kwargs to override token auth
@@ -75,12 +76,22 @@ def ansible_galaxy(
 
     for x in range(retries + 1):
         try:
+            # Drop inherited galaxy server config and config file overrides so
+            # the subprocess only uses the ansible.cfg generated above; without
+            # this, credentials in the surrounding environment could authenticate
+            # a call that is meant to be anonymous.
+            env = os.environ
+            if isolate_env:
+                env = {
+                    k: v for k, v in os.environ.items()
+                    if not k.startswith("ANSIBLE_GALAXY_") and k != "ANSIBLE_CONFIG"
+                }
             p = subprocess.run(
                 command_string,
                 cwd=tdir,
                 shell=True,
                 capture_output=True,
-                env=os.environ,
+                env=env,
                 timeout=300,
             )
             logger.debug(f"RUN [retry #{x}] {command_string}")

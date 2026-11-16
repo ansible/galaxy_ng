@@ -332,13 +332,14 @@ def test_custom_browsable_format(galaxy_client, gh_user_1):
     resp = gc_admin.get("v1/namespaces/", headers=headers, parse_json=False)
     assert "results" in str(resp.content)
 
-    # An anonymous HTML request requires authentication.
+    # Legacy role reads stay anonymous for tokenless ansible-galaxy usage.
     resp = requests.get(
         f"{gc_admin.galaxy_root.rstrip('/')}/v1/namespaces/",
         headers={"Accept": "text/html"},
         timeout=30,
     )
-    assert resp.status_code == 401
+    assert resp.status_code == 200
+    assert b"results" in resp.content
 
     # test as a basic user
     resp = gh_user_1.get("v1/namespaces/")

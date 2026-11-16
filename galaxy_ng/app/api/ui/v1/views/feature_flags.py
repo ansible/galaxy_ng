@@ -11,6 +11,9 @@ from galaxy_ng.app.api import base as api_base
 PUBLIC_FEATURE_FLAGS = (
     "dab_resource_registry",
     "external_authentication",
+    # The UI menu needs this before login to render the Roles section
+    # for anonymous users when legacy roles are enabled.
+    "legacy_roles",
 )
 
 

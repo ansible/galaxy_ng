@@ -10,6 +10,7 @@ class TestUiFeatureFlagsView(BaseTestCase):
         settings.GALAXY_FEATURE_FLAGS = {
             'execution_environments': True,
             'widget_x': False,
+            'legacy_roles': True,
         }
 
     def tearDown(self):
@@ -22,14 +23,15 @@ class TestUiFeatureFlagsView(BaseTestCase):
         self.assertEqual(response.data['execution_environments'], True)
         self.assertEqual(response.data['widget_x'], False)
 
-    def test_unauthenticated_user_gets_authentication_feature_flags(self):
+    def test_unauthenticated_user_gets_public_feature_flags(self):
         self.client.force_authenticate(user=None)
         response = self.client.get(get_current_ui_url('feature-flags'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             set(response.data),
-            {'dab_resource_registry', 'external_authentication'},
+            {'dab_resource_registry', 'external_authentication', 'legacy_roles'},
         )
+        self.assertEqual(response.data['legacy_roles'], True)
         self.assertEqual(response["Cache-Control"], "private")
         self.assertIn("Authorization", response["Vary"])
         self.assertIn("Cookie", response["Vary"])

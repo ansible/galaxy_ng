@@ -76,7 +76,9 @@ class LegacyTasksMixin:
 
         # get messages from the model if this was a role import
         roleimport = LegacyRoleImport.objects.filter(task=this_task).first()
-        if roleimport:
+        # Import messages can contain clone URLs with embedded credentials,
+        # so they are only returned to authenticated callers.
+        if roleimport and request.user.is_authenticated:
             for message in roleimport.messages:
                 msg_type = msg_type_map.get(message['level'], message['level'])
                 # FIXME(cutwater): The `datetime.utcfromtimestamp` method used here is a cause of

@@ -78,6 +78,20 @@ def test_community_feature_flags(ansible_config):
     assert resp['execution_environments'] is False
     assert resp['legacy_roles'] is True
 
+    # anonymous callers get the public flags, including legacy_roles,
+    # so the UI can render the Roles menu for logged-out users
+    anon_config = ansible_config("anonymous_user")
+    anon_client = get_client(
+        config=anon_config,
+        request_token=False,
+        require_auth=False
+    )
+    resp = anon_client('/api/_ui/v1/feature-flags/', method='GET')
+    assert set(resp) == {
+        'dab_resource_registry', 'external_authentication', 'legacy_roles'
+    }
+    assert resp['legacy_roles'] is True
+
 
 @pytest.mark.deployment_community
 def test_me_anonymous(ansible_config):
@@ -577,16 +591,21 @@ def test_v1_username_autocomplete_search(ansible_config):
         assert role["username"] == github_user
 
     # test correct results with ansible-galaxy role search
+    # run the CLI without credentials to cover tokenless community usage
     proc = ansible_galaxy(
         f"role search --author {github_user}",
-        ansible_config=config,
+        server_url=config["url"],
+        force_token=True,
+        isolate_env=True,
         check_retcode=False,
     )
     assert b"Found 5 roles matching your search" in proc.stdout
 
     proc = ansible_galaxy(
         f"role search --author {github_user} adminer",
-        ansible_config=config,
+        server_url=config["url"],
+        force_token=True,
+        isolate_env=True,
         check_retcode=False,
     )
     assert b"Found 1 roles matching your search" in proc.stdout
