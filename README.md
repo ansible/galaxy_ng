@@ -118,3 +118,5 @@ Please see the official
 ## License
 
 GNU General Public License v2. View [LICENSE](/LICENSE) for full text.
+
+<!-- Temporary approval-label authorization smoke test. -->
