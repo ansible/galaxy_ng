@@ -51,6 +51,7 @@ dependencies = [
   "pyasn1>=0.6.4",
   "djangorestframework>=3.18.2,<3.19",
   "gitpython>=3.2.0",
+  "sqlparse>=0.6.1",
 ]
 
 [project.optional-dependencies]

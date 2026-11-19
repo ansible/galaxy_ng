@@ -444,10 +444,11 @@ social-auth-core==4.9.1
     # via
     #   galaxy-ng
     #   social-auth-app-django
-sqlparse==0.6.0
+sqlparse==0.6.1
     # via
     #   django
     #   django-ansible-base
+    #   galaxy-ng
 subprocess-tee==0.4.2
     # via
     #   ansible-compat
