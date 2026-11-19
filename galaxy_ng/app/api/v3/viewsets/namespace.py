@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from django_filters import filters
 from django_filters.rest_framework import DjangoFilterBackend, filterset
-from pulp_ansible.app.models import Collection
+from pulp_ansible.app.models import CollectionVersion
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
@@ -71,8 +71,8 @@ class NamespaceViewSet(api_base.ModelViewSet):
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         """Delete a namespace.
 
-        1. Perform a check to see if there are any collections in the namespace.
-           If there are, return a failure.
+        1. Perform a check to see if there are any non-rejected collections
+           in the namespace. If there are, return a failure.
         2. Delete the pulp distro and repository
         3. Delete the namespace object.
 
@@ -80,8 +80,12 @@ class NamespaceViewSet(api_base.ModelViewSet):
         """
         namespace = self.get_object()
 
-        # 1. Check if there are any collections in the namespace.
-        if Collection.objects.filter(namespace=namespace.name).exists():
+        # 1. Check if there are any collection versions in the namespace.
+        # Collections with no versions don't block deletion.
+        # For now, we allow deletion if no collection versions exist.
+        if CollectionVersion.objects.filter(
+            collection__namespace=namespace.name
+        ).exists():
             raise ValidationError(
                 detail=_(
                     "Namespace {name} cannot be deleted because "
