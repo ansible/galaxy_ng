@@ -1,11 +1,14 @@
-# Consolidated OpenAPI Spec Management
+# OpenAPI Spec: Central Drift Check + Sync
 #
-# Combines three concerns into one workflow:
-# 1. PR schema review: diffs PR branch vs base branch to surface API changes
-# 2. Central drift check: compares local spec against aap-openapi-specs
-# 3. Spec sync: on push to main (aap-openapi-specs devel) or stable-* except
-#    stable-2.4, copies galaxy.json to aap-openapi-specs and opens or updates
-#    a PR. workflow_dispatch runs the same sync for the selected branch.
+# Two concerns:
+# 1. Central drift check: on PRs, compares local spec against aap-openapi-specs
+#    to surface divergence from the central spec repository.
+# 2. Spec sync: on push to main or stable-*, copies galaxy.json to
+#    aap-openapi-specs and opens or updates a PR.
+#
+# PR-to-base breaking change detection and commenting has moved to the
+# standardized ansible/actions workflows (oasdiff-breaking-changes.yml and
+# oasdiff-breaking-change-comment.yml) as part of ANSTRAT-2346.
 #
 # The static spec lives at galaxy_ng/app/static/galaxy.json.
 # stable-2.4 is excluded: that branch does not exist in aap-openapi-specs.
@@ -30,86 +33,24 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ── PR review: intra-repo diff + central drift ──────────────────────
-  review:
+  # ── Central drift check (local vs aap-openapi-specs) ─────────────────
+  drift-check:
     if: github.event_name == 'pull_request'
+    name: Central spec drift check
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
 
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          path: source
 
-      - name: Checkout base branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.base.sha }}
-          path: base
-
-      - name: Check spec files exist
+      - name: Check spec file exists
         id: specs
         run: |
-          SOURCE="source/galaxy_ng/app/static/galaxy.json"
-          BASE="base/galaxy_ng/app/static/galaxy.json"
-          echo "source_exists=$( [ -f "$SOURCE" ] && echo true || echo false )" >> $GITHUB_OUTPUT
-          echo "base_exists=$( [ -f "$BASE" ] && echo true || echo false )" >> $GITHUB_OUTPUT
+          SPEC="galaxy_ng/app/static/galaxy.json"
+          echo "exists=$( [ -f "$SPEC" ] && echo true || echo false )" >> $GITHUB_OUTPUT
 
-      - name: Install oasdiff
-        if: steps.specs.outputs.source_exists == 'true'
-        env:
-          OASDIFF_VERSION: "1.33.0"
-          OASDIFF_SHA256_AMD64: "43a4e328e2d13ba1552d760aa68d2485c75c5621f309f6ff64ae895188345247"
-          OASDIFF_SHA256_ARM64: "4ae3c362d6074d919aada2dea82d0ee84366591600384455d0bdc658ddf8f7ae"
-        run: |
-          case "$(uname -m)" in
-            x86_64) arch=amd64; expected="$OASDIFF_SHA256_AMD64" ;;
-            aarch64) arch=arm64; expected="$OASDIFF_SHA256_ARM64" ;;
-            *) echo "::error::Unsupported architecture $(uname -m)"; exit 1 ;;
-          esac
-          archive="oasdiff_${OASDIFF_VERSION}_linux_${arch}.tar.gz"
-          url="https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/${archive}"
-          curl -fsSL -o "/tmp/${archive}" "$url"
-          echo "${expected}  /tmp/${archive}" | sha256sum -c -
-          sudo tar -xzf "/tmp/${archive}" -C /usr/local/bin oasdiff
-          sudo chmod 0755 /usr/local/bin/oasdiff
-          oasdiff --version
-
-      # Intra-repo diff (PR vs base)
-      - name: Diff PR against base branch
-        if: steps.specs.outputs.source_exists == 'true' && steps.specs.outputs.base_exists == 'true'
-        id: pr_diff
-        run: |
-          source/.github/scripts/compare_openapi_specs.sh \
-            --structured \
-            base/galaxy_ng/app/static/galaxy.json \
-            source/galaxy_ng/app/static/galaxy.json \
-            /tmp/pr_diff.md || EXIT_CODE=$?
-          if [ "${EXIT_CODE:-0}" = "2" ]; then
-            echo "::error::Failed to compare OpenAPI specs"
-            exit 1
-          fi
-
-      - name: Check for breaking changes in PR
-        if: steps.pr_diff.outputs.has_changes == 'true'
-        id: pr_breaking
-        run: |
-          BREAKING_OUTPUT=$(oasdiff breaking \
-            base/galaxy_ng/app/static/galaxy.json \
-            source/galaxy_ng/app/static/galaxy.json \
-            --format markdown 2>&1) || true
-          if echo "$BREAKING_OUTPUT" | grep -qE ':(warning|x):'; then
-            echo "has_breaking=true" >> $GITHUB_OUTPUT
-            echo "$BREAKING_OUTPUT" > /tmp/pr_breaking.md
-          else
-            echo "has_breaking=false" >> $GITHUB_OUTPUT
-          fi
-
-      # Central drift check (local vs aap-openapi-specs)
       - name: Determine central branch
         id: branch_map
         run: |
@@ -121,7 +62,9 @@ jobs:
           fi
 
       - name: Check token available
-        if: github.repository_owner == 'ansible-automation-platform'
+        if: >-
+          steps.specs.outputs.exists == 'true' &&
+          github.repository_owner == 'ansible-automation-platform'
         id: check_token
         env:
           TOKEN: ${{ secrets.OPENAPI_SPEC_SYNC_TOKEN }}
@@ -149,115 +92,61 @@ jobs:
         run: |
           echo "::warning::Could not checkout aap-openapi-specs branch '${{ steps.branch_map.outputs.target_branch }}'. Skipping drift check."
 
+      - name: Install oasdiff
+        if: steps.checkout_central.outcome == 'success'
+        env:
+          OASDIFF_VERSION: "1.33.0"
+          OASDIFF_SHA256_AMD64: "43a4e328e2d13ba1552d760aa68d2485c75c5621f309f6ff64ae895188345247"
+          OASDIFF_SHA256_ARM64: "4ae3c362d6074d919aada2dea82d0ee84366591600384455d0bdc658ddf8f7ae"
+        run: |
+          case "$(uname -m)" in
+            x86_64) arch=amd64; expected="$OASDIFF_SHA256_AMD64" ;;
+            aarch64) arch=arm64; expected="$OASDIFF_SHA256_ARM64" ;;
+            *) echo "::error::Unsupported architecture $(uname -m)"; exit 1 ;;
+          esac
+          archive="oasdiff_${OASDIFF_VERSION}_linux_${arch}.tar.gz"
+          url="https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/${archive}"
+          curl -fsSL -o "/tmp/${archive}" "$url"
+          echo "${expected}  /tmp/${archive}" | sha256sum -c -
+          sudo tar -xzf "/tmp/${archive}" -C /usr/local/bin oasdiff
+          sudo chmod 0755 /usr/local/bin/oasdiff
+          oasdiff --version
+
       - name: Diff against central spec
         if: steps.checkout_central.outcome == 'success'
         id: drift_diff
         run: |
           CENTRAL="spec-repo/galaxy.json"
-          LOCAL="source/galaxy_ng/app/static/galaxy.json"
-          if [ ! -f "$LOCAL" ]; then
-            echo "drift_detected=false" >> "$GITHUB_OUTPUT"
-            echo "Local spec not found — skipping drift check"
-            exit 0
-          fi
+          LOCAL="galaxy_ng/app/static/galaxy.json"
           if [ ! -f "$CENTRAL" ]; then
-            echo "drift_detected=false" >> "$GITHUB_OUTPUT"
-            echo "Central spec not found — skipping drift check"
+            echo "::notice::Central spec not found — skipping drift check"
             exit 0
           fi
-          source/.github/scripts/compare_openapi_specs.sh \
-            --structured "$CENTRAL" "$LOCAL" /tmp/drift_diff.md || EXIT_CODE=$?
-          if [ "${EXIT_CODE:-0}" = "2" ]; then
-            echo "::error::Failed to compare against central spec"
-            exit 1
+          if diff -q "$LOCAL" "$CENTRAL" > /dev/null 2>&1; then
+            echo "No drift from central spec repository."
+          else
+            echo "drift_detected=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::Local spec differs from aap-openapi-specs/${{ steps.branch_map.outputs.target_branch }}/galaxy.json"
           fi
 
       - name: Check for breaking changes vs central
         if: steps.drift_diff.outputs.drift_detected == 'true'
-        id: drift_breaking
         run: |
-          BREAKING_OUTPUT=$(oasdiff breaking \
-            spec-repo/galaxy.json \
-            source/galaxy_ng/app/static/galaxy.json \
-            --format markdown 2>&1) || true
-          if echo "$BREAKING_OUTPUT" | grep -qE ':(warning|x):'; then
-            echo "has_breaking=true" >> $GITHUB_OUTPUT
-            echo "$BREAKING_OUTPUT" > /tmp/drift_breaking.md
+          # oasdiff's text output is nonempty even when there are no breaking
+          # changes ("No breaking changes to report, but the specs are
+          # different."), so output emptiness cannot signal breaking changes.
+          # --fail-on ERR makes oasdiff exit 1 only when error-level breaking
+          # changes are actually found.
+          if ! oasdiff breaking \
+              spec-repo/galaxy.json \
+              galaxy_ng/app/static/galaxy.json \
+              --format text \
+              --fail-on ERR > /tmp/breaking-output.txt 2>&1; then
+            echo "::warning::Breaking changes detected vs central spec:"
+            cat /tmp/breaking-output.txt
           else
-            echo "has_breaking=false" >> $GITHUB_OUTPUT
+            echo "Spec drift detected, but no breaking changes vs central spec."
           fi
-
-      # Post a single unified comment
-      - name: Prepare comment
-        if: steps.pr_diff.outputs.has_changes == 'true' || steps.drift_diff.outputs.drift_detected == 'true'
-        id: comment
-        run: |
-          {
-            echo 'body<<EOF'
-            source/.github/scripts/prepare_openapi_comment.sh \
-              "${{ steps.pr_diff.outputs.has_changes }}" \
-              "${{ steps.pr_breaking.outputs.has_breaking }}" \
-              /tmp/pr_diff.md \
-              /tmp/pr_breaking.md \
-              "${{ steps.drift_diff.outputs.drift_detected }}" \
-              "${{ steps.drift_breaking.outputs.has_breaking }}" \
-              /tmp/drift_diff.md \
-              /tmp/drift_breaking.md \
-              "${{ steps.branch_map.outputs.target_branch }}"
-            echo 'EOF'
-          } >> $GITHUB_OUTPUT
-
-      - name: Find existing comment
-        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
-        id: find_comment
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: '<!-- openapi-spec-review -->'
-
-      - name: Post or update comment
-        if: steps.pr_diff.outputs.has_changes == 'true' || steps.drift_diff.outputs.drift_detected == 'true'
-        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
-        with:
-          comment-id: ${{ steps.find_comment.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            <!-- openapi-spec-review -->
-            ${{ steps.comment.outputs.body }}
-          edit-mode: replace
-
-      - name: Clear resolved comment
-        if: >-
-          steps.find_comment.outputs.comment-id &&
-          steps.pr_diff.outputs.has_changes == 'false' &&
-          steps.drift_diff.outputs.drift_detected == 'false'
-        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
-        with:
-          comment-id: ${{ steps.find_comment.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            <!-- openapi-spec-review -->
-            ## OpenAPI Spec Review
-
-            No schema changes relative to the base branch, and no drift from `aap-openapi-specs`.
-          edit-mode: replace
-
-      - name: Clear resolved comment without drift check
-        if: >-
-          steps.find_comment.outputs.comment-id &&
-          steps.pr_diff.outputs.has_changes == 'false' &&
-          steps.drift_diff.outputs.drift_detected != 'true' &&
-          steps.drift_diff.outputs.drift_detected != 'false'
-        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
-        with:
-          comment-id: ${{ steps.find_comment.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            <!-- openapi-spec-review -->
-            ## OpenAPI Spec Review
-
-            No schema changes relative to the base branch.
-          edit-mode: replace
 
   # ── Sync spec to central repo on merge ───────────────────────────────
   sync:

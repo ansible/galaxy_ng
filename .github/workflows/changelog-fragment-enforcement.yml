@@ -1,0 +1,26 @@
+---
+# Caller workflow for changelog fragment enforcement.
+# Consumes reusable workflow from ansible/actions.
+# Jira: AAP-86436
+name: "API: Changelog Fragment Enforcement"
+
+on:
+  pull_request:
+    branches:
+      - main
+      - 'stable-*'
+      - '!stable-2.4'
+    paths:
+      - 'galaxy_ng/app/static/galaxy.json'
+      - 'changelogs/fragments/**'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  enforce:
+    uses: ansible/actions/.github/workflows/openapi-changelog-fragment.yml@216419226018c512a37ed606e85b9df6aca50fee
+    with:
+      spec-paths: "galaxy_ng/app/static/galaxy.json"
+      fragment-dir: "changelogs/fragments"
