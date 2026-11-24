@@ -257,7 +257,7 @@ nh3==0.3.7
     # via
     #   django-ansible-base
     #   galaxy-importer
-oauthlib==4.0.0
+oauthlib==4.0.1
     # via
     #   requests-oauthlib
     #   social-auth-core
