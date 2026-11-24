@@ -41,7 +41,7 @@ dependencies = [
   "django-crum==0.7.9",
   "django-automated-logging~=6.2",
   "django-storages[azure,boto3,s3]",
-  "aiohttp>=3.14.3",
+  "aiohttp>=3.14.5",
   "aiodns>=3.3.0,<3.7",
   "pillow>=13.0.0",
   "cryptography>=46.0.7",

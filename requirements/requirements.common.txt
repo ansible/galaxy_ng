@@ -8,7 +8,7 @@ aiofiles==25.1.0
     # via pulpcore
 aiohappyeyeballs==2.7.1
     # via aiohttp
-aiohttp==3.14.3
+aiohttp==3.14.5
     # via
     #   galaxy-ng
     #   pulpcore
@@ -330,7 +330,7 @@ pulp-container==2.27.13
     # via galaxy-ng
 pulp-glue==0.39.5
     # via pulpcore
-pulpcore==3.105.25
+pulpcore==3.105.28
     # via
     #   galaxy-ng
     #   pulp-ansible
@@ -370,7 +370,7 @@ pyparsing==3.3.3
     # via
     #   drf-access-policy
     #   pulpcore
-pysequoia==0.1.35
+pysequoia==0.1.36
     # via
     #   pulp-container
     #   pulpcore
@@ -495,7 +495,7 @@ whitenoise==6.12.0
     # via pulpcore
 yamllint==1.38.0
     # via ansible-lint
-yarl==1.23.0
+yarl==1.25.1
     # via
     #   aiohttp
     #   pulpcore
