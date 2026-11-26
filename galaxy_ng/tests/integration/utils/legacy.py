@@ -23,16 +23,17 @@ def wait_for_v1_task(task_id=None, resp=None, api_client=None, check=True):
     if task_id is None:
         task_id = resp['task']
 
-    # poll till done or timeout
     poll_url = f'/api/v1/tasks/{task_id}/'
 
+    # poll till done or timeout; WAITING means queued and not yet picked
+    # up by the worker, so it is not a final state
     state = None
     counter = 0
-    while state is None or (state == 'RUNNING' and counter <= 500):
+    while state is None or (state in ('RUNNING', 'WAITING') and counter <= 500):
         counter += 1
         task_resp = api_client(poll_url, method='GET')
         state = task_resp['results'][0]['state']
-        if state != 'RUNNING':
+        if state not in ('RUNNING', 'WAITING'):
             break
         time.sleep(SLEEP_SECONDS_POLLING)
 
