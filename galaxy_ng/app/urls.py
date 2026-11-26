@@ -22,6 +22,7 @@ galaxy_urls = [
 ]
 
 status_urls = [
+    path("", views.StatusViewSet.as_view({"get": "list"}), name="status-root"),
     path("healthz", views.health_view, name="status-healthz"),
     path("metrics", exports.ExportToDjangoView, name="status-metrics"),
 ]
