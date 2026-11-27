@@ -5,6 +5,7 @@ env:
   # Version used for coverage/SonarCloud/jUnit reporting
   # Note: When changing versions, you must also update the matrix in the test job
   PRIMARY_PYTHON_VERSION: "3.12"
+  UPSTREAM_REPOSITORY_ID: 246303277
 
 on:
   pull_request:
@@ -170,13 +171,19 @@ jobs:
             -Dsonar.projectKey=${{ env.REPO_OWNER }}_${{ env.REPO_NAME }}
             -Dsonar.organization=${{ env.REPO_OWNER }}
 
-      - name: upload jUnit XML test results
-        if: always() && github.event_name == 'push' && contains(github.repository, 'ansible') && github.ref_name == 'main' && matrix.python-version == env.PRIMARY_PYTHON_VERSION
-        continue-on-error: true
-        run: |
-          curl -v --user "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}:${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}" \
-            --form "xunit_xml=@/tmp/galaxy_ng-test-results.xml" \
-            --form "component_name=hub" \
-            --form "git_commit_sha=${{ github.sha }}" \
-            --form "git_repository_url=https://github.com/${{ github.repository }}" \
-            "${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}/api/results/upload/"
+      - name: Upload hub jUnit test reports to the unified dashboard
+        if: >-
+          !cancelled()
+          && github.event_name == 'push'
+          && env.UPSTREAM_REPOSITORY_ID == github.repository_id
+          && github.ref_name == github.event.repository.default_branch
+          && matrix.python-version == env.PRIMARY_PYTHON_VERSION
+        uses: ansible/gh-action-record-test-results@58376e7785cbb37b4ca0c0638edf9db4e21fd0b6
+        with:
+          aggregation-server-url: ${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_URL }}
+          http-auth-password: >-
+            ${{ secrets.PDE_ORG_RESULTS_UPLOAD_PASSWORD }}
+          http-auth-username: >-
+            ${{ vars.PDE_ORG_RESULTS_AGGREGATOR_UPLOAD_USER }}
+          project-component-name: hub
+          test-result-files: /tmp/galaxy_ng-test-results.xml
