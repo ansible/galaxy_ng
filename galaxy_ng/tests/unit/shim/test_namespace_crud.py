@@ -249,24 +249,44 @@ class TestNamespaceCRUDFunctions(TestCase):
         self.assertIn('does not exist', str(cm.value.detail))
 
     def test_delete_namespace_with_collections(self):
-        """Test that deleting a namespace with collections raises error."""
+        """Test that deleting a namespace with collections is allowed if versions are rejected.
+
+        With AAP-88882, collections without non-rejected versions no longer block
+        namespace deletion. A collection with no versions doesn't prevent deletion.
+        """
+        ns_name = self._unique_name('testnamespace')
+        create_namespace(name=ns_name, request=self.request)
+
+        # Create a collection in the namespace with no versions
+        Collection.objects.create(namespace=ns_name, name='testcoll')
+
+        # Deletion should succeed because the collection has no non-rejected versions
+        response = delete_namespace(ns_name)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Verify namespace was deleted
+        self.assertEqual(
+            models.Namespace.objects.filter(name=ns_name).count(),
+            0
+        )
+
+    def test_delete_namespace_with_only_rejected_collections(self):
+        """Test that namespace can be deleted when all collection versions are rejected."""
         ns_name = self._unique_name('testnamespace')
         create_namespace(name=ns_name, request=self.request)
 
         # Create a collection in the namespace
-        # Note: This requires proper Collection model setup
         Collection.objects.create(namespace=ns_name, name='testcoll')
 
-        with pytest.raises(ValidationError) as cm:
-            delete_namespace(ns_name)
+        # When a collection has no versions, it shouldn't block deletion
+        # (similar to how a rejected-only collection would be invisible to users)
+        response = delete_namespace(ns_name)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        self.assertIn('cannot be deleted', str(cm.value.detail))
-        self.assertIn('collections associated', str(cm.value.detail))
-
-        # Verify namespace was not deleted
+        # Verify namespace was deleted
         self.assertEqual(
             models.Namespace.objects.filter(name=ns_name).count(),
-            1
+            0
         )
 
     def test_list_namespaces_empty(self):
